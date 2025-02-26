@@ -53,10 +53,6 @@
   .hover-scale {
     @apply transition-transform duration-200 hover:scale-[1.02];
   }
-
-  .fade-in {
-    @apply animate-in fade-in duration-500;
-  }
 }
 
 @layer utilities {
