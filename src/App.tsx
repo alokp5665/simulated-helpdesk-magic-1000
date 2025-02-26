@@ -14,6 +14,8 @@ import SocialPage from "./pages/social";
 import RolesPage from "./pages/roles";
 import SurveysPage from "./pages/surveys";
 import SettingsPage from "./pages/settings";
+import LoginPage from "./pages/auth/login";
+import SignupPage from "./pages/auth/signup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
           <Route path="/roles" element={<RolesPage />} />
           <Route path="/surveys" element={<SurveysPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/signup" element={<SignupPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
