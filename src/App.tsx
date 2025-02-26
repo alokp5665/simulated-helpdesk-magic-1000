@@ -10,6 +10,7 @@ import EmailPage from "./pages/email";
 import AgentsPage from "./pages/agents";
 import ChatPage from "./pages/chat";
 import CallsPage from "./pages/calls";
+import SocialPage from "./pages/social";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/agents" element={<AgentsPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/calls" element={<CallsPage />} />
+          <Route path="/social" element={<SocialPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
