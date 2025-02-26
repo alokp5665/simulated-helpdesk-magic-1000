@@ -13,6 +13,7 @@ import CallsPage from "./pages/calls";
 import SocialPage from "./pages/social";
 import RolesPage from "./pages/roles";
 import SurveysPage from "./pages/surveys";
+import SettingsPage from "./pages/settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/social" element={<SocialPage />} />
           <Route path="/roles" element={<RolesPage />} />
           <Route path="/surveys" element={<SurveysPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
