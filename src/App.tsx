@@ -19,6 +19,7 @@ import SettingsPage from "./pages/settings";
 import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
 import NotFound from "./pages/NotFound";
+import TicketsPage from "./pages/tickets";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/roles" element={<RolesPage />} />
           <Route path="/surveys" element={<SurveysPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/tickets" element={<TicketsPage />} />
           <Route path="/auth/login" element={<LoginPage />} />
           <Route path="/auth/signup" element={<SignupPage />} />
           <Route path="*" element={<NotFound />} />
