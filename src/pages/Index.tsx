@@ -1,7 +1,8 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard";
 import {
   Ticket,
   Clock,
@@ -18,7 +19,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Toaster } from "@/components/ui/toaster";
 
 const generateRandomData = (points: number) => {
   return Array.from({ length: points }).map((_, i) => ({
@@ -36,15 +36,8 @@ const Index = () => {
   });
 
   const [chartData, setChartData] = useState(generateRandomData(24));
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate page loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      document.querySelector('.page-loader')?.classList.add('loader-hidden');
-    }, 1000);
-
     // Simulate real-time ticket updates
     const interval = setInterval(() => {
       setTicketData({
@@ -61,7 +54,6 @@ const Index = () => {
     }, 4000);
 
     return () => {
-      clearTimeout(timer);
       clearInterval(interval);
       clearInterval(chartInterval);
     };
@@ -69,11 +61,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Page loader */}
-      <div className="page-loader">
-        <div className="loader-circle"></div>
-      </div>
-
       <TopBar />
       <Sidebar />
       
@@ -82,64 +69,37 @@ const Index = () => {
           <h1 className="text-3xl font-bold mb-8">Dashboard Overview</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            <div className="glass-card p-4 rounded-lg hover-scale">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Resolved Tickets</p>
-                  <h3 className="text-2xl font-bold mt-1">{ticketData.resolved}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Last 24 hours</p>
-                </div>
-                <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/20">
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card p-4 rounded-lg hover-scale">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                  <h3 className="text-2xl font-bold mt-1">{ticketData.inProgress}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Currently being handled</p>
-                </div>
-                <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/20">
-                  <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card p-4 rounded-lg hover-scale">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Due Today</p>
-                  <h3 className="text-2xl font-bold mt-1">{ticketData.due}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Requires attention</p>
-                </div>
-                <div className="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900/20">
-                  <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card p-4 rounded-lg hover-scale">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">New Tickets</p>
-                  <h3 className="text-2xl font-bold mt-1">{ticketData.new}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Awaiting assignment</p>
-                </div>
-                <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/20">
-                  <Ticket className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                </div>
-              </div>
-            </div>
+            <AnalyticsCard
+              title="Resolved Tickets"
+              value={ticketData.resolved}
+              icon={<CheckCircle className="h-4 w-4 text-green-500" />}
+              description="Last 24 hours"
+            />
+            <AnalyticsCard
+              title="In Progress"
+              value={ticketData.inProgress}
+              icon={<Clock className="h-4 w-4 text-blue-500" />}
+              description="Currently being handled"
+            />
+            <AnalyticsCard
+              title="Due Today"
+              value={ticketData.due}
+              icon={<AlertCircle className="h-4 w-4 text-yellow-500" />}
+              description="Requires attention"
+            />
+            <AnalyticsCard
+              title="New Tickets"
+              value={ticketData.new}
+              icon={<Ticket className="h-4 w-4 text-purple-500" />}
+              description="Awaiting assignment"
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
             <div className="glass-card p-6 hover-scale">
               <h3 className="text-lg font-semibold mb-4 flex items-center">
                 <BarChart3 className="h-5 w-5 mr-2" />
-                Student Query Volume (24h)
+                Ticket Volume (24h)
               </h3>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -186,8 +146,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-      
-      <Toaster />
     </div>
   );
 };
