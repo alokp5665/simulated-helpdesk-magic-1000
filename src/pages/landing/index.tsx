@@ -13,7 +13,6 @@ import {
   Sparkles,
   Star,
   ChevronRight,
-  Play,
   GraduationCap,
   BookOpen,
   CalendarClock,
@@ -53,6 +52,7 @@ const LandingPage = () => {
   const pricingRef = useRef<HTMLDivElement>(null);
   const faqRef = useRef<HTMLDivElement>(null);
   
+  const [isLoading, setIsLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [activeFeature, setActiveFeature] = useState(0);
@@ -65,6 +65,14 @@ const LandingPage = () => {
   const [currentTip, setCurrentTip] = useState<DidYouKnowTip | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+
+  // Simulate page loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Features for the rotating showcase
   const features = [
@@ -203,7 +211,7 @@ const LandingPage = () => {
     }
   ];
 
-  // Pre-written chat responses
+  // Expanded chatbot responses (35+ pre-written responses)
   const chatResponses = [
     {
       keywords: ["price", "cost", "pricing", "plan"],
@@ -264,10 +272,90 @@ const LandingPage = () => {
     {
       keywords: ["hello", "hi", "hey", "greetings"],
       response: "Hello! Welcome to EduCare. I'm here to answer any questions you might have about our educational support platform. How can I assist you today?"
+    },
+    {
+      keywords: ["features", "capabilities", "functions", "can do"],
+      response: "EduCare offers a comprehensive suite of features including omnichannel support, AI-powered knowledge management, advanced analytics, LMS integrations, workflow automation, and collaborative tools for faculty. Which specific feature would you like to learn more about?"
+    },
+    {
+      keywords: ["customization", "personalize", "tailor", "adapt"],
+      response: "Every educational institution has unique needs, which is why EduCare is highly customizable. You can configure workflows, branding, user roles, notification preferences, and even create custom fields to track institution-specific data. Our implementation team will help you set everything up to match your requirements."
+    },
+    {
+      keywords: ["testimonials", "reviews", "feedback", "success stories"],
+      response: "Our customers love EduCare! Universities report an average 42% reduction in administrative workload, while K-12 districts have seen student satisfaction scores increase by 3.2x. I'd be happy to connect you with reference customers similar to your institution to hear their experiences firsthand."
+    },
+    {
+      keywords: ["onboarding", "migration", "transition", "switch"],
+      response: "Transitioning to EduCare is smooth and well-supported. Our implementation specialists will guide you through data migration, integration setup, and configuration. We provide comprehensive training for all user roles and offer 24/7 support during the critical launch period to ensure a successful transition."
+    },
+    {
+      keywords: ["updates", "improvements", "new features", "roadmap"],
+      response: "EduCare is constantly evolving! We release updates every two weeks with new features and improvements based on customer feedback. Our upcoming roadmap includes enhanced AI capabilities, expanded integration options, and new analytical tools. As a customer, you'll have input into our product development priorities."
+    },
+    {
+      keywords: ["team", "support staff", "customer service", "contact"],
+      response: "Our dedicated support team is available through multiple channels: live chat, email, phone, and our community forum. Professional and Enterprise plans include access to priority support with guaranteed response times. We also assign a dedicated Customer Success Manager to ensure you're getting maximum value from the platform."
+    },
+    {
+      keywords: ["parent", "guardian", "family"],
+      response: "EduCare includes dedicated parent communication tools! Parents can submit inquiries, receive automated updates about their students, access important resources, and communicate directly with appropriate staff members—all while maintaining proper privacy controls in compliance with educational regulations."
+    },
+    {
+      keywords: ["free", "trial", "demo", "preview"],
+      response: "We offer a no-obligation 14-day free trial with access to all features. Our team will help you set up a test environment with sample data so you can experience how EduCare would work in your specific context. Alternatively, we can provide a personalized demo tailored to your institution's needs."
+    },
+    {
+      keywords: ["contract", "terms", "commitment", "cancel"],
+      response: "Our standard contracts are annual, but we offer flexible options including month-to-month plans with slightly higher rates. There's no long-term commitment for Starter plans, while Professional and Enterprise plans can be customized to your budgeting cycles. You can upgrade, downgrade, or cancel with 30 days' notice."
+    },
+    {
+      keywords: ["implementation", "timeline", "launch", "go-live"],
+      response: "Implementation typically takes 2-4 weeks for smaller institutions and 4-8 weeks for larger or more complex deployments. The process includes discovery, configuration, data migration, integration setup, user training, and go-live support. We'll create a detailed implementation plan tailored to your institution's specific needs and timeline."
+    },
+    {
+      keywords: ["dashboard", "reports", "metrics", "kpi"],
+      response: "EduCare's powerful analytics dashboard provides real-time visibility into key metrics like response times, resolution rates, student satisfaction, common inquiry topics, and support team performance. You can create custom reports, set up automated distribution to stakeholders, and drill down into specific departments or courses."
+    },
+    {
+      keywords: ["scalability", "grow", "expand", "add users"],
+      response: "EduCare grows with you! Our platform easily scales from small departments to multi-campus institutions with thousands of users. You can add users, departments, or features as needed, and our flexible pricing ensures you only pay for what you use. Many customers start with a focused implementation and expand over time."
+    },
+    {
+      keywords: ["offline", "downtime", "outage", "availability"],
+      response: "EduCare maintains 99.9% uptime, with scheduled maintenance performed during low-usage periods. Our system includes offline functionality, allowing users to continue working during rare connectivity issues, with automatic synchronization when connection is restored. We provide real-time system status updates and proactive notifications of any planned maintenance."
+    },
+    {
+      keywords: ["accessibility", "ada", "wcag", "disabilities"],
+      response: "EduCare is fully WCAG 2.1 AA compliant, ensuring accessibility for all users. Our platform works with screen readers, supports keyboard navigation, maintains appropriate color contrast, and includes other accessibility features. We regularly audit our system to maintain and improve accessibility standards."
+    },
+    {
+      keywords: ["competitors", "alternatives", "other platforms", "versus"],
+      response: "While there are general helpdesk solutions available, EduCare is purpose-built for education with specialized workflows, FERPA compliance, and deep integration with learning management systems. Unlike generic platforms, we understand the unique challenges of academic support and provide tailored solutions that address the specific needs of educational institutions."
+    },
+    {
+      keywords: ["api", "webhook", "integration", "developer"],
+      response: "EduCare offers a comprehensive API that allows for deep integration with your existing systems. Our developer portal provides documentation, sample code, and testing tools. We also support webhooks for real-time event notifications and offer pre-built integrations with popular educational tools and platforms."
+    },
+    {
+      keywords: ["workflow", "automation", "process", "rules"],
+      response: "With EduCare's powerful workflow engine, you can automate routine tasks and processes. Create custom rules for ticket routing, set up automatic notifications, establish escalation paths, and design approval workflows. This automation reduces manual effort, ensures consistency, and speeds up resolution times."
+    },
+    {
+      keywords: ["storage", "capacity", "files", "attachments"],
+      response: "EduCare includes generous file storage for knowledge base articles, ticket attachments, and shared resources. Our Starter plan includes 100GB of storage, Professional includes 500GB, and Enterprise offers unlimited storage. All files are securely stored with end-to-end encryption and accessible based on user permissions."
+    },
+    {
+      keywords: ["community", "forum", "user group", "network"],
+      response: "Our EduCare community is vibrant and supportive! Join our user forums to connect with peers, share best practices, and learn from other institutions. We also host quarterly virtual meetups, an annual user conference, and special interest groups for different educational sectors. It's a great way to maximize your investment in the platform."
+    },
+    {
+      keywords: ["case study", "success story", "example", "reference"],
+      response: "We have numerous case studies showcasing how institutions like yours have succeeded with EduCare. For example, Westfield University reduced their ticket backlog by 78% within 30 days of implementation, while Greenwood School District improved parent satisfaction scores by 45%. I'd be happy to share relevant case studies for your specific educational context."
     }
   ];
 
-  // "Did you know" tips
+  // Expanded "Did you know" tips
   const didYouKnowTips = [
     { id: 1, text: "You can automate attendance notifications with EduCare's scheduling system!" },
     { id: 2, text: "Our AI Tutor suggests personalized learning resources based on student questions!" },
@@ -278,7 +366,17 @@ const LandingPage = () => {
     { id: 7, text: "Our analytics can help identify at-risk students before they fall behind!" },
     { id: 8, text: "Faculty can share knowledge base articles across departments to ensure consistency!" },
     { id: 9, text: "EduCare is fully FERPA compliant to protect student information!" },
-    { id: 10, text: "Automated grading notifications can be sent directly through EduCare!" }
+    { id: 10, text: "Automated grading notifications can be sent directly through EduCare!" },
+    { id: 11, text: "EduCare's AI can automatically categorize and prioritize incoming student queries!" },
+    { id: 12, text: "Custom dashboards can be created for different stakeholders in your institution!" },
+    { id: 13, text: "You can set up automatic escalation rules for time-sensitive student inquiries!" },
+    { id: 14, text: "EduCare's knowledge base articles support rich media including videos and interactive quizzes!" },
+    { id: 15, text: "Seasonal support volumes can be predicted with our AI-powered forecasting tools!" },
+    { id: 16, text: "Student satisfaction surveys can be automatically triggered after support interactions!" },
+    { id: 17, text: "EduCare's chatbot can be customized with your institution's specific terminology and policies!" },
+    { id: 18, text: "Support teams can collaborate on complex student cases with internal notes and assignments!" },
+    { id: 19, text: "You can track resolution time by issue type to identify areas for process improvement!" },
+    { id: 20, text: "EduCare's reporting tools allow you to visualize support trends over academic terms!" }
   ];
 
   // Handle scroll effects
@@ -347,15 +445,6 @@ const LandingPage = () => {
     navigate("/auth/login");
   };
 
-  // Handle demo button click
-  const handleWatchDemo = () => {
-    toast({
-      title: "Demo Access",
-      description: "Demo video is opening in a new window.",
-    });
-    // In a real app, this would open a modal with a demo video
-  };
-
   // Handle sign up click
   const handleSignUp = () => {
     navigate("/auth/signup");
@@ -383,17 +472,30 @@ const LandingPage = () => {
     
     // Simulate bot "thinking" and typing
     setTimeout(() => {
-      // Find matching response
+      // Find matching response based on keywords
       let botResponse = "I'm not sure I understand. Could you rephrase your question about our educational support platform?";
       
-      // Check for keyword matches
-      for (const response of chatResponses) {
-        if (response.keywords.some(keyword => 
+      // Start with matched responses based on keywords
+      const matchedResponses = chatResponses.filter(response => 
+        response.keywords.some(keyword => 
           userMessage.text.toLowerCase().includes(keyword.toLowerCase())
-        )) {
-          botResponse = response.response;
-          break;
-        }
+        )
+      );
+      
+      // If we have matches, select one randomly for variety
+      if (matchedResponses.length > 0) {
+        const randomMatch = matchedResponses[Math.floor(Math.random() * matchedResponses.length)];
+        botResponse = randomMatch.response;
+      } else {
+        // If no specific match, use a general response
+        const generalResponses = [
+          "That's an interesting question about our educational platform. Could you provide more details about what you're looking for?",
+          "I'd like to help you with that. Can you share more about your specific requirements or concerns?",
+          "Thanks for reaching out. To better assist you, could you tell me more about your institution and what you're hoping to achieve?",
+          "I'm here to help with any questions about EduCare. Could you elaborate a bit more on what you're interested in learning?",
+          "Great question! To provide the most relevant information, could you share a bit more about your role and institution type?"
+        ];
+        botResponse = generalResponses[Math.floor(Math.random() * generalResponses.length)];
       }
       
       setIsTyping(false);
@@ -421,6 +523,26 @@ const LandingPage = () => {
   const prevTestimonial = () => {
     setCurrentTestimonialIndex(prev => (prev - 1 + testimonials.length) % testimonials.length);
   };
+
+  // Loading screen
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center z-50">
+        <div className="text-center">
+          <div className="relative h-24 w-24 mx-auto mb-8">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-spin blur-xl opacity-20"></div>
+            <div className="absolute inset-[6px] rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-spin blur-md opacity-30"></div>
+            <div className="absolute inset-[12px] rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-spin"></div>
+            <div className="absolute inset-[15px] rounded-full bg-slate-900 flex items-center justify-center">
+              <GraduationCap className="h-10 w-10 text-white" />
+            </div>
+          </div>
+          <h2 className="text-xl text-white font-medium">Loading EduCare</h2>
+          <p className="text-indigo-300 mt-2">Preparing your educational experience...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden">
@@ -493,7 +615,6 @@ const LandingPage = () => {
               </Button>
               <Button 
                 variant="default" 
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 premium-button"
                 onClick={handleSignUp}
               >
                 Sign Up Free
@@ -526,30 +647,15 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-full premium-button"
+                  className="rounded-full"
                   onClick={handleSignUp}
                 >
                   Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-indigo-400/30 text-white hover:bg-white/10 rounded-full"
-                  onClick={handleWatchDemo}
-                >
-                  <Play className="mr-2 h-4 w-4" /> Watch Demo
-                </Button>
               </div>
 
               <div className="mt-8 flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className={`w-8 h-8 rounded-full border-2 border-indigo-900 bg-indigo-${300 + i * 100} flex items-center justify-center text-xs font-bold`}>
-                      {String.fromCharCode(64 + i)}
-                    </div>
-                  ))}
-                </div>
-                <div className="text-sm text-indigo-200/80 ml-2">
+                <div className="text-sm text-indigo-200/80">
                   <span className="font-bold text-white">1,000+</span> educational institutions already using EduCare
                 </div>
               </div>
@@ -966,7 +1072,7 @@ const LandingPage = () => {
                   ))}
                 </ul>
                 <Button 
-                  className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700' : 'bg-white/10 hover:bg-white/20'} premium-button`}
+                  className={`w-full ${plan.popular ? '' : ''}`}
                   onClick={handleContactPage}
                 >
                   {plan.cta}
@@ -978,8 +1084,6 @@ const LandingPage = () => {
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Need a custom plan for your unique requirements?</p>
             <Button 
-              variant="outline" 
-              className="border-indigo-400/30 text-white hover:bg-white/10"
               onClick={handleContactPage}
             >
               Contact Our Education Specialists
@@ -1024,10 +1128,7 @@ const LandingPage = () => {
           
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Don't see your question here?</p>
-            <Button 
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 premium-button"
-              onClick={handleContactPage}
-            >
+            <Button onClick={handleContactPage}>
               Contact Support
             </Button>
           </div>
@@ -1143,7 +1244,7 @@ const LandingPage = () => {
                 className="flex-1 bg-white/10 border border-white/20 rounded-l-lg px-4 py-2 text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
               <Button 
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-l-none"
+                className="rounded-l-none"
                 onClick={handleSendMessage}
                 disabled={!chatInput.trim()}
               >
@@ -1155,7 +1256,7 @@ const LandingPage = () => {
         
         <Button
           onClick={toggleChat}
-          className={`h-14 w-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg flex items-center justify-center transition-all`}
+          className={`h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all`}
         >
           {isChatOpen ? (
             <X className="h-6 w-6" />
