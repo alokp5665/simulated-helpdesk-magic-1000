@@ -1,172 +1,145 @@
 
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { Mail, Lock, ArrowRight, User } from "lucide-react";
-
-interface StoredUser {
-  fullName: string;
-  email: string;
-  password: string;
-  role: string;
-}
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { Shield, ArrowRight, Github, Twitter } from "lucide-react";
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-
-  const validateEmail = (email: string) => {
-    return email.includes("@") && email.includes(".");
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
-    // Check registered users
-    const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
-    const user = storedUsers.find((u: StoredUser) => u.email === email && u.password === password);
-
-    if (user) {
-      toast.success("Login successful!");
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      navigate("/");
-    } else {
-      toast.error("Invalid email or password");
-    }
-  };
-
-  const handleForgotPassword = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!resetEmail || !validateEmail(resetEmail)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-    toast.success("Password reset link sent", {
-      description: "Check your email for further instructions",
-    });
-    setForgotPasswordOpen(false);
-    setResetEmail("");
+    setIsLoading(true);
+    
+    // Simulate login process
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Login successful",
+        description: "Welcome back to PrimeCare",
+      });
+      // Redirect to dashboard after successful login
+      navigate("/dashboard");
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md glass-card animate-fade-up hover-scale">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
-          <CardDescription className="text-center">
-            Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                PrimeCare
+              </span>
+            </div>
+          </div>
+          
+          <h1 className="text-2xl font-bold text-white mb-2 text-center">Welcome Back</h1>
+          <p className="text-indigo-200/70 text-center mb-8">Log in to your account to continue</p>
+          
+          <form onSubmit={handleLogin}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Email
+                </label>
                 <Input
                   id="email"
-                  placeholder="Enter your email"
                   type="email"
+                  placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-9"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                  required
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-indigo-200">
+                    Password
+                  </label>
+                  <a href="#" className="text-xs text-indigo-300 hover:text-white">
+                    Forgot password?
+                  </a>
+                </div>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-9"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                  required
                 />
               </div>
+              
+              <div className="flex items-center">
+                <Checkbox id="remember" className="border-white/20 data-[state=checked]:bg-indigo-500" />
+                <label htmlFor="remember" className="ml-2 text-sm text-indigo-200">
+                  Remember me
+                </label>
+              </div>
+              
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-200"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Log in to Dashboard"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            <Button
-              type="submit"
-              className="w-full transition-all duration-200 hover:scale-[1.02]"
-            >
-              Sign in
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </form>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            variant="link"
-            className="text-sm text-muted-foreground hover:text-primary"
-            onClick={() => setForgotPasswordOpen(true)}
-          >
-            Forgot your password?
-          </Button>
-          <div className="text-sm text-muted-foreground text-center">
-            Don't have an account?{" "}
-            <Link
-              to="/auth/signup"
-              className="text-primary hover:underline font-medium"
-            >
-              Sign up
-            </Link>
-          </div>
-        </CardFooter>
-      </Card>
-
-      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Reset Password</DialogTitle>
-            <DialogDescription>
-              Enter your email address and we'll send you a password reset link
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleForgotPassword}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="reset-email"
-                    placeholder="Enter your email"
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
+          
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-indigo-950/50 text-indigo-300 backdrop-blur-sm">
+                  Or continue with
+                </span>
               </div>
             </div>
-            <DialogFooter>
-              <Button type="submit" className="w-full">
-                Send Reset Link
+            
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <Github className="mr-2 h-4 w-4" /> GitHub
               </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <Twitter className="mr-2 h-4 w-4" /> Twitter
+              </Button>
+            </div>
+          </div>
+          
+          <p className="mt-8 text-center text-sm text-indigo-300/70">
+            Don't have an account?{" "}
+            <a 
+              href="/auth/signup" 
+              className="font-medium text-indigo-300 hover:text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/auth/signup");
+              }}
+            >
+              Sign up
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

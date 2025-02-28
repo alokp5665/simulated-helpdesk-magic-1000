@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import LandingPage from "./pages/landing";
 import Index from "./pages/Index";
 import HomePage from "./pages/home";
 import KnowledgeBasePage from "./pages/knowledge";
@@ -28,7 +29,13 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Public routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/auth/login" element={<LoginPage />} />
+          <Route path="/auth/signup" element={<SignupPage />} />
+          
+          {/* Dashboard and protected routes */}
+          <Route path="/dashboard" element={<Index />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/knowledge" element={<KnowledgeBasePage />} />
           <Route path="/tasks" element={<TasksPage />} />
@@ -41,8 +48,8 @@ const App = () => (
           <Route path="/surveys" element={<SurveysPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/tickets" element={<TicketsPage />} />
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/signup" element={<SignupPage />} />
+          
+          {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

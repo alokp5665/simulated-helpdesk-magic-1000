@@ -1,193 +1,181 @@
 
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Mail, Lock, User, UserCog, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { Shield, ArrowRight, Github, Twitter } from "lucide-react";
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "",
-  });
-
-  const validateEmail = (email: string) => {
-    return email.includes("@") && email.includes(".");
-  };
+  const { toast } = useToast();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [company, setCompany] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate all fields are filled
-    if (!Object.values(formData).every(Boolean)) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-
-    // Validate email format
-    if (!validateEmail(formData.email)) {
-      toast.error("Please enter a valid email address");
-      return;
-    }
-
-    // Check password match
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-
-    // Check if email already exists
-    const storedUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
-    if (storedUsers.some((user: { email: string }) => user.email === formData.email)) {
-      toast.error("Email already registered");
-      return;
-    }
-
-    // Store user data
-    const newUser = {
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      role: formData.role,
-    };
-
-    localStorage.setItem(
-      "registeredUsers",
-      JSON.stringify([...storedUsers, newUser])
-    );
-
-    toast.success("Account created successfully!", {
-      description: "Please login with your credentials",
-    });
-    navigate("/auth/login");
+    setIsLoading(true);
+    
+    // Simulate signup process
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Account created",
+        description: "Welcome to PrimeCare. Your account has been created successfully.",
+      });
+      // Redirect to dashboard after successful signup
+      navigate("/dashboard");
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md glass-card animate-fade-up hover-scale">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-          <CardDescription className="text-center">
-            Enter your information to create your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="fullName"
-                  placeholder="Enter your full name"
-                  value={formData.fullName}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, fullName: e.target.value }))
-                  }
-                  className="pl-9"
-                />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <Shield className="h-5 w-5 text-white" />
               </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                PrimeCare
+              </span>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          </div>
+          
+          <h1 className="text-2xl font-bold text-white mb-2 text-center">Create Your Account</h1>
+          <p className="text-indigo-200/70 text-center mb-8">Start your 14-day free trial. No credit card required.</p>
+          
+          <form onSubmit={handleSignup}>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-indigo-200 mb-1">
+                    Full Name
+                  </label>
+                  <Input
+                    id="name"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="company" className="block text-sm font-medium text-indigo-200 mb-1">
+                    Company Name
+                  </label>
+                  <Input
+                    id="company"
+                    placeholder="Acme Inc."
+                    value={company}
+                    onChange={(e) => setCompany(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Email
+                </label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  className="pl-9"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                  required
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Password
+                </label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, password: e.target.value }))
-                  }
-                  className="pl-9"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                  required
                 />
+                <p className="mt-1 text-xs text-indigo-300/70">
+                  Must be at least 8 characters and include a number and symbol
+                </p>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  className="pl-9"
-                />
+              
+              <div className="flex items-start">
+                <Checkbox id="terms" className="border-white/20 data-[state=checked]:bg-indigo-500 mt-1" />
+                <label htmlFor="terms" className="ml-2 text-sm text-indigo-200">
+                  I agree to the{" "}
+                  <a href="#" className="text-indigo-300 hover:text-white">
+                    Terms of Service
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="text-indigo-300 hover:text-white">
+                    Privacy Policy
+                  </a>
+                </label>
               </div>
+              
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-200"
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating account..." : "Create Account"}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <div className="relative">
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({ ...prev, role: value }))
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                    <SelectItem value="support">Support</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full transition-all duration-200 hover:scale-[1.02]"
-            >
-              Create Account
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </form>
-        </CardContent>
-        <CardFooter>
-          <div className="text-sm text-muted-foreground text-center w-full">
-            Already have an account?{" "}
-            <Link
-              to="/auth/login"
-              className="text-primary hover:underline font-medium"
-            >
-              Sign in
-            </Link>
+          
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/10"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-2 bg-indigo-950/50 text-indigo-300 backdrop-blur-sm">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+            
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <Github className="mr-2 h-4 w-4" /> GitHub
+              </Button>
+              <Button variant="outline" className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+                <Twitter className="mr-2 h-4 w-4" /> Twitter
+              </Button>
+            </div>
           </div>
-        </CardFooter>
-      </Card>
+          
+          <p className="mt-8 text-center text-sm text-indigo-300/70">
+            Already have an account?{" "}
+            <a 
+              href="/auth/login" 
+              className="font-medium text-indigo-300 hover:text-white"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/auth/login");
+              }}
+            >
+              Log in
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
