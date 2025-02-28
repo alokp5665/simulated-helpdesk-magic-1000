@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { 
   Book, Search, Clock, TrendingUp, BookOpen, FilePlus, 
   FileText, HelpCircle, GraduationCap, MessageSquare, 
-  Star, ChevronRight, Bookmark, CheckCircle2
+  Star, ChevronRight, Bookmark, CheckCircle2, Mail
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";

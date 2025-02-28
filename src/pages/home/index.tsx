@@ -7,7 +7,7 @@ import {
   Search, ArrowRight, Sparkles, Bot, X, Maximize2, 
   Minimize2, MessageSquare, AlertCircle, CheckCircle2,
   BarChart3, Users, Zap, Shield, Award, ArrowUpRight,
-  RefreshCcw, Clock, BookOpen, Send, ChevronRight, PanelRight
+  RefreshCcw, Clock, BookOpen, Send, ChevronRight, PanelRight, Star, Mail
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
