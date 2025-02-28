@@ -1,201 +1,196 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  ArrowRight, 
-  MessageSquare, 
-  CheckCircle, 
-  Phone, 
-  Mail, 
-  MapPin,
-  Send,
-  ArrowUp,
-  Linkedin,
-  Twitter,
-  Facebook,
-  Instagram,
-  Github
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { Slider } from "@/components/ui/slider"
+import { useToast } from "@/hooks/use-toast";
+import { 
+  CheckCircle, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Send, 
+  LoaderCircle,
+  GraduationCap,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin
+} from "lucide-react";
 
 const ContactPage = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    subject: "",
+    institution: "",
+    phone: "",
     message: "",
-    interestLevel: [50]
   });
-  const [formErrors, setFormErrors] = useState({
-    name: "",
-    email: "",
-    message: ""
-  });
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    institution?: string;
+    message?: string;
+  }>({});
 
+  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
     
-    // Clear error when user types
-    if (formErrors[name as keyof typeof formErrors]) {
-      setFormErrors(prev => ({ ...prev, [name]: "" }));
+    // Clear error when user starts typing
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
     }
   };
 
-  const handleInterestChange = (value: number[]) => {
-    setFormData(prev => ({ ...prev, interestLevel: value }));
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  };
-
+  // Validate form data
   const validateForm = () => {
-    const errors = {
-      name: "",
-      email: "",
-      message: ""
-    };
-    let isValid = true;
-
+    const newErrors: {
+      name?: string;
+      email?: string;
+      institution?: string;
+      message?: string;
+    } = {};
+    
     if (!formData.name.trim()) {
-      errors.name = "Name is required";
-      isValid = false;
+      newErrors.name = "Name is required";
     }
-
+    
     if (!formData.email.trim()) {
-      errors.email = "Email is required";
-      isValid = false;
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Please enter a valid email";
-      isValid = false;
+      newErrors.email = "Email is invalid";
     }
-
+    
+    if (!formData.institution.trim()) {
+      newErrors.institution = "Institution name is required";
+    }
+    
     if (!formData.message.trim()) {
-      errors.message = "Message is required";
-      isValid = false;
+      newErrors.message = "Message is required";
     }
-
-    setFormErrors(errors);
-    return isValid;
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast({
+        title: "Form Error",
+        description: "Please complete all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
     
-    setIsSubmitting(true);
+    setIsLoading(true);
     
     // Simulate API call
     setTimeout(() => {
-      setIsSubmitting(false);
+      setIsLoading(false);
+      setIsSubmitted(true);
       
       toast({
-        title: "Message sent successfully!",
+        title: "Message Sent!",
         description: "We'll get back to you as soon as possible.",
-        variant: "default",
       });
       
-      // Reset form
-      setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        interestLevel: [50]
-      });
+      // Reset form after 3 seconds
+      setTimeout(() => {
+        setFormData({
+          name: "",
+          email: "",
+          institution: "",
+          phone: "",
+          message: ""
+        });
+        setIsSubmitted(false);
+      }, 3000);
     }, 1500);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
-      {/* Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg shadow-lg">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center gap-2 mr-10 cursor-pointer"
-                onClick={() => navigate("/")}
-              >
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                  EduCare
-                </span>
-              </motion.div>
+      <TopBar />
+      <Sidebar />
+      
+      <main className="pl-64 pt-16">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-purple-200 mb-4">
+              Contact Us
+            </h1>
+            <p className="text-lg text-indigo-100/70 max-w-2xl mx-auto">
+              Have questions about how EduCare can transform your educational institution?
+              Our team is ready to help you implement the perfect solution.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="glass-effect rounded-xl p-6 hover:shadow-purple-900/20 hover:shadow-lg transition-all bento-card">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
+                <Mail className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Email Us</h3>
+              <p className="text-indigo-100/70 mb-2">We'll respond within 24 hours</p>
+              <a href="mailto:support@educare.com" className="text-indigo-300 hover:text-indigo-200 transition-colors">
+                support@educare.com
+              </a>
             </div>
-
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10" 
-                onClick={() => navigate("/auth/login")}
-              >
-                Log in
-              </Button>
-              <Button 
-                variant="premium"
-                onClick={() => navigate("/auth/signup")}
-              >
-                Sign Up Free
-              </Button>
+            
+            <div className="glass-effect rounded-xl p-6 hover:shadow-purple-900/20 hover:shadow-lg transition-all bento-card">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center mb-4">
+                <Phone className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Call Us</h3>
+              <p className="text-indigo-100/70 mb-2">Available 9am-6pm, Mon-Fri</p>
+              <a href="tel:+918001234567" className="text-indigo-300 hover:text-indigo-200 transition-colors">
+                +91 800-123-4567
+              </a>
+            </div>
+            
+            <div className="glass-effect rounded-xl p-6 hover:shadow-purple-900/20 hover:shadow-lg transition-all bento-card">
+              <div className="h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mb-4">
+                <MapPin className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Visit Us</h3>
+              <p className="text-indigo-100/70 mb-2">Our headquarters</p>
+              <address className="text-indigo-300 not-italic">
+                EduCare Tower, Whitefield<br />
+                Bangalore, 560066<br />
+                India
+              </address>
             </div>
           </div>
-        </div>
-      </header>
-
-      <main className="pt-28 pb-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="text-center mb-16"
-            >
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-purple-200">
-                  Get in Touch with Our Team
-                </span>
-              </h1>
-              <p className="text-lg md:text-xl text-indigo-100/80 max-w-3xl mx-auto">
-                Have questions about how EduCare can transform your educational institution? 
-                Our education specialists are here to help you find the perfect solution.
-              </p>
-            </motion.div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Contact Form */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.1 }}
-                className="lg:col-span-2 glass-effect rounded-2xl p-8 border border-white/10 shadow-xl"
-              >
-                <h2 className="text-2xl font-bold mb-6">Send us a message</h2>
-                
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label htmlFor="name" className="text-sm font-medium text-indigo-100">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-3 glass-effect rounded-xl p-8 border border-white/10">
+              {!isSubmitted ? (
+                <form onSubmit={handleSubmit}>
+                  <h2 className="text-2xl font-bold mb-6">Send Us a Message</h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label htmlFor="name" className="block text-sm font-medium text-indigo-100 mb-2">
                         Full Name <span className="text-red-400">*</span>
                       </label>
                       <Input
@@ -203,18 +198,16 @@ const ContactPage = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Enter your full name"
-                        className={`bg-white/5 border-white/10 focus:border-indigo-500 text-white ${
-                          formErrors.name ? "border-red-400" : ""
-                        }`}
+                        className={`bg-indigo-950/50 border ${errors.name ? 'border-red-400' : 'border-indigo-800'} text-white`}
+                        placeholder="Your name"
                       />
-                      {formErrors.name && (
-                        <p className="text-red-400 text-xs">{formErrors.name}</p>
+                      {errors.name && (
+                        <p className="mt-1 text-sm text-red-400">{errors.name}</p>
                       )}
                     </div>
                     
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium text-indigo-100">
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-indigo-100 mb-2">
                         Email Address <span className="text-red-400">*</span>
                       </label>
                       <Input
@@ -223,33 +216,50 @@ const ContactPage = () => {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Enter your email address"
-                        className={`bg-white/5 border-white/10 focus:border-indigo-500 text-white ${
-                          formErrors.email ? "border-red-400" : ""
-                        }`}
+                        className={`bg-indigo-950/50 border ${errors.email ? 'border-red-400' : 'border-indigo-800'} text-white`}
+                        placeholder="you@example.com"
                       />
-                      {formErrors.email && (
-                        <p className="text-red-400 text-xs">{formErrors.email}</p>
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-400">{errors.email}</p>
                       )}
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label htmlFor="subject" className="text-sm font-medium text-indigo-100">
-                      Subject
-                    </label>
-                    <Input
-                      id="subject"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      placeholder="What is this regarding?"
-                      className="bg-white/5 border-white/10 focus:border-indigo-500 text-white"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label htmlFor="institution" className="block text-sm font-medium text-indigo-100 mb-2">
+                        Institution Name <span className="text-red-400">*</span>
+                      </label>
+                      <Input
+                        id="institution"
+                        name="institution"
+                        value={formData.institution}
+                        onChange={handleChange}
+                        className={`bg-indigo-950/50 border ${errors.institution ? 'border-red-400' : 'border-indigo-800'} text-white`}
+                        placeholder="Your institution"
+                      />
+                      {errors.institution && (
+                        <p className="mt-1 text-sm text-red-400">{errors.institution}</p>
+                      )}
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-indigo-100 mb-2">
+                        Phone Number <span className="text-indigo-400/50">(Optional)</span>
+                      </label>
+                      <Input
+                        id="phone"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        className="bg-indigo-950/50 border border-indigo-800 text-white"
+                        placeholder="+91 9876543210"
+                      />
+                    </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label htmlFor="message" className="text-sm font-medium text-indigo-100">
+                  <div className="mb-6">
+                    <label htmlFor="message" className="block text-sm font-medium text-indigo-100 mb-2">
                       Message <span className="text-red-400">*</span>
                     </label>
                     <Textarea
@@ -257,201 +267,109 @@ const ContactPage = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="How can we help you?"
-                      className={`min-h-[150px] bg-white/5 border-white/10 focus:border-indigo-500 text-white ${
-                        formErrors.message ? "border-red-400" : ""
-                      }`}
+                      className={`bg-indigo-950/50 border ${errors.message ? 'border-red-400' : 'border-indigo-800'} text-white min-h-[150px]`}
+                      placeholder="Tell us about your requirements or questions..."
                     />
-                    {formErrors.message && (
-                      <p className="text-red-400 text-xs">{formErrors.message}</p>
+                    {errors.message && (
+                      <p className="mt-1 text-sm text-red-400">{errors.message}</p>
                     )}
                   </div>
                   
-                  <div className="space-y-4">
-                    <label className="text-sm font-medium text-indigo-100">
-                      How interested are you in EduCare?
-                    </label>
-                    <Slider 
-                      value={formData.interestLevel} 
-                      onValueChange={handleInterestChange}
-                      max={100}
-                      step={1}
-                      className="py-4"
-                    />
-                    <div className="flex justify-between text-xs text-indigo-200">
-                      <span>Just exploring</span>
-                      <span>Very interested</span>
-                    </div>
-                  </div>
-                  
-                  <Button
+                  <Button 
                     type="submit"
                     variant="premium"
-                    size="lg"
-                    className="w-full"
-                    disabled={isSubmitting}
+                    disabled={isLoading}
+                    className="w-full sm:w-auto"
                   >
-                    {isSubmitting ? (
+                    {isLoading ? (
                       <>
-                        <span className="mr-2">Sending...</span>
-                        <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
+                        <LoaderCircle className="h-4 w-4 animate-spin" />
+                        Sending...
                       </>
                     ) : (
                       <>
-                        Send Message <Send className="ml-2 h-4 w-4" />
+                        <Send className="h-4 w-4" />
+                        Send Message
                       </>
                     )}
                   </Button>
                 </form>
-              </motion.div>
-              
-              {/* Contact Information */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="glass-effect rounded-2xl p-8 border border-white/10 shadow-xl"
-              >
-                <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
-                
-                <div className="space-y-8">
-                  <div className="flex items-start gap-4">
-                    <div className="bg-indigo-500/20 p-3 rounded-lg">
-                      <Mail className="h-6 w-6 text-indigo-300" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-1">Email Us</h3>
-                      <p className="text-indigo-200">support@educare.com</p>
-                      <p className="text-indigo-200">sales@educare.com</p>
-                    </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 form-success">
+                  <div className="h-20 w-20 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center mb-6">
+                    <CheckCircle className="h-10 w-10" />
                   </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-indigo-500/20 p-3 rounded-lg">
-                      <Phone className="h-6 w-6 text-indigo-300" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-1">Call Us</h3>
-                      <p className="text-indigo-200">+91 (800) 123-4567</p>
-                      <p className="text-indigo-200">Mon-Fri, 9AM-6PM IST</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="bg-indigo-500/20 p-3 rounded-lg">
-                      <MapPin className="h-6 w-6 text-indigo-300" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-1">Visit Us</h3>
-                      <p className="text-indigo-200">
-                        1234 Tech Park, Cyber City<br />
-                        Bangalore, Karnataka 560100<br />
-                        India
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <Separator className="bg-white/10" />
-                  
-                  <div>
-                    <h3 className="text-lg font-medium mb-4">Connect With Us</h3>
-                    <div className="flex gap-4">
-                      <a href="#" className="bg-white/10 p-3 rounded-full hover:bg-indigo-500/30 transition-colors">
-                        <Twitter className="h-5 w-5" />
-                      </a>
-                      <a href="#" className="bg-white/10 p-3 rounded-full hover:bg-indigo-500/30 transition-colors">
-                        <Linkedin className="h-5 w-5" />
-                      </a>
-                      <a href="#" className="bg-white/10 p-3 rounded-full hover:bg-indigo-500/30 transition-colors">
-                        <Facebook className="h-5 w-5" />
-                      </a>
-                      <a href="#" className="bg-white/10 p-3 rounded-full hover:bg-indigo-500/30 transition-colors">
-                        <Instagram className="h-5 w-5" />
-                      </a>
-                      <a href="#" className="bg-white/10 p-3 rounded-full hover:bg-indigo-500/30 transition-colors">
-                        <Github className="h-5 w-5" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-            
-            {/* Map or Image */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="mt-16 glass-effect rounded-2xl overflow-hidden h-[400px] border border-white/10 shadow-xl"
-            >
-              <div className="w-full h-full bg-gradient-to-br from-indigo-900/50 to-purple-900/50 flex items-center justify-center">
-                <div className="text-center">
-                  <h3 className="text-xl font-bold mb-4">Interactive Map Coming Soon</h3>
-                  <p className="text-indigo-200 max-w-md mx-auto">
-                    Our development team is working on an interactive map feature to help you find our offices.
+                  <h2 className="text-2xl font-bold mb-4 text-center">Message Sent Successfully!</h2>
+                  <p className="text-indigo-100/70 text-center max-w-md mb-6">
+                    Thank you for reaching out. Our team will review your message and get back to you shortly.
                   </p>
                 </div>
+              )}
+            </div>
+            
+            <div className="lg:col-span-2 glass-effect rounded-xl p-8 border border-white/10 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <GraduationCap className="h-5 w-5 text-white" />
+                  </div>
+                  <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                    EduCare
+                  </span>
+                </div>
+                
+                <h3 className="text-xl font-semibold mb-4">Why Choose EduCare?</h3>
+                
+                <ul className="space-y-4 mb-8">
+                  <li className="flex items-start">
+                    <div className="bg-indigo-500/20 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-indigo-300" />
+                    </div>
+                    <p className="text-indigo-100/80">Trusted by 1,000+ educational institutions across India</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-indigo-500/20 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-indigo-300" />
+                    </div>
+                    <p className="text-indigo-100/80">42% average reduction in administrative workload</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-indigo-500/20 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-indigo-300" />
+                    </div>
+                    <p className="text-indigo-100/80">Advanced AI Tutor to enhance student performance</p>
+                  </li>
+                  <li className="flex items-start">
+                    <div className="bg-indigo-500/20 rounded-full p-1 mr-3 mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-indigo-300" />
+                    </div>
+                    <p className="text-indigo-100/80">Dedicated implementation and support team</p>
+                  </li>
+                </ul>
               </div>
-            </motion.div>
+              
+              <div>
+                <Separator className="bg-indigo-800/50 mb-6" />
+                <h4 className="text-lg font-medium mb-4">Connect With Us</h4>
+                <div className="flex space-x-4">
+                  <a href="#" className="social-icon h-10 w-10 rounded-full bg-indigo-800/50 flex items-center justify-center hover:bg-indigo-700/50 transition-colors">
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="social-icon h-10 w-10 rounded-full bg-indigo-800/50 flex items-center justify-center hover:bg-indigo-700/50 transition-colors">
+                    <Twitter className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="social-icon h-10 w-10 rounded-full bg-indigo-800/50 flex items-center justify-center hover:bg-indigo-700/50 transition-colors">
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                  <a href="#" className="social-icon h-10 w-10 rounded-full bg-indigo-800/50 flex items-center justify-center hover:bg-indigo-700/50 transition-colors">
+                    <Linkedin className="h-5 w-5" />
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
-      
-      {/* Footer */}
-      <footer className="bg-gradient-to-b from-transparent to-black/50 py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
-            <div className="flex items-center mb-6 md:mb-0">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3">
-                <MessageSquare className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                EduCare
-              </span>
-            </div>
-            
-            <div className="flex space-x-8">
-              <a href="/#features" className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Features</a>
-              <a href="/#testimonials" className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Testimonials</a>
-              <a href="/#pricing" className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Pricing</a>
-              <a href="/#faq" className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">FAQ</a>
-            </div>
-            
-            <div className="flex gap-4 mt-6 md:mt-0">
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-            </div>
-          </div>
-          
-          <Separator className="bg-indigo-900/50 mb-8" />
-          
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-indigo-400 text-sm mb-4 md:mb-0">© 2023 EduCare. All rights reserved.</p>
-            <div className="flex space-x-6">
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">Contact</a>
-            </div>
-          </div>
-        </div>
-        
-        <button 
-          onClick={scrollToTop}
-          className="fixed bottom-6 right-6 h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg hover:from-indigo-600 hover:to-purple-700 transition-all"
-        >
-          <ArrowUp className="h-5 w-5" />
-        </button>
-      </footer>
     </div>
   );
 };
