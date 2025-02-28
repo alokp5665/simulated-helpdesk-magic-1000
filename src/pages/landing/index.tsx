@@ -607,8 +607,8 @@ const LandingPage = () => {
               className="flex items-center gap-4"
             >
               <Button 
-                variant="ghost" 
-                className="text-white hover:bg-white/10" 
+                variant="secondary" 
+                className="text-white" 
                 onClick={handleLogin}
               >
                 Log in
@@ -617,7 +617,7 @@ const LandingPage = () => {
                 variant="default" 
                 onClick={handleSignUp}
               >
-                Sign Up Free
+                Sign Up
               </Button>
             </motion.div>
           </div>
@@ -788,7 +788,7 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Feature 1 - Student Query Management */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -817,7 +817,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group md:row-span-2 h-full flex flex-col"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg w-fit mb-4">
                 <Brain className="h-6 w-6" />
@@ -840,7 +840,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg w-fit mb-4">
                 <BarChart3 className="h-6 w-6" />
@@ -862,7 +862,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group lg:col-span-2 h-full"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg w-fit mb-4">
                 <BookOpen className="h-6 w-6" />
@@ -884,7 +884,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg w-fit mb-4">
                 <Zap className="h-6 w-6" />
@@ -906,7 +906,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg w-fit mb-4">
                 <Users className="h-6 w-6" />
@@ -980,14 +980,14 @@ const LandingPage = () => {
             <div className="flex justify-between absolute top-1/2 left-0 right-0 -mx-4 transform -translate-y-1/2 pointer-events-none">
               <Button 
                 onClick={prevTestimonial} 
-                variant="ghost" 
+                variant="default" 
                 className="rounded-full bg-black/20 backdrop-blur-sm border border-white/10 h-10 w-10 p-0 pointer-events-auto"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
               <Button 
                 onClick={nextTestimonial} 
-                variant="ghost" 
+                variant="default" 
                 className="rounded-full bg-black/20 backdrop-blur-sm border border-white/10 h-10 w-10 p-0 pointer-events-auto"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -1051,7 +1051,7 @@ const LandingPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true, margin: "-100px" }}
-                className={`relative bg-gradient-to-br ${plan.popular ? 'from-indigo-800/40 to-purple-800/40 border-indigo-500/30' : 'from-indigo-900/30 to-purple-900/30 border-white/10'} backdrop-blur-md rounded-xl p-8 border`}
+                className={`relative bg-gradient-to-br ${plan.popular ? 'from-indigo-800/40 to-purple-800/40 border-indigo-500/30' : 'from-indigo-900/30 to-purple-900/30 border-white/10'} backdrop-blur-md rounded-xl p-8 border flex flex-col`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full py-1 px-4 text-sm font-medium">
@@ -1063,7 +1063,7 @@ const LandingPage = () => {
                   <span className="text-4xl font-bold">{plan.price}</span>
                   <span className="text-indigo-300 ml-2">{plan.period}</span>
                 </div>
-                <ul className="space-y-3 mb-8">
+                <ul className="space-y-3 mb-8 flex-grow">
                   {plan.features.map((feature, i) => (
                     <li key={i} className="flex items-start">
                       <CheckCircle2 className="h-5 w-5 text-indigo-400 mr-2 flex-shrink-0 mt-0.5" />
