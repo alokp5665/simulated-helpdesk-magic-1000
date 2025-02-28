@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -592,4 +593,15 @@ const LandingPage = () => {
                 Designed for the Way Modern Teams Work
               </h2>
               <p className="text-lg text-indigo-100/70 mb-8">
-                PrimeCare adapts to your workflow, not the other
+                PrimeCare adapts to your workflow, not the other way around. Our intuitive
+                interface makes it easy for your team to get started and stay productive.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default LandingPage;
