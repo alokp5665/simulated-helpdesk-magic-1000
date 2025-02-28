@@ -28,8 +28,8 @@ const menuItems = [
   { icon: Phone, label: "Calls", path: "/calls" },
   { icon: Share2, label: "Social", path: "/social" },
   { icon: Book, label: "Knowledge Base", path: "/knowledge" },
-  { icon: FileHeart, label: "Feedback", path: "/feedback" },
-  { icon: Shield, label: "Permissions", path: "/permissions" },
+  { icon: FileHeart, label: "Feedback", path: "/surveys" },
+  { icon: Shield, label: "Permissions", path: "/roles" },
 ];
 
 export const Sidebar = () => {

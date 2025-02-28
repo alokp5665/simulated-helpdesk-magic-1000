@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { Bell, User, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,7 @@ interface Notification {
 }
 
 export const TopBar = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -45,6 +48,13 @@ export const TopBar = () => {
       message: messages[Math.floor(Math.random() * messages.length)],
       time: new Date().toLocaleTimeString(),
     };
+  };
+
+  const handleLogout = () => {
+    toast.success("Logout Successful", {
+      description: "You have been successfully logged out.",
+    });
+    navigate('/auth/login');
   };
 
   return (
@@ -81,9 +91,9 @@ export const TopBar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Help</DropdownMenuItem>
-              <DropdownMenuItem>Feedback</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/knowledge')}>Help</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/surveys')}>Feedback</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -97,9 +107,9 @@ export const TopBar = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Account</DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>Profile</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/settings')}>Account</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-red-600">Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
