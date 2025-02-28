@@ -22,7 +22,8 @@ import {
   School,
   Send,
   X,
-  Lightbulb
+  Lightbulb,
+  ChevronLeft
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ const LandingPage = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [currentTip, setCurrentTip] = useState<DidYouKnowTip | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
 
   // Features for the rotating showcase
   const features = [
@@ -93,25 +95,25 @@ const LandingPage = () => {
     }
   ];
 
-  // Testimonials from educational institutions
+  // Testimonials from educational institutions with Indian names
   const testimonials = [
     {
       quote: "EduCare transformed our student support workflow and reduced response times by 62%. The automation features alone saved our administrative staff 20+ hours per week.",
-      author: "Dr. Sarah Johnson",
+      author: "Dr. Rajesh Kumar",
       position: "Director of Student Success",
       institution: "Westfield University",
       rating: 5
     },
     {
       quote: "The multi-channel support capabilities have allowed us to consolidate all student interactions in one place. Implementation was smooth and our faculty loved it from day one.",
-      author: "Prof. Michael Chen",
+      author: "Prof. Ananya Sharma",
       position: "Dean of Academic Affairs",
       institution: "Lakeside College",
       rating: 5
     },
     {
       quote: "As a rapidly growing K-12 school district, we needed a scalable solution. EduCare grew with us from 5 to 50 support agents without a hitch and improved our parent communication significantly.",
-      author: "Elena Rodriguez",
+      author: "Vikram Patel",
       position: "District Technology Coordinator",
       institution: "Greenwood School District",
       rating: 5
@@ -150,11 +152,11 @@ const LandingPage = () => {
     }
   ];
 
-  // Pricing plans
+  // Pricing plans with INR
   const pricingPlans = [
     {
       name: "Starter",
-      price: "$299",
+      price: "₹24,999",
       period: "per month",
       features: [
         "Up to 1,000 students",
@@ -168,7 +170,7 @@ const LandingPage = () => {
     },
     {
       name: "Professional",
-      price: "$599",
+      price: "₹49,999",
       period: "per month",
       features: [
         "Up to 5,000 students",
@@ -205,7 +207,7 @@ const LandingPage = () => {
   const chatResponses = [
     {
       keywords: ["price", "cost", "pricing", "plan"],
-      response: "We offer flexible pricing plans designed specifically for educational institutions. Our Starter plan begins at $299/month, while our Professional plan is $599/month. For larger institutions, we provide custom Enterprise pricing. Would you like me to tell you more about what's included in each plan?"
+      response: "We offer flexible pricing plans designed specifically for educational institutions. Our Starter plan begins at ₹24,999/month, while our Professional plan is ₹49,999/month. For larger institutions, we provide custom Enterprise pricing. Would you like me to tell you more about what's included in each plan?"
     },
     {
       keywords: ["demo", "try", "trial", "see"],
@@ -322,6 +324,14 @@ const LandingPage = () => {
     }
   }, [isChatOpen]);
 
+  // Auto rotate testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonialIndex(prev => (prev + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [testimonials.length]);
+
   // Scroll to chat end when new messages are added
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -349,6 +359,11 @@ const LandingPage = () => {
   // Handle sign up click
   const handleSignUp = () => {
     navigate("/auth/signup");
+  };
+
+  // Handle navigating to contact page
+  const handleContactPage = () => {
+    navigate("/contact");
   };
 
   // Handle sending a chat message
@@ -396,6 +411,15 @@ const LandingPage = () => {
     if (!isChatOpen) {
       setCurrentTip(didYouKnowTips[Math.floor(Math.random() * didYouKnowTips.length)]);
     }
+  };
+
+  // Handle testimonial navigation
+  const nextTestimonial = () => {
+    setCurrentTestimonialIndex(prev => (prev + 1) % testimonials.length);
+  };
+
+  const prevTestimonial = () => {
+    setCurrentTestimonialIndex(prev => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
   return (
@@ -450,6 +474,7 @@ const LandingPage = () => {
                 <button onClick={() => scrollToSection(testimonialsRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Testimonials</button>
                 <button onClick={() => scrollToSection(pricingRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Pricing</button>
                 <button onClick={() => scrollToSection(faqRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">FAQ</button>
+                <button onClick={handleContactPage} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Contact</button>
               </motion.nav>
             </div>
 
@@ -664,7 +689,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg w-fit mb-4">
                 <MessageSquare className="h-6 w-6" />
@@ -674,7 +699,7 @@ const LandingPage = () => {
                 Centralize all student inquiries about courses, assignments, and administrative requests
                 in a single, intuitive interface for seamless resolution.
               </p>
-              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors mt-auto">
                 <span className="text-sm font-medium">Learn more</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
@@ -686,7 +711,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group md:row-span-2"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group md:row-span-2 h-full flex flex-col"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg w-fit mb-4">
                 <Brain className="h-6 w-6" />
@@ -697,29 +722,7 @@ const LandingPage = () => {
                 and provide insights that improve educational outcomes.
               </p>
               
-              <div className="p-4 bg-black/30 rounded-lg mb-6 border border-indigo-500/20">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs font-bold">AI</span>
-                  </div>
-                  <div className="bg-indigo-900/30 p-3 rounded-lg rounded-tl-none">
-                    <p className="text-sm text-indigo-100">
-                      Based on this student's past questions, I recommend sharing our 
-                      "Advanced Calculus Resources" article and connecting them with Professor Williams who specializes in this topic.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center text-sm text-indigo-300 gap-3">
-                  <Button variant="outline" size="sm" className="bg-indigo-800/30 border-indigo-700/50 hover:bg-indigo-700/50 text-xs">
-                    Apply Suggestion
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    Ignore
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+              <div className="mt-auto flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                 <span className="text-sm font-medium">See how AI improves learning outcomes</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
@@ -731,7 +734,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg w-fit mb-4">
                 <BarChart3 className="h-6 w-6" />
@@ -741,7 +744,7 @@ const LandingPage = () => {
                 Gain actionable insights with comprehensive dashboards that visualize participation rates, 
                 performance trends, and identify at-risk students.
               </p>
-              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+              <div className="mt-auto flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                 <span className="text-sm font-medium">Explore analytics features</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
@@ -753,43 +756,19 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group lg:col-span-2"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group lg:col-span-2 h-full"
             >
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="flex-1">
-                  <div className="bento-icon p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg w-fit mb-4">
-                    <BookOpen className="h-6 w-6" />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">Learning Resource Center</h3>
-                  <p className="text-indigo-100/70 mb-4">
-                    Create a self-service portal with powerful search capabilities that helps students
-                    find educational materials quickly and reduces your support workload.
-                  </p>
-                  <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
-                    <span className="text-sm font-medium">Learn about our knowledge management</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </div>
-                </div>
-                <div className="flex-1 bg-black/20 rounded-lg p-4 border border-indigo-500/20">
-                  <div className="mb-4">
-                    <div className="h-6 w-32 bg-indigo-500/20 rounded mb-2"></div>
-                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
-                    <div className="h-3 w-3/4 bg-indigo-500/10 rounded mt-1"></div>
-                    <div className="h-3 w-5/6 bg-indigo-500/10 rounded mt-1"></div>
-                  </div>
-                  <Separator className="bg-indigo-500/20 my-3" />
-                  <div className="mb-4">
-                    <div className="h-6 w-36 bg-indigo-500/20 rounded mb-2"></div>
-                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
-                    <div className="h-3 w-4/5 bg-indigo-500/10 rounded mt-1"></div>
-                  </div>
-                  <Separator className="bg-indigo-500/20 my-3" />
-                  <div>
-                    <div className="h-6 w-28 bg-indigo-500/20 rounded mb-2"></div>
-                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
-                    <div className="h-3 w-2/3 bg-indigo-500/10 rounded mt-1"></div>
-                  </div>
-                </div>
+              <div className="bento-icon p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg w-fit mb-4">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-bold mb-3">Learning Resource Center</h3>
+              <p className="text-indigo-100/70 mb-4">
+                Create a self-service portal with powerful search capabilities that helps students
+                find educational materials quickly and reduces your support workload.
+              </p>
+              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+                <span className="text-sm font-medium">Learn about our knowledge management</span>
+                <ChevronRight className="h-4 w-4" />
               </div>
             </motion.div>
 
@@ -799,7 +778,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-lg w-fit mb-4">
                 <Zap className="h-6 w-6" />
@@ -809,7 +788,7 @@ const LandingPage = () => {
                 Create custom workflows that automatically handle attendance tracking, fee reminders, and 
                 timetable management, saving administrative staff valuable time.
               </p>
-              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+              <div className="mt-auto flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                 <span className="text-sm font-medium">Discover automation options</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
@@ -821,7 +800,7 @@ const LandingPage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
               viewport={{ once: true, margin: "-100px" }}
-              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group"
+              className="bento-card bg-gradient-to-br from-indigo-900/40 to-purple-900/40 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-white/20 transition-all group h-full flex flex-col"
             >
               <div className="bento-icon p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg w-fit mb-4">
                 <Users className="h-6 w-6" />
@@ -831,7 +810,7 @@ const LandingPage = () => {
                 Enable seamless teamwork among faculty with shared resources, internal notes, curriculum planning, 
                 and coordinated student support strategies.
               </p>
-              <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
+              <div className="mt-auto flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                 <span className="text-sm font-medium">See collaboration tools</span>
                 <ChevronRight className="h-4 w-4" />
               </div>
@@ -858,29 +837,68 @@ const LandingPage = () => {
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-md rounded-xl p-6 border border-white/10"
+          {/* Testimonial carousel */}
+          <div className="relative max-w-4xl mx-auto">
+            <div className="overflow-hidden">
+              <motion.div 
+                className="flex items-center justify-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-indigo-100 mb-6 italic">"{testimonial.quote}"</p>
-                <div>
-                  <p className="font-medium text-white">{testimonial.author}</p>
-                  <p className="text-sm text-indigo-300">{testimonial.position}</p>
-                  <p className="text-sm text-indigo-300">{testimonial.institution}</p>
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentTestimonialIndex}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 backdrop-blur-md rounded-xl p-8 border border-white/10 min-h-[300px] flex flex-col justify-between w-full"
+                  >
+                    <div className="flex mb-4">
+                      {[...Array(testimonials[currentTestimonialIndex].rating)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-indigo-100 mb-6 italic text-lg">"{testimonials[currentTestimonialIndex].quote}"</p>
+                    <div>
+                      <p className="font-medium text-white text-lg">{testimonials[currentTestimonialIndex].author}</p>
+                      <p className="text-indigo-300">{testimonials[currentTestimonialIndex].position}</p>
+                      <p className="text-indigo-300">{testimonials[currentTestimonialIndex].institution}</p>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
-            ))}
+            </div>
+            {/* Navigation buttons */}
+            <div className="flex justify-between absolute top-1/2 left-0 right-0 -mx-4 transform -translate-y-1/2 pointer-events-none">
+              <Button 
+                onClick={prevTestimonial} 
+                variant="ghost" 
+                className="rounded-full bg-black/20 backdrop-blur-sm border border-white/10 h-10 w-10 p-0 pointer-events-auto"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button 
+                onClick={nextTestimonial} 
+                variant="ghost" 
+                className="rounded-full bg-black/20 backdrop-blur-sm border border-white/10 h-10 w-10 p-0 pointer-events-auto"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+            {/* Testimonial indicators */}
+            <div className="flex justify-center mt-6 gap-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonialIndex(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    index === currentTestimonialIndex ? "w-8 bg-indigo-500" : "w-2 bg-indigo-500/30"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
           
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -949,6 +967,7 @@ const LandingPage = () => {
                 </ul>
                 <Button 
                   className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700' : 'bg-white/10 hover:bg-white/20'} premium-button`}
+                  onClick={handleContactPage}
                 >
                   {plan.cta}
                 </Button>
@@ -958,7 +977,11 @@ const LandingPage = () => {
           
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Need a custom plan for your unique requirements?</p>
-            <Button variant="outline" className="border-indigo-400/30 text-white hover:bg-white/10">
+            <Button 
+              variant="outline" 
+              className="border-indigo-400/30 text-white hover:bg-white/10"
+              onClick={handleContactPage}
+            >
               Contact Our Education Specialists
             </Button>
           </div>
@@ -1001,7 +1024,10 @@ const LandingPage = () => {
           
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Don't see your question here?</p>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 premium-button">
+            <Button 
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 premium-button"
+              onClick={handleContactPage}
+            >
               Contact Support
             </Button>
           </div>
@@ -1026,6 +1052,7 @@ const LandingPage = () => {
               <button onClick={() => scrollToSection(testimonialsRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Testimonials</button>
               <button onClick={() => scrollToSection(pricingRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Pricing</button>
               <button onClick={() => scrollToSection(faqRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">FAQ</button>
+              <button onClick={handleContactPage} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Contact</button>
             </div>
           </div>
           
@@ -1036,7 +1063,7 @@ const LandingPage = () => {
             <div className="flex space-x-6">
               <a href="#" className="text-indigo-300 hover:text-white transition-colors">Privacy Policy</a>
               <a href="#" className="text-indigo-300 hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="text-indigo-300 hover:text-white transition-colors">Contact</a>
+              <a href="/contact" className="text-indigo-300 hover:text-white transition-colors">Contact</a>
             </div>
           </div>
         </div>
