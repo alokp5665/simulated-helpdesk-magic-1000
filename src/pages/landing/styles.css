@@ -296,3 +296,67 @@ html {
   opacity: 0;
   visibility: hidden;
 }
+
+/* Testimonial carousel indicators */
+.carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 0 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carousel-indicator.active {
+  width: 24px;
+  border-radius: 4px;
+  background-color: white;
+}
+
+/* Form input focus effects */
+.input-focus-effect {
+  position: relative;
+}
+
+.input-focus-effect::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+  transition: width 0.3s ease;
+}
+
+.input-focus-effect:focus-within::after {
+  width: 100%;
+}
+
+/* Pricing card hover effect */
+.pricing-card {
+  transition: all 0.3s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Social media icons */
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.social-link:hover {
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+  transform: translateY(-3px);
+}
