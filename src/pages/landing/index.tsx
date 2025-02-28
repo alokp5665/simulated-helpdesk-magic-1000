@@ -9,20 +9,20 @@ import {
   Zap, 
   BarChart3,
   Users, 
+  Award, 
+  Sparkles,
+  Star,
+  ChevronRight,
+  Play,
   GraduationCap,
   BookOpen,
   CalendarClock,
+  FileText,
   Brain,
   School,
   Send,
   X,
-  Lightbulb,
-  ChevronRight,
-  Facebook,
-  Twitter,
-  Instagram,
-  Linkedin,
-  ArrowUp
+  Lightbulb
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -97,23 +97,23 @@ const LandingPage = () => {
   const testimonials = [
     {
       quote: "EduCare transformed our student support workflow and reduced response times by 62%. The automation features alone saved our administrative staff 20+ hours per week.",
-      author: "Dr. Aditya Sharma",
+      author: "Dr. Sarah Johnson",
       position: "Director of Student Success",
-      institution: "National University of India",
+      institution: "Westfield University",
       rating: 5
     },
     {
       quote: "The multi-channel support capabilities have allowed us to consolidate all student interactions in one place. Implementation was smooth and our faculty loved it from day one.",
-      author: "Prof. Priya Patel",
+      author: "Prof. Michael Chen",
       position: "Dean of Academic Affairs",
-      institution: "Delhi Technical Institute",
+      institution: "Lakeside College",
       rating: 5
     },
     {
       quote: "As a rapidly growing K-12 school district, we needed a scalable solution. EduCare grew with us from 5 to 50 support agents without a hitch and improved our parent communication significantly.",
-      author: "Rajesh Verma",
+      author: "Elena Rodriguez",
       position: "District Technology Coordinator",
-      institution: "Bangalore Educational District",
+      institution: "Greenwood School District",
       rating: 5
     }
   ];
@@ -154,7 +154,7 @@ const LandingPage = () => {
   const pricingPlans = [
     {
       name: "Starter",
-      price: "₹22,999",
+      price: "$299",
       period: "per month",
       features: [
         "Up to 1,000 students",
@@ -168,7 +168,7 @@ const LandingPage = () => {
     },
     {
       name: "Professional",
-      price: "₹45,999",
+      price: "$599",
       period: "per month",
       features: [
         "Up to 5,000 students",
@@ -205,7 +205,7 @@ const LandingPage = () => {
   const chatResponses = [
     {
       keywords: ["price", "cost", "pricing", "plan"],
-      response: "We offer flexible pricing plans designed specifically for educational institutions. Our Starter plan begins at ₹22,999/month, while our Professional plan is ₹45,999/month. For larger institutions, we provide custom Enterprise pricing. Would you like me to tell you more about what's included in each plan?"
+      response: "We offer flexible pricing plans designed specifically for educational institutions. Our Starter plan begins at $299/month, while our Professional plan is $599/month. For larger institutions, we provide custom Enterprise pricing. Would you like me to tell you more about what's included in each plan?"
     },
     {
       keywords: ["demo", "try", "trial", "see"],
@@ -332,27 +332,23 @@ const LandingPage = () => {
     ref.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Scroll to top functionality
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  };
-
   // Handle login navigation
   const handleLogin = () => {
     navigate("/auth/login");
   };
 
+  // Handle demo button click
+  const handleWatchDemo = () => {
+    toast({
+      title: "Demo Access",
+      description: "Demo video is opening in a new window.",
+    });
+    // In a real app, this would open a modal with a demo video
+  };
+
   // Handle sign up click
   const handleSignUp = () => {
     navigate("/auth/signup");
-  };
-
-  // Handle contact page navigation
-  const handleContact = () => {
-    navigate("/contact");
   };
 
   // Handle sending a chat message
@@ -454,7 +450,6 @@ const LandingPage = () => {
                 <button onClick={() => scrollToSection(testimonialsRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Testimonials</button>
                 <button onClick={() => scrollToSection(pricingRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Pricing</button>
                 <button onClick={() => scrollToSection(faqRef)} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">FAQ</button>
-                <button onClick={handleContact} className="text-sm font-medium opacity-80 hover:opacity-100 transition-opacity">Contact</button>
               </motion.nav>
             </div>
 
@@ -465,15 +460,15 @@ const LandingPage = () => {
               className="flex items-center gap-4"
             >
               <Button 
-                variant="premium" 
-                className="text-white" 
+                variant="ghost" 
+                className="text-white hover:bg-white/10" 
                 onClick={handleLogin}
               >
                 Log in
               </Button>
               <Button 
-                variant="premium" 
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0"
+                variant="default" 
+                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 premium-button"
                 onClick={handleSignUp}
               >
                 Sign Up Free
@@ -506,16 +501,30 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
-                  variant="premium"
-                  className="rounded-full"
+                  className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 border-0 rounded-full premium-button"
                   onClick={handleSignUp}
                 >
                   Start Free Trial <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-indigo-400/30 text-white hover:bg-white/10 rounded-full"
+                  onClick={handleWatchDemo}
+                >
+                  <Play className="mr-2 h-4 w-4" /> Watch Demo
+                </Button>
               </div>
 
               <div className="mt-8 flex items-center gap-2">
-                <div className="text-sm text-indigo-200/80">
+                <div className="flex -space-x-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className={`w-8 h-8 rounded-full border-2 border-indigo-900 bg-indigo-${300 + i * 100} flex items-center justify-center text-xs font-bold`}>
+                      {String.fromCharCode(64 + i)}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-sm text-indigo-200/80 ml-2">
                   <span className="font-bold text-white">1,000+</span> educational institutions already using EduCare
                 </div>
               </div>
@@ -688,6 +697,28 @@ const LandingPage = () => {
                 and provide insights that improve educational outcomes.
               </p>
               
+              <div className="p-4 bg-black/30 rounded-lg mb-6 border border-indigo-500/20">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs font-bold">AI</span>
+                  </div>
+                  <div className="bg-indigo-900/30 p-3 rounded-lg rounded-tl-none">
+                    <p className="text-sm text-indigo-100">
+                      Based on this student's past questions, I recommend sharing our 
+                      "Advanced Calculus Resources" article and connecting them with Professor Williams who specializes in this topic.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center text-sm text-indigo-300 gap-3">
+                  <Button variant="outline" size="sm" className="bg-indigo-800/30 border-indigo-700/50 hover:bg-indigo-700/50 text-xs">
+                    Apply Suggestion
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    Ignore
+                  </Button>
+                </div>
+              </div>
+              
               <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                 <span className="text-sm font-medium">See how AI improves learning outcomes</span>
                 <ChevronRight className="h-4 w-4" />
@@ -737,6 +768,26 @@ const LandingPage = () => {
                   <div className="flex items-center gap-1 text-indigo-300 group-hover:text-indigo-200 transition-colors">
                     <span className="text-sm font-medium">Learn about our knowledge management</span>
                     <ChevronRight className="h-4 w-4" />
+                  </div>
+                </div>
+                <div className="flex-1 bg-black/20 rounded-lg p-4 border border-indigo-500/20">
+                  <div className="mb-4">
+                    <div className="h-6 w-32 bg-indigo-500/20 rounded mb-2"></div>
+                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
+                    <div className="h-3 w-3/4 bg-indigo-500/10 rounded mt-1"></div>
+                    <div className="h-3 w-5/6 bg-indigo-500/10 rounded mt-1"></div>
+                  </div>
+                  <Separator className="bg-indigo-500/20 my-3" />
+                  <div className="mb-4">
+                    <div className="h-6 w-36 bg-indigo-500/20 rounded mb-2"></div>
+                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
+                    <div className="h-3 w-4/5 bg-indigo-500/10 rounded mt-1"></div>
+                  </div>
+                  <Separator className="bg-indigo-500/20 my-3" />
+                  <div>
+                    <div className="h-6 w-28 bg-indigo-500/20 rounded mb-2"></div>
+                    <div className="h-3 w-full bg-indigo-500/10 rounded"></div>
+                    <div className="h-3 w-2/3 bg-indigo-500/10 rounded mt-1"></div>
                   </div>
                 </div>
               </div>
@@ -819,7 +870,7 @@ const LandingPage = () => {
               >
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <svg key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
                 <p className="text-indigo-100 mb-6 italic">"{testimonial.quote}"</p>
@@ -898,8 +949,6 @@ const LandingPage = () => {
                 </ul>
                 <Button 
                   className={`w-full ${plan.popular ? 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700' : 'bg-white/10 hover:bg-white/20'} premium-button`}
-                  onClick={handleContact}
-                  variant="premium"
                 >
                   {plan.cta}
                 </Button>
@@ -909,11 +958,7 @@ const LandingPage = () => {
           
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Need a custom plan for your unique requirements?</p>
-            <Button 
-              variant="premium" 
-              className="border-indigo-400/30 text-white hover:bg-white/10"
-              onClick={handleContact}
-            >
+            <Button variant="outline" className="border-indigo-400/30 text-white hover:bg-white/10">
               Contact Our Education Specialists
             </Button>
           </div>
@@ -956,11 +1001,7 @@ const LandingPage = () => {
           
           <div className="mt-12 text-center">
             <p className="text-indigo-300 mb-4">Don't see your question here?</p>
-            <Button 
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 premium-button"
-              onClick={handleContact}
-              variant="premium"
-            >
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 premium-button">
               Contact Support
             </Button>
           </div>
@@ -985,45 +1026,18 @@ const LandingPage = () => {
               <button onClick={() => scrollToSection(testimonialsRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Testimonials</button>
               <button onClick={() => scrollToSection(pricingRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Pricing</button>
               <button onClick={() => scrollToSection(faqRef)} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">FAQ</button>
-              <button onClick={handleContact} className="text-sm font-medium text-indigo-300 hover:text-white transition-colors">Contact</button>
             </div>
           </div>
           
           <Separator className="bg-indigo-900/50 mb-8" />
           
-          <div className="flex flex-col md:flex-row-reverse justify-between items-center mb-8">
-            <div className="flex space-x-4 mb-6 md:mb-0">
-              <Button variant="outline" size="icon" className="rounded-full border-white/20 text-white hover:bg-white/10">
-                <Facebook className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-white/20 text-white hover:bg-white/10">
-                <Twitter className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-white/20 text-white hover:bg-white/10">
-                <Instagram className="h-5 w-5" />
-              </Button>
-              <Button variant="outline" size="icon" className="rounded-full border-white/20 text-white hover:bg-white/10">
-                <Linkedin className="h-5 w-5" />
-              </Button>
-            </div>
-            
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-indigo-400 text-sm mb-4 md:mb-0">© 2023 EduCare. All rights reserved.</p>
             <div className="flex space-x-6">
               <a href="#" className="text-indigo-300 hover:text-white transition-colors">Privacy Policy</a>
               <a href="#" className="text-indigo-300 hover:text-white transition-colors">Terms of Service</a>
-              <a onClick={handleContact} className="text-indigo-300 hover:text-white transition-colors cursor-pointer">Contact</a>
+              <a href="#" className="text-indigo-300 hover:text-white transition-colors">Contact</a>
             </div>
-          </div>
-          
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-indigo-400 text-sm mb-4 md:mb-0">© 2023 EduCare. All rights reserved.</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="rounded-full border-white/20 text-white hover:bg-white/10 px-4"
-              onClick={scrollToTop}
-            >
-              Back to Top <ArrowUp className="ml-2 h-3 w-3" />
-            </Button>
           </div>
         </div>
       </footer>
@@ -1105,7 +1119,6 @@ const LandingPage = () => {
                 className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-l-none"
                 onClick={handleSendMessage}
                 disabled={!chatInput.trim()}
-                variant="premium"
               >
                 <Send className="h-4 w-4" />
               </Button>
@@ -1115,8 +1128,7 @@ const LandingPage = () => {
         
         <Button
           onClick={toggleChat}
-          className="h-14 w-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg flex items-center justify-center transition-all"
-          variant="premium"
+          className={`h-14 w-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg flex items-center justify-center transition-all`}
         >
           {isChatOpen ? (
             <X className="h-6 w-6" />
@@ -1125,23 +1137,6 @@ const LandingPage = () => {
           )}
         </Button>
       </div>
-      
-      {/* Back to top button */}
-      <AnimatePresence>
-        {isScrolled && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={scrollToTop}
-            className="fixed bottom-6 left-6 z-50 h-12 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg"
-          >
-            <ArrowUp className="h-5 w-5" />
-          </motion.button>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
