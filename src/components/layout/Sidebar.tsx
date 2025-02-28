@@ -3,27 +3,31 @@ import {
   BarChart3,
   CheckSquare,
   Users,
-  Ticket,
   Mail,
   MessageSquare,
   Phone,
   Share2,
-  FileHeart,
   Shield,
+  Home,
+  Ticket,
+  FileHeart,
+  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
+  { icon: Home, label: "Home", path: "/home" },
   { icon: BarChart3, label: "Dashboard", path: "/" },
   { icon: CheckSquare, label: "Tasks", path: "/tasks" },
   { icon: Users, label: "Agents", path: "/agents" },
   { icon: Ticket, label: "Tickets", path: "/tickets" },
-  { icon: Mail, label: "Emails", path: "/emails" },
+  { icon: Mail, label: "Emails", path: "/email" },
   { icon: MessageSquare, label: "Chat", path: "/chat" },
   { icon: Phone, label: "Calls", path: "/calls" },
   { icon: Share2, label: "Social", path: "/social" },
+  { icon: Book, label: "Knowledge Base", path: "/knowledge" },
   { icon: FileHeart, label: "Feedback", path: "/feedback" },
   { icon: Shield, label: "Permissions", path: "/permissions" },
 ];
