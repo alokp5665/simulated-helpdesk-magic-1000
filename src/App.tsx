@@ -21,6 +21,7 @@ import LoginPage from "./pages/auth/login";
 import SignupPage from "./pages/auth/signup";
 import NotFound from "./pages/NotFound";
 import TicketsPage from "./pages/tickets";
+import ContactPage from "./pages/contact";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth/login" element={<LoginPage />} />
           <Route path="/auth/signup" element={<SignupPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           
           {/* Dashboard and protected routes */}
           <Route path="/dashboard" element={<Index />} />
