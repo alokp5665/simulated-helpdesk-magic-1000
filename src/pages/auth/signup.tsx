@@ -25,7 +25,7 @@ const SignupPage = () => {
       setIsLoading(false);
       toast({
         title: "Account created",
-        description: "Welcome to PrimeCare. Your account has been created successfully.",
+        description: "Welcome to EduCare. Your account has been created successfully.",
       });
       // Redirect to dashboard after successful signup
       navigate("/dashboard");
@@ -42,7 +42,7 @@ const SignupPage = () => {
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                PrimeCare
+                EduCare
               </span>
             </div>
           </div>

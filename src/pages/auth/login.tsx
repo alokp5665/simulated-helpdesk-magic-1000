@@ -13,6 +13,9 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +26,109 @@ const LoginPage = () => {
       setIsLoading(false);
       toast({
         title: "Login successful",
-        description: "Welcome back to PrimeCare",
+        description: "Welcome back to EduCare",
       });
       // Redirect to dashboard after successful login
       navigate("/dashboard");
     }, 1500);
   };
+
+  const handleResetPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    // Simulate password reset process
+    setTimeout(() => {
+      setIsLoading(false);
+      setResetSent(true);
+      toast({
+        title: "Password reset link sent",
+        description: "Please check your email inbox",
+      });
+    }, 1500);
+  };
+
+  if (resetMode) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/20">
+            <div className="flex justify-center mb-8">
+              <div className="flex items-center gap-2">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                  EduCare
+                </span>
+              </div>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-white mb-2 text-center">Reset Password</h1>
+            <p className="text-indigo-200/70 text-center mb-8">
+              {resetSent 
+                ? "Password reset link sent to your email." 
+                : "Enter your email address to receive a password reset link"}
+            </p>
+            
+            {!resetSent ? (
+              <form onSubmit={handleResetPassword}>
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="reset-email" className="block text-sm font-medium text-indigo-200 mb-1">
+                      Email
+                    </label>
+                    <Input
+                      id="reset-email"
+                      type="email"
+                      placeholder="name@company.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
+                      required
+                    />
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-200"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Sending..." : "Send Reset Link"}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <Button
+                onClick={() => {
+                  setResetMode(false);
+                  setResetSent(false);
+                }}
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white py-2 rounded-lg transition-all duration-200"
+              >
+                Return to Login
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+            
+            <p className="mt-8 text-center text-sm text-indigo-300/70">
+              <a 
+                href="#" 
+                className="font-medium text-indigo-300 hover:text-white"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setResetMode(false);
+                }}
+              >
+                Back to login
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center p-4">
@@ -40,7 +140,7 @@ const LoginPage = () => {
                 <Shield className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                PrimeCare
+                EduCare
               </span>
             </div>
           </div>
@@ -70,7 +170,14 @@ const LoginPage = () => {
                   <label htmlFor="password" className="block text-sm font-medium text-indigo-200">
                     Password
                   </label>
-                  <a href="#" className="text-xs text-indigo-300 hover:text-white">
+                  <a 
+                    href="#" 
+                    className="text-xs text-indigo-300 hover:text-white"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setResetMode(true);
+                    }}
+                  >
                     Forgot password?
                   </a>
                 </div>

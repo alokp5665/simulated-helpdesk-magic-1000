@@ -314,18 +314,6 @@ const ContactPage = () => {
                 </div>
               </div>
             </motion.div>
-
-            <motion.div 
-              className="contact-map bg-white dark:bg-gray-900/50 backdrop-blur-sm rounded-xl shadow-md p-2 border border-gray-200 dark:border-gray-800 h-[240px] overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              {/* Placeholder for a map - in a real app you'd use Google Maps or similar */}
-              <div className="w-full h-full bg-gray-200 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                <p className="text-muted-foreground">Interactive Map would be displayed here</p>
-              </div>
-            </motion.div>
           </div>
         </div>
 
