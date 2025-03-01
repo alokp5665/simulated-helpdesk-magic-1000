@@ -309,31 +309,6 @@ const Index = () => {
     }
   };
 
-  // Add two new state variables for ocean wave analytics data
-  const [oceanWaveData1, setOceanWaveData1] = useState(generateSmoothData(24, 35, 55));
-  const [oceanWaveData2, setOceanWaveData2] = useState(generateSmoothData(24, 30, 45));
-  const [isHoveringWave1, setIsHoveringWave1] = useState(false);
-  const [isHoveringWave2, setIsHoveringWave2] = useState(false);
-
-  // Simulate real-time updates for ocean wave charts
-  useEffect(() => {
-    if (isLoading) return;
-    
-    // Update ocean wave data every 4 seconds if not being hovered
-    const oceanWaveInterval = setInterval(() => {
-      if (!isHoveringWave1) {
-        setOceanWaveData1(generateSmoothData(24, 35, 55));
-      }
-      if (!isHoveringWave2) {
-        setOceanWaveData2(generateSmoothData(24, 30, 45));
-      }
-    }, 4000);
-    
-    return () => {
-      clearInterval(oceanWaveInterval);
-    };
-  }, [isLoading, isHoveringWave1, isHoveringWave2]);
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-violet-50/10">
       <TopBar />
@@ -790,68 +765,6 @@ const Index = () => {
                                 fill="url(#colorResponse)"
                                 dot={false}
                                 activeDot={{ r: 5 }}
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </ChartContainer>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Ocean Wave Analytics Chart 1 */}
-                <Card 
-                  className="glass-card hover-scale overflow-hidden border border-blue-200/20 bg-white/90"
-                  onMouseEnter={() => setIsHoveringWave1(true)}
-                  onMouseLeave={() => setIsHoveringWave1(false)}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <BarChart className="h-4 w-4 text-blue-500" />
-                      <span>Ocean Wave Analytics 1</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[200px]">
-                      {isLoading ? (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <div className="animate-pulse h-5 w-32 bg-muted rounded"></div>
-                        </div>
-                      ) : (
-                        <ChartContainer config={{
-                          wave1: { label: "Wave Height", theme: { light: "#3b82f6", dark: "#3b82f6" } },
-                        }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={oceanWaveData1}>
-                              <defs>
-                                <linearGradient id="colorWave1" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.5}/>
-                                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                                </linearGradient>
-                              </defs>
-                              <XAxis 
-                                dataKey="name" 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <YAxis 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <ChartTooltip
-                                content={<ChartTooltipContent indicator="dot" />}
-                              />
-                              <Area
-                                type="monotone"
-                                dataKey="value"
-                                name="wave1"
-                                stroke="#3b82f6"
-                                strokeWidth={2}
-                                fill="url(#colorWave1)"
-                                dot={false}
-                                activeDot={{ r: 5 }}
                                 className="ocean-wave"
                               />
                             </AreaChart>
@@ -862,66 +775,65 @@ const Index = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Ocean Wave Analytics Chart 2 */}
-                <Card 
-                  className="glass-card hover-scale overflow-hidden border border-purple-200/20 bg-white/90"
-                  onMouseEnter={() => setIsHoveringWave2(true)}
-                  onMouseLeave={() => setIsHoveringWave2(false)}
-                >
+                {/* Top Performers */}
+                <Card className="glass-card hover-scale overflow-hidden border border-purple-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <LineChart className="h-4 w-4 text-purple-500" />
-                      <span>Ocean Wave Analytics 2</span>
+                      <Award className="h-4 w-4 text-purple-500" />
+                      <span>Top Performers</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="h-[200px]">
-                      {isLoading ? (
-                        <div className="h-full w-full flex items-center justify-center">
-                          <div className="animate-pulse h-5 w-32 bg-muted rounded"></div>
+                  <CardContent className="overflow-auto max-h-[200px] custom-scrollbar">
+                    {isLoading ? (
+                      Array(3).fill(null).map((_, i) => (
+                        <div key={i} className="mb-3 animate-pulse">
+                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-muted rounded w-1/2"></div>
                         </div>
-                      ) : (
-                        <ChartContainer config={{
-                          wave2: { label: "Wave Frequency", theme: { light: "#8b5cf6", dark: "#8b5cf6" } },
-                        }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={oceanWaveData2}>
-                              <defs>
-                                <linearGradient id="colorWave2" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.5}/>
-                                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
-                                </linearGradient>
-                              </defs>
-                              <XAxis 
-                                dataKey="name" 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <YAxis 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <ChartTooltip
-                                content={<ChartTooltipContent indicator="dot" />}
-                              />
-                              <Area
-                                type="monotone"
-                                dataKey="value"
-                                name="wave2"
-                                stroke="#8b5cf6"
-                                strokeWidth={2}
-                                fill="url(#colorWave2)"
-                                dot={false}
-                                activeDot={{ r: 5 }}
-                                className="ocean-wave"
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </ChartContainer>
-                      )}
-                    </div>
+                      ))
+                    ) : (
+                      topPerformers.map((performer, i) => (
+                        <motion.div 
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="mb-3 p-3 bg-purple-50/50 rounded-lg border border-purple-100/20 hover:bg-purple-50/80 transition-all duration-200"
+                        >
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
+                                {i === 0 ? (
+                                  <Award className="h-4 w-4" />
+                                ) : (
+                                  <Users className="h-4 w-4" />
+                                )}
+                              </div>
+                              <span className="font-medium text-sm">{performer.name}</span>
+                            </div>
+                            <div className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                              #{i+1}
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span>Tickets</span>
+                                <span className="font-medium">{performer.tickets}</span>
+                              </div>
+                              <Progress value={performer.tickets * 5} className="h-1 bg-purple-100" />
+                            </div>
+                            <div>
+                              <div className="flex justify-between mb-1">
+                                <span>Satisfaction</span>
+                                <span className="font-medium">{performer.satisfaction}%</span>
+                              </div>
+                              <Progress value={performer.satisfaction} className="h-1 bg-purple-100" />
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
               </div>
