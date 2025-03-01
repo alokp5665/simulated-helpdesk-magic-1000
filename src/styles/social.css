@@ -58,7 +58,7 @@
   background: linear-gradient(90deg, #4f46e5, #8b5cf6);
 }
 
-/* Badge styling */
+/* Badge styling - updated to avoid conflicts with component styles */
 .badge-success {
   @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300;
 }
@@ -113,4 +113,33 @@
   .bentoGrid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Premium button styling */
+.premium-button {
+  background: linear-gradient(90deg, #4f46e5, #8b5cf6);
+  transition: all 0.3s ease;
+}
+
+.premium-button:hover {
+  background: linear-gradient(90deg, #4338ca, #7e3af2);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+}
+
+/* Hover scale animation */
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
 }

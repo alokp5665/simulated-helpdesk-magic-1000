@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { BarChart3, PieChart, MessageSquare, Heart, Share2, ThumbsUp, Star, Filter, Bell, Calendar, Check, AlertTriangle, TrendingUp, Activity, BarChart, User, RefreshCw } from "lucide-react";
-import { Area, AreaChart, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, LineChart, Line } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, BarChart as ReBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, LineChart, Line } from "recharts";
 
 interface SocialPost {
   id: string;
@@ -115,12 +115,12 @@ const SocialPage = () => {
   // Update wave graphs
   useEffect(() => {
     const interval = setInterval(() => {
-      setWaveData1(prev => [...prev.slice(1), { value: Math.random() * 100 }]);
-      setWaveData2(prev => [...prev.slice(1), { value: Math.random() * 100 }]);
+      setWaveData1(prevData => [...prevData.slice(1), { value: Math.random() * 100 }]);
+      setWaveData2(prevData => [...prevData.slice(1), { value: Math.random() * 100 }]);
       
       // Update interaction rates
-      setInteractionRates(prev => {
-        const newRates = [...prev];
+      setInteractionRates(prevRates => {
+        const newRates = [...prevRates];
         const lastValue = newRates[newRates.length - 1].rate;
         const change = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 5);
         const newValue = Math.max(40, Math.min(90, lastValue + change));
@@ -189,7 +189,6 @@ const SocialPage = () => {
         "The webinar yesterday was so informative",
         "When will exam results be published?"
       ];
-      const sentiments = ["positive", "neutral", "negative"] as const;
       const randomNameIndex = Math.floor(Math.random() * indianNames.length);
       const randomContentIndex = Math.floor(Math.random() * contents.length);
       const randomPlatformIndex = Math.floor(Math.random() * platforms.length);
@@ -222,7 +221,7 @@ const SocialPage = () => {
 
     const interval = setInterval(() => {
       const newPost = generatePost();
-      setPosts(prev => [newPost, ...prev.slice(0, 19)]);
+      setPosts(prevPosts => [newPost, ...prevPosts.slice(0, 19)]);
       
       if (newPost.sentiment === "negative") {
         displayNotification(`Alert: Negative feedback from ${newPost.author}`);
@@ -275,16 +274,17 @@ const SocialPage = () => {
 
     const interval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * campaigns.length);
-      setCampaigns(prev => {
-        const updated = [...prev];
-        updated[randomIndex] = {
-          ...updated[randomIndex],
-          reach: updated[randomIndex].reach + Math.floor(Math.random() * 500),
-          engagement: Math.min(100, updated[randomIndex].engagement + Math.floor(Math.random() * 3))
-        };
-        
-        displayNotification(`Campaign Update: ${updated[randomIndex].name} reached ${updated[randomIndex].reach.toLocaleString()} people`);
-        
+      setCampaigns(prevCampaigns => {
+        const updated = [...prevCampaigns];
+        if (updated[randomIndex]) {
+          updated[randomIndex] = {
+            ...updated[randomIndex],
+            reach: updated[randomIndex].reach + Math.floor(Math.random() * 500),
+            engagement: Math.min(100, updated[randomIndex].engagement + Math.floor(Math.random() * 3))
+          };
+          
+          displayNotification(`Campaign Update: ${updated[randomIndex].name} reached ${updated[randomIndex].reach.toLocaleString()} people`);
+        }
         return updated;
       });
     }, 15000);
@@ -295,8 +295,8 @@ const SocialPage = () => {
   // Simulate updates to engagement goals
   useEffect(() => {
     const interval = setInterval(() => {
-      setGoals(prev => {
-        const updated = [...prev];
+      setGoals(prevGoals => {
+        const updated = [...prevGoals];
         const randomIndex = Math.floor(Math.random() * updated.length);
         const change = (Math.random() > 0.6 ? 1 : -1) * (Math.random() * 3);
         updated[randomIndex] = {
@@ -369,418 +369,418 @@ const SocialPage = () => {
               <TabsTrigger value="feed" className="text-sm">Social Feed</TabsTrigger>
               <TabsTrigger value="campaigns" className="text-sm">Campaigns</TabsTrigger>
             </TabsList>
-          </Tabs>
 
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-12 gap-6 bentoGrid">
-              {/* Engagement Trends */}
-              <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <span>Engagement Trends</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Daily interaction rates across all platforms
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={interactionRates}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, 'Interaction Rate']}
-                        contentStyle={{ 
-                          backgroundColor: 'rgba(23, 23, 23, 0.8)', 
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white' 
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="rate" 
-                        stroke="#8884d8" 
-                        strokeWidth={3} 
-                        dot={{ fill: '#8884d8', r: 6 }}
-                        activeDot={{ r: 8, fill: '#8884d8', stroke: 'white', strokeWidth: 2 }} 
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Engagement Goals */}
-              <Card className="col-span-12 md:col-span-4 glass-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    <span>Engagement Goals</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {goals.map((goal, index) => (
-                      <div key={index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="capitalize">
-                            {goal.platform === "all" ? "Overall" : goal.platform}
-                          </span>
-                          <span className={`font-mono ${goal.current >= goal.target ? 'text-green-500' : 'text-amber-500'}`}>
-                            {goal.current.toFixed(1)}% / {goal.target}%
-                          </span>
-                        </div>
-                        <Progress 
-                          value={(goal.current / goal.target) * 100} 
-                          className={`h-2 ${goal.current >= goal.target ? 'bg-secondary' : 'bg-secondary/50'}`}
+            <TabsContent value="overview" className="space-y-6">
+              <div className="grid grid-cols-12 gap-6 bentoGrid">
+                {/* Engagement Trends */}
+                <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      <span>Engagement Trends</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Daily interaction rates across all platforms
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={interactionRates}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis dataKey="day" />
+                        <YAxis />
+                        <RechartsTooltip 
+                          formatter={(value: number) => [`${value.toFixed(1)}%`, 'Interaction Rate']}
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(23, 23, 23, 0.8)', 
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: 'white' 
+                          }}
                         />
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        <Line 
+                          type="monotone" 
+                          dataKey="rate" 
+                          stroke="#8884d8" 
+                          strokeWidth={3} 
+                          dot={{ fill: '#8884d8', r: 6 }}
+                          activeDot={{ r: 8, fill: '#8884d8', stroke: 'white', strokeWidth: 2 }} 
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
 
-              {/* Sentiment Analysis */}
-              <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="h-5 w-5 text-primary" />
-                    <span>Sentiment Analysis</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Distribution of feedback sentiment across platforms
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RePieChart>
-                      <Pie
-                        data={pieData1}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                        className="animate-pulse-slow"
-                      >
-                        {pieData1.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={index === 0 ? SENTIMENT_COLORS.positive : index === 1 ? SENTIMENT_COLORS.neutral : SENTIMENT_COLORS.negative} 
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
-                        contentStyle={{ 
-                          backgroundColor: 'rgba(23, 23, 23, 0.8)', 
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white' 
-                        }}
-                      />
-                      <Legend />
-                    </RePieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Platform Distribution */}
-              <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <BarChart className="h-5 w-5 text-primary" />
-                    <span>Platform Distribution</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Engagement breakdown by social media platform
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ReBarChart data={pieData2}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip 
-                        formatter={(value: number) => [`${value.toFixed(1)}%`, 'Engagement']}
-                        contentStyle={{ 
-                          backgroundColor: 'rgba(23, 23, 23, 0.8)', 
-                          borderRadius: '8px',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: 'white' 
-                        }}
-                      />
-                      <Bar dataKey="value">
-                        {pieData2.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Bar>
-                    </ReBarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="feed" className="space-y-6">
-            <div className="grid grid-cols-12 gap-6 bentoGrid">
-              {/* Filters and Actions */}
-              <Card className="col-span-12 glass-card">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col md:flex-row justify-between gap-4">
-                    <div className="flex gap-2">
-                      <Select 
-                        value={platformFilter} 
-                        onValueChange={setPlatformFilter}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Platform" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Platforms</SelectItem>
-                          <SelectItem value="twitter">Twitter</SelectItem>
-                          <SelectItem value="facebook">Facebook</SelectItem>
-                          <SelectItem value="instagram">Instagram</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Select 
-                        value={sentimentFilter} 
-                        onValueChange={setSentimentFilter}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Sentiment" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Sentiments</SelectItem>
-                          <SelectItem value="positive">Positive</SelectItem>
-                          <SelectItem value="neutral">Neutral</SelectItem>
-                          <SelectItem value="negative">Negative</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Button onClick={() => setShowScheduler(true)} className="premium-button">
-                        <Calendar className="mr-2 h-4 w-4" />
-                        Schedule Post
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Social Feed */}
-              <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <MessageSquare className="h-5 w-5 text-primary" />
-                    <span>Social Feed</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Recent posts and interactions across platforms
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[600px] pr-4">
-                    <div className="space-y-4">
-                      {filteredPosts.map(post => (
-                        <div key={post.id} className="p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors response-card">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <Avatar>
-                              <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.author.replace(" ", "+")}`} />
-                              <AvatarFallback>{post.author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">{post.author}</p>
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm text-muted-foreground">
-                                  via {post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
-                                </p>
-                                <Badge variant={
-                                  post.sentiment === "positive" ? "success" : 
-                                  post.sentiment === "neutral" ? "warning" : "destructive"
-                                }>
-                                  {post.sentiment.charAt(0).toUpperCase() + post.sentiment.slice(1)}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div className="ml-auto text-xs text-muted-foreground">
-                              {post.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          </div>
-                          <p className="mb-3">{post.content}</p>
-                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                            <div className="flex items-center space-x-1">
-                              <Heart className="h-4 w-4" />
-                              <span>{post.likes}</span>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Share2 className="h-4 w-4" />
-                              <span>{post.shares}</span>
-                            </div>
-                            <div className="ml-auto">
-                              <Button variant="ghost" size="sm">Reply</Button>
-                              <Button variant="ghost" size="sm">Mark Resolved</Button>
-                            </div>
-                          </div>
-                          {post.responses && (
-                            <div className="mt-3 pl-4 border-l-2 border-primary/30">
-                              {post.responses.map((response, idx) => (
-                                <div key={idx} className="mt-2">
-                                  <div className="flex items-center">
-                                    <Avatar className="h-6 w-6 mr-2">
-                                      <AvatarFallback className="text-xs">{response.author[0]}</AvatarFallback>
-                                    </Avatar>
-                                    <p className="text-sm font-medium">{response.author}</p>
-                                  </div>
-                                  <p className="text-sm ml-8">{response.content}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Right Sidebar with Templates and Quick Stats */}
-              <div className="col-span-12 md:col-span-4 space-y-6">
-                {/* Quick Stats */}
-                <Card className="glass-card hover-scale">
+                {/* Engagement Goals */}
+                <Card className="col-span-12 md:col-span-4 glass-card hover-scale">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Activity className="h-5 w-5 text-primary" />
-                      <span>Quick Stats</span>
+                      <span>Engagement Goals</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
-                        <div className="flex items-center">
-                          <div className="mr-3 p-2 bg-blue-500/10 rounded-full">
-                            <MessageSquare className="h-5 w-5 text-blue-500" />
+                    <div className="space-y-6">
+                      {goals.map((goal, index) => (
+                        <div key={index} className="space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="capitalize">
+                              {goal.platform === "all" ? "Overall" : goal.platform}
+                            </span>
+                            <span className={`font-mono ${goal.current >= goal.target ? 'text-green-500' : 'text-amber-500'}`}>
+                              {goal.current.toFixed(1)}% / {goal.target}%
+                            </span>
                           </div>
-                          <span>Total Posts</span>
+                          <Progress 
+                            value={(goal.current / goal.target) * 100} 
+                            className={`h-2 ${goal.current >= goal.target ? 'bg-secondary' : 'bg-secondary/50'}`}
+                          />
                         </div>
-                        <span className="font-mono font-bold">{posts.length}</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
-                        <div className="flex items-center">
-                          <div className="mr-3 p-2 bg-green-500/10 rounded-full">
-                            <ThumbsUp className="h-5 w-5 text-green-500" />
-                          </div>
-                          <span>Positive</span>
-                        </div>
-                        <span className="font-mono font-bold">
-                          {posts.filter(p => p.sentiment === "positive").length}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
-                        <div className="flex items-center">
-                          <div className="mr-3 p-2 bg-red-500/10 rounded-full">
-                            <AlertTriangle className="h-5 w-5 text-red-500" />
-                          </div>
-                          <span>Negative</span>
-                        </div>
-                        <span className="font-mono font-bold">
-                          {posts.filter(p => p.sentiment === "negative").length}
-                        </span>
-                      </div>
-                      
-                      <Button className="w-full" variant="outline">
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        Refresh Stats
-                      </Button>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* Response Templates */}
-                <Card className="glass-card hover-scale">
+                {/* Sentiment Analysis */}
+                <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <PieChart className="h-5 w-5 text-primary" />
+                      <span>Sentiment Analysis</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Distribution of feedback sentiment across platforms
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RePieChart>
+                        <Pie
+                          data={pieData1}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                          className="animate-pulse-slow"
+                        >
+                          {pieData1.map((entry, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={index === 0 ? SENTIMENT_COLORS.positive : index === 1 ? SENTIMENT_COLORS.neutral : SENTIMENT_COLORS.negative} 
+                            />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          formatter={(value: number) => [`${value.toFixed(1)}%`, '']}
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(23, 23, 23, 0.8)', 
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: 'white' 
+                          }}
+                        />
+                        <Legend />
+                      </RePieChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Platform Distribution */}
+                <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <BarChart className="h-5 w-5 text-primary" />
+                      <span>Platform Distribution</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Engagement breakdown by social media platform
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ReBarChart data={pieData2}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <RechartsTooltip 
+                          formatter={(value: number) => [`${value.toFixed(1)}%`, 'Engagement']}
+                          contentStyle={{ 
+                            backgroundColor: 'rgba(23, 23, 23, 0.8)', 
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            color: 'white' 
+                          }}
+                        />
+                        <Bar dataKey="value">
+                          {pieData2.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Bar>
+                      </ReBarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="feed" className="space-y-6">
+              <div className="grid grid-cols-12 gap-6 bentoGrid">
+                {/* Filters and Actions */}
+                <Card className="col-span-12 glass-card">
+                  <CardContent className="pt-6">
+                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                      <div className="flex gap-2">
+                        <Select 
+                          value={platformFilter} 
+                          onValueChange={setPlatformFilter}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Platform" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Platforms</SelectItem>
+                            <SelectItem value="twitter">Twitter</SelectItem>
+                            <SelectItem value="facebook">Facebook</SelectItem>
+                            <SelectItem value="instagram">Instagram</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Select 
+                          value={sentimentFilter} 
+                          onValueChange={setSentimentFilter}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Sentiment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Sentiments</SelectItem>
+                            <SelectItem value="positive">Positive</SelectItem>
+                            <SelectItem value="neutral">Neutral</SelectItem>
+                            <SelectItem value="negative">Negative</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Button onClick={() => setShowScheduler(true)} className="premium-button">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          Schedule Post
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Social Feed */}
+                <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <MessageSquare className="h-5 w-5 text-primary" />
-                      <span>Response Templates</span>
+                      <span>Social Feed</span>
                     </CardTitle>
+                    <CardDescription>
+                      Recent posts and interactions across platforms
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
-                      {[
-                        "Thank you for your feedback! We're glad you had a positive experience.",
-                        "We appreciate your feedback and will work on improving this aspect.",
-                        "We're sorry you had this experience. Our team will contact you shortly.",
-                        "Thanks for bringing this to our attention. We'll look into it right away."
-                      ].map((template, i) => (
-                        <div key={i} className="p-3 rounded-lg bg-background/50 cursor-pointer hover:bg-background transition-colors">
-                          <p className="text-sm">{template}</p>
+                    <ScrollArea className="h-[600px] pr-4">
+                      <div className="space-y-4">
+                        {filteredPosts.map(post => (
+                          <div key={post.id} className="p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors response-card">
+                            <div className="flex items-center space-x-3 mb-3">
+                              <Avatar>
+                                <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${post.author.replace(" ", "+")}`} />
+                                <AvatarFallback>{post.author.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{post.author}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm text-muted-foreground">
+                                    via {post.platform.charAt(0).toUpperCase() + post.platform.slice(1)}
+                                  </p>
+                                  <Badge variant={
+                                    post.sentiment === "positive" ? "success" : 
+                                    post.sentiment === "neutral" ? "warning" : "destructive"
+                                  }>
+                                    {post.sentiment.charAt(0).toUpperCase() + post.sentiment.slice(1)}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="ml-auto text-xs text-muted-foreground">
+                                {post.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            </div>
+                            <p className="mb-3">{post.content}</p>
+                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                              <div className="flex items-center space-x-1">
+                                <Heart className="h-4 w-4" />
+                                <span>{post.likes}</span>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <Share2 className="h-4 w-4" />
+                                <span>{post.shares}</span>
+                              </div>
+                              <div className="ml-auto">
+                                <Button variant="ghost" size="sm">Reply</Button>
+                                <Button variant="ghost" size="sm">Mark Resolved</Button>
+                              </div>
+                            </div>
+                            {post.responses && (
+                              <div className="mt-3 pl-4 border-l-2 border-primary/30">
+                                {post.responses.map((response, idx) => (
+                                  <div key={idx} className="mt-2">
+                                    <div className="flex items-center">
+                                      <Avatar className="h-6 w-6 mr-2">
+                                        <AvatarFallback className="text-xs">{response.author[0]}</AvatarFallback>
+                                      </Avatar>
+                                      <p className="text-sm font-medium">{response.author}</p>
+                                    </div>
+                                    <p className="text-sm ml-8">{response.content}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Right Sidebar with Templates and Quick Stats */}
+                <div className="col-span-12 md:col-span-4 space-y-6">
+                  {/* Quick Stats */}
+                  <Card className="glass-card hover-scale">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <Activity className="h-5 w-5 text-primary" />
+                        <span>Quick Stats</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
+                          <div className="flex items-center">
+                            <div className="mr-3 p-2 bg-blue-500/10 rounded-full">
+                              <MessageSquare className="h-5 w-5 text-blue-500" />
+                            </div>
+                            <span>Total Posts</span>
+                          </div>
+                          <span className="font-mono font-bold">{posts.length}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
+                          <div className="flex items-center">
+                            <div className="mr-3 p-2 bg-green-500/10 rounded-full">
+                              <ThumbsUp className="h-5 w-5 text-green-500" />
+                            </div>
+                            <span>Positive</span>
+                          </div>
+                          <span className="font-mono font-bold">
+                            {posts.filter(p => p.sentiment === "positive").length}
+                          </span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center p-3 rounded-lg bg-background/50">
+                          <div className="flex items-center">
+                            <div className="mr-3 p-2 bg-red-500/10 rounded-full">
+                              <AlertTriangle className="h-5 w-5 text-red-500" />
+                            </div>
+                            <span>Negative</span>
+                          </div>
+                          <span className="font-mono font-bold">
+                            {posts.filter(p => p.sentiment === "negative").length}
+                          </span>
+                        </div>
+                        
+                        <Button className="w-full" variant="outline">
+                          <RefreshCw className="mr-2 h-4 w-4" />
+                          Refresh Stats
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Response Templates */}
+                  <Card className="glass-card hover-scale">
+                    <CardHeader>
+                      <CardTitle className="flex items-center space-x-2">
+                        <MessageSquare className="h-5 w-5 text-primary" />
+                        <span>Response Templates</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {[
+                          "Thank you for your feedback! We're glad you had a positive experience.",
+                          "We appreciate your feedback and will work on improving this aspect.",
+                          "We're sorry you had this experience. Our team will contact you shortly.",
+                          "Thanks for bringing this to our attention. We'll look into it right away."
+                        ].map((template, i) => (
+                          <div key={i} className="p-3 rounded-lg bg-background/50 cursor-pointer hover:bg-background transition-colors">
+                            <p className="text-sm">{template}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="campaigns" className="space-y-6">
+              <div className="grid grid-cols-12 gap-6 bentoGrid">
+                {/* Campaigns Overview */}
+                <Card className="col-span-12 glass-card hover-scale">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      <span>Campaign Performance</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Active social media campaigns and their metrics
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {campaigns.map(campaign => (
+                        <div 
+                          key={campaign.id} 
+                          className="p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors response-card"
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="font-medium text-lg">{campaign.name}</h3>
+                              <p className="text-sm text-muted-foreground capitalize">{campaign.platform}</p>
+                            </div>
+                            <Badge variant={campaign.engagement > 20 ? "success" : "default"}>
+                              {campaign.engagement}% Engagement
+                            </Badge>
+                          </div>
+                          
+                          <div className="mb-4">
+                            <div className="flex justify-between text-sm mb-1">
+                              <span>Reach</span>
+                              <span className="font-mono">{campaign.reach.toLocaleString()}</span>
+                            </div>
+                            <Progress 
+                              value={(campaign.reach / 15000) * 100} 
+                              className="h-2"
+                            />
+                          </div>
+                          
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Started: {campaign.startDate.toLocaleDateString()}</span>
+                            <span>Ends: {campaign.endDate.toLocaleDateString()}</span>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="campaigns" className="space-y-6">
-            <div className="grid grid-cols-12 gap-6 bentoGrid">
-              {/* Campaigns Overview */}
-              <Card className="col-span-12 glass-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <span>Campaign Performance</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Active social media campaigns and their metrics
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {campaigns.map(campaign => (
-                      <div 
-                        key={campaign.id} 
-                        className="p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors response-card"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-medium text-lg">{campaign.name}</h3>
-                            <p className="text-sm text-muted-foreground capitalize">{campaign.platform}</p>
-                          </div>
-                          <Badge variant={campaign.engagement > 20 ? "success" : "default"}>
-                            {campaign.engagement}% Engagement
-                          </Badge>
-                        </div>
-                        
-                        <div className="mb-4">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>Reach</span>
-                            <span className="font-mono">{campaign.reach.toLocaleString()}</span>
-                          </div>
-                          <Progress 
-                            value={(campaign.reach / 15000) * 100} 
-                            className="h-2"
-                          />
-                        </div>
-                        
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Started: {campaign.startDate.toLocaleDateString()}</span>
-                          <span>Ends: {campaign.endDate.toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+            </TabsContent>
+          </Tabs>
 
           {/* Post Scheduler Modal */}
           {showScheduler && (
