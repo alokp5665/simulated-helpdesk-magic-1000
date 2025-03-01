@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
@@ -308,6 +307,34 @@ const Index = () => {
       }
     }
   };
+
+  // Add two new state variables for ocean wave analytics data
+  const [oceanWaveData1, setOceanWaveData1] = useState(generateSmoothData(24, 35, 55));
+  const [oceanWaveData2, setOceanWaveData2] = useState(generateSmoothData(24, 30, 45));
+  const [isHoveringWave1, setIsHoveringWave1] = useState(false);
+  const [isHoveringWave2, setIsHoveringWave2] = useState(false);
+
+  // Simulate real-time updates
+  useEffect(() => {
+    if (isLoading) return;
+    
+    // Update ocean wave data every 4 seconds if not being hovered
+    const oceanWaveInterval = setInterval(() => {
+      if (!isHoveringWave1) {
+        setOceanWaveData1(generateSmoothData(24, 35, 55));
+      }
+      if (!isHoveringWave2) {
+        setOceanWaveData2(generateSmoothData(24, 30, 45));
+      }
+    }, 4000);
+    
+    return () => {
+      clearInterval(ticketInterval);
+      clearInterval(chartInterval);
+      clearInterval(feedInterval);
+      clearInterval(oceanWaveInterval);
+    };
+  }, [isLoading, isHoveringWave1, isHoveringWave2]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-violet-50/10">
@@ -739,110 +766,4 @@ const Index = () => {
                               <defs>
                                 <linearGradient id="colorResponse" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.5}/>
-                                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
-                                </linearGradient>
-                              </defs>
-                              <XAxis 
-                                dataKey="name" 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <YAxis 
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fontSize: 10 }}
-                              />
-                              <ChartTooltip
-                                content={<ChartTooltipContent indicator="dot" />}
-                              />
-                              <Area
-                                type="monotone"
-                                dataKey="value"
-                                name="response"
-                                stroke="#14b8a6"
-                                strokeWidth={2}
-                                fill="url(#colorResponse)"
-                                dot={false}
-                                activeDot={{ r: 5 }}
-                                className="ocean-wave"
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </ChartContainer>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Top Performers */}
-                <Card className="glass-card hover-scale overflow-hidden border border-purple-200/20 bg-white/90">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <Award className="h-4 w-4 text-purple-500" />
-                      <span>Top Performers</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="overflow-auto max-h-[200px] custom-scrollbar">
-                    {isLoading ? (
-                      Array(3).fill(null).map((_, i) => (
-                        <div key={i} className="mb-3 animate-pulse">
-                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-muted rounded w-1/2"></div>
-                        </div>
-                      ))
-                    ) : (
-                      topPerformers.map((performer, i) => (
-                        <motion.div 
-                          key={i}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="mb-3 p-3 bg-purple-50/50 rounded-lg border border-purple-100/20 hover:bg-purple-50/80 transition-all duration-200"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
-                                {i === 0 ? (
-                                  <Award className="h-4 w-4" />
-                                ) : (
-                                  <Users className="h-4 w-4" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm">{performer.name}</span>
-                            </div>
-                            <div className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                              #{i+1}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span>Tickets</span>
-                                <span className="font-medium">{performer.tickets}</span>
-                              </div>
-                              <Progress value={performer.tickets * 5} className="h-1 bg-purple-100" />
-                            </div>
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span>Satisfaction</span>
-                                <span className="font-medium">{performer.satisfaction}%</span>
-                              </div>
-                              <Progress value={performer.satisfaction} className="h-1 bg-purple-100" />
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default Index;
+                                  <stop offset="95%" stopColor="#14b8a6
