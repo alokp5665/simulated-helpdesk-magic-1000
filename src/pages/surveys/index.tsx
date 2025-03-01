@@ -202,14 +202,14 @@ const SurveysPage = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       const newRate = 75 + Math.random() * 15;
-      setResponseRates(prev => [
-        ...prev.slice(1),
+      setResponseRates(prevRates => [
+        ...prevRates.slice(1),
         { timestamp: Date.now(), rate: newRate }
       ]);
       
       // Occasionally show rate change notification
       if (Math.random() > 0.7) {
-        const message = `Response Rate ${newRate > prev[prev.length-1]?.rate ? 'increased' : 'decreased'} to ${newRate.toFixed(1)}%`;
+        const message = `Response Rate ${newRate > responseRates[responseRates.length-1]?.rate ? 'increased' : 'decreased'} to ${newRate.toFixed(1)}%`;
         setLatestNotification(message);
         setShowNotification(true);
         setTimeout(() => setShowNotification(false), 3000);
@@ -217,7 +217,7 @@ const SurveysPage = () => {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [responseRates]);
 
   // Add new responses randomly
   useEffect(() => {
@@ -510,7 +510,7 @@ const SurveysPage = () => {
                                 <div className="bg-background border rounded-lg p-3 shadow-lg">
                                   <p className="font-medium">Response Rate</p>
                                   <p className="text-lg font-bold text-primary">
-                                    {payload[0].value.toFixed(1)}%
+                                    {typeof payload[0].value === 'number' ? payload[0].value.toFixed(1) : payload[0].value}%
                                   </p>
                                   <p className="text-xs text-muted-foreground">
                                     {new Date(payload[0].payload.timestamp).toLocaleTimeString()}
@@ -643,7 +643,9 @@ const SurveysPage = () => {
                       <BarChart data={feedbackTrend}>
                         <XAxis dataKey="month" />
                         <RechartsTooltip 
-                          formatter={(value, name) => [`${value}%`, name.charAt(0).toUpperCase() + name.slice(1)]}
+                          formatter={(value, name) => {
+                            return [`${value}%`, typeof name === 'string' ? name.charAt(0).toUpperCase() + name.slice(1) : name];
+                          }}
                         />
                         <Bar dataKey="positive" name="Positive" fill="#22c55e" />
                         <Bar dataKey="neutral" name="Neutral" fill="#eab308" />
@@ -680,7 +682,7 @@ const SurveysPage = () => {
                         <RechartsTooltip 
                           formatter={(value) => [`${value} responses`, 'Total']}
                         />
-                        <Bar dataKey="responses" nameKey="name">
+                        <Bar dataKey="responses">
                           {responseBreakdownData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
                           ))}
