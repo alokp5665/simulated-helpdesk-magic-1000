@@ -179,7 +179,7 @@ const HomePage = () => {
     {
       id: "welcome",
       role: "bot",
-      content: "👋 Hi there! I'm your PrimeCare assistant. How can I help you today?",
+      content: "👋 Hi there! I'm your EduCare assistant. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
@@ -716,10 +716,10 @@ const HomePage = () => {
                       Join thousands of companies that are delivering exceptional support experiences with PrimeCare Helpdesk.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                      <Button size="lg" className="gap-2">
+                      <Button size="lg" className="gap-2" onClick={goToContact}>
                         Buy Now <ArrowRight className="h-4 w-4" />
                       </Button>
-                      <Button size="lg" variant="outline" className="gap-2">
+                      <Button size="lg" variant="outline" className="gap-2" onClick={goToContact}>
                         Upgrade <Sparkles className="h-4 w-4" />
                       </Button>
                     </div>
@@ -734,9 +734,9 @@ const HomePage = () => {
         </div>
       </main>
       
-      {/* AI Chatbot */}
+      {/* AI Chatbot - Improved positioning and functionality */}
       <div className={cn(
-        "fixed bottom-6 right-6 z-50 transition-all duration-300",
+        "fixed bottom-6 right-6 z-50 transition-all duration-300 shadow-xl",
         isChatbotMinimized ? "w-auto" : isChatbotOpen ? "w-80 sm:w-96" : "w-auto"
       )}>
         {!isChatbotOpen ? (
@@ -746,7 +746,7 @@ const HomePage = () => {
               setIsChatbotMinimized(false);
               toast({
                 title: "AI Assistant Activated",
-                description: "Ask any question about PrimeCare Helpdesk.",
+                description: "Ask any question about EduCare.",
               });
             }} 
             size="lg"
@@ -766,7 +766,7 @@ const HomePage = () => {
                   <Bot className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-sm">PrimeCare Assistant</h3>
+                  <h3 className="font-medium text-sm">EduCare Assistant</h3>
                   <div className="flex items-center gap-1">
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
                     <p className="text-xs text-muted-foreground">Online</p>
@@ -865,7 +865,7 @@ const HomePage = () => {
                 <div className="p-3 border-t">
                   <div className="flex items-center gap-2">
                     <Textarea 
-                      placeholder="Ask me anything about PrimeCare..." 
+                      placeholder="Ask me anything about EduCare..." 
                       className="min-h-9 resize-none"
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
