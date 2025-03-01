@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -741,3 +742,458 @@ const ChatPage = () => {
       
       // Update the next session's status
       setAllSessions(prev =>
+        prev.map(session => 
+          session.id === nextActiveSession.id ? { ...session, status: "active" as const } : session
+        )
+      );
+      
+      // Reduce queue count if we're taking from the queue
+      if (nextActiveSession.status === "waiting") {
+        setQueueCount(prev => Math.max(0, prev - 1));
+      }
+      
+      toast({
+        title: "Chat Transferred",
+        description: `Chat with ${activeSession.customer} transferred to ${newAgent}. New chat with ${nextActiveSession.customer} activated.`,
+        className: "notification-animate"
+      });
+    } else {
+      setActiveSession(null);
+      
+      toast({
+        title: "Chat Transferred",
+        description: `Chat with ${activeSession.customer} transferred to ${newAgent}. No more chats in queue.`,
+        className: "notification-animate"
+      });
+    }
+  };
+
+  // Render UI
+  return (
+    <div className="flex h-screen">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <TopBar />
+        <div className="flex-1 grid grid-cols-12 gap-4 p-4 bg-gray-50 dark:bg-gray-900">
+          {/* Left column: Chat sessions */}
+          <div className="col-span-3 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+            <div className="p-4 border-b dark:border-gray-700">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Chats</h2>
+                <Badge variant="success" size="sm" className="ml-2">{queueCount} in queue</Badge>
+              </div>
+              <div className="mt-2">
+                <Input 
+                  type="search" 
+                  placeholder="Search conversations..." 
+                  className="w-full" 
+                />
+              </div>
+            </div>
+            
+            <ScrollArea className="h-[calc(100vh-12rem)]">
+              <div className="p-2 space-y-2">
+                {allSessions.map(session => (
+                  <Card 
+                    key={session.id} 
+                    className={`cursor-pointer border-l-4 ${
+                      session.id === activeSession?.id 
+                        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-500' 
+                        : session.status === 'waiting'
+                          ? 'border-yellow-500'
+                          : session.status === 'resolved'
+                            ? 'border-green-500'
+                            : session.status === 'transferred'
+                              ? 'border-purple-500'
+                              : 'border-gray-200 dark:border-gray-700'
+                    }`}
+                    onClick={() => {
+                      if (session.status !== 'resolved' && session.status !== 'transferred') {
+                        setActiveSession(session);
+                        // Mark unread messages as read
+                        if (session.messages.some(msg => !msg.read)) {
+                          const updatedMessages = session.messages.map(msg => ({
+                            ...msg, 
+                            read: true
+                          }));
+                          const updatedSession = { ...session, messages: updatedMessages };
+                          setAllSessions(prev => 
+                            prev.map(s => s.id === session.id ? updatedSession : s)
+                          );
+                        }
+                      }
+                    }}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center space-x-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={`https://ui-avatars.com/api/?name=${session.customer.replace(" ", "+")}&background=random`} />
+                            <AvatarFallback>{session.customer.substring(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 className="font-medium text-sm">{session.customer}</h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[180px]">
+                              {session.messages.length > 0 
+                                ? session.messages[session.messages.length - 1].content.substring(0, 25) + (session.messages[session.messages.length - 1].content.length > 25 ? '...' : '')
+                                : 'No messages yet'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={
+                            session.status === 'active' ? 'default' :
+                            session.status === 'waiting' ? 'warning' :
+                            session.status === 'resolved' ? 'success' :
+                            'secondary'
+                          } size="sm">
+                            {session.status}
+                          </Badge>
+                          {session.messages.some(msg => !msg.read && msg.sender === 'customer') && (
+                            <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 ml-auto"></div>
+                          )}
+                          <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+                            {new Date(session.lastActive).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          
+          {/* Middle column: Active chat */}
+          <div className="col-span-6 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden flex flex-col">
+            {activeSession ? (
+              <>
+                <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <Avatar>
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=${activeSession.customer.replace(" ", "+")}&background=random`} />
+                      <AvatarFallback>{activeSession.customer.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h2 className="text-lg font-semibold flex items-center">
+                        {activeSession.customer}
+                        {activeSession.history && (
+                          <Badge variant="secondary" size="sm" className="ml-2">
+                            {activeSession.history.conversationCount} past chats
+                          </Badge>
+                        )}
+                      </h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+                        <Clock className="w-3 h-3 mr-1" />
+                        {new Date(activeSession.startTime).toLocaleString()} 
+                        {activeSession.scheduled && (
+                          <span className="ml-2 flex items-center">
+                            <CalendarClock className="w-3 h-3 mr-1" />
+                            Scheduled: {new Date(activeSession.scheduled).toLocaleString()}
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleTransferChat}
+                    >
+                      <UserPlus className="w-4 h-4 mr-1" />
+                      Transfer
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleResolveChat}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Resolve
+                    </Button>
+                  </div>
+                </div>
+                
+                <ScrollArea className="flex-1 p-4">
+                  <div className="space-y-4">
+                    {activeSession.messages.map(message => (
+                      <div 
+                        key={message.id}
+                        className={`flex ${message.sender === 'agent' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`max-w-[70%] ${
+                          message.sender === 'agent' 
+                            ? 'bg-blue-500 text-white rounded-l-lg rounded-tr-lg' 
+                            : 'bg-gray-100 dark:bg-gray-700 rounded-r-lg rounded-tl-lg'
+                        } p-3 shadow-sm`}>
+                          {message.sender === 'agent' && message.agentName === 'System' ? (
+                            <div className="italic text-sm text-white">{message.content}</div>
+                          ) : (
+                            <>
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs font-medium">
+                                  {message.sender === 'agent' ? message.agentName : message.customerName}
+                                </span>
+                                <span className="text-xs opacity-70 ml-2">
+                                  {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                              </div>
+                              <p className={`text-sm ${message.sender === 'agent' ? 'text-white' : ''}`}>{message.content}</p>
+                              <div className="flex justify-between items-center mt-1">
+                                <Badge 
+                                  variant={
+                                    message.sentiment === 'positive' ? 'success' :
+                                    message.sentiment === 'negative' ? 'destructive' :
+                                    'secondary'
+                                  }
+                                  size="sm"
+                                >
+                                  {message.sentiment}
+                                </Badge>
+                                {message.sender === 'agent' && (
+                                  <div className="text-xs text-white">
+                                    {message.read ? <CheckCheck className="w-3 h-3" /> : <Check className="w-3 h-3" />}
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {isTyping && (
+                      <div className="flex items-center">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {isTyping} is typing...
+                        </div>
+                        <div className="ml-2 flex space-x-1">
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+                
+                <div className="p-4 border-t dark:border-gray-700">
+                  <div className="flex">
+                    <Textarea
+                      placeholder="Type your message here..."
+                      className="flex-1 min-h-[80px] resize-none"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                    />
+                    <Button 
+                      className="ml-2 h-[80px]"
+                      onClick={handleSendMessage}
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center p-6">
+                  <MessageSquare className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium">No active chat</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-2">
+                    Select a conversation from the list or wait for a new customer.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Right column: Customer info and analytics */}
+          <div className="col-span-3 space-y-4">
+            {/* Customer Details */}
+            {activeSession && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Customer Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center space-x-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=${activeSession.customer.replace(" ", "+")}&background=random`} />
+                      <AvatarFallback>{activeSession.customer.substring(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="font-semibold">{activeSession.customer}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Customer ID: #CUS{Math.floor(Math.random() * 10000)}</p>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center text-sm">
+                      <MessageSquare className="w-4 h-4 mr-2 text-gray-500" />
+                      <span className="font-medium mr-2">Total Chats:</span>
+                      <span>{activeSession.history ? activeSession.history.conversationCount + 1 : 1}</span>
+                    </div>
+                    {activeSession.history && (
+                      <div className="flex items-center text-sm">
+                        <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                        <span className="font-medium mr-2">Last Contact:</span>
+                        <span>{new Date(activeSession.history.lastConversation).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center text-sm">
+                      <Heart className="w-4 h-4 mr-2 text-gray-500" />
+                      <span className="font-medium mr-2">Sentiment:</span>
+                      <span>
+                        {(() => {
+                          // Calculate average sentiment
+                          const customerMsgs = activeSession.messages.filter(msg => msg.sender === 'customer');
+                          if (customerMsgs.length === 0) return 'N/A';
+                          
+                          const sentiments = {
+                            positive: customerMsgs.filter(msg => msg.sentiment === 'positive').length,
+                            neutral: customerMsgs.filter(msg => msg.sentiment === 'neutral').length,
+                            negative: customerMsgs.filter(msg => msg.sentiment === 'negative').length
+                          };
+                          
+                          if (sentiments.positive > sentiments.neutral && sentiments.positive > sentiments.negative)
+                            return 'Positive';
+                          if (sentiments.negative > sentiments.neutral && sentiments.negative > sentiments.positive)
+                            return 'Negative';
+                          return 'Neutral';
+                        })()}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-sm">Quick Actions</h4>
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="outline" size="sm" className="text-xs">View Orders</Button>
+                      <Button variant="outline" size="sm" className="text-xs">Account History</Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs"
+                        onClick={() => setShowScheduler(prev => !prev)}
+                      >
+                        Schedule Follow-up
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  {showScheduler && (
+                    <div className="mt-4 space-y-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-md">
+                      <h4 className="font-medium text-sm">Schedule Follow-up</h4>
+                      <div className="grid gap-2">
+                        <Input
+                          type="date"
+                          className="text-xs"
+                          min={new Date().toISOString().split('T')[0]}
+                          onChange={(e) => setScheduledDate(e.target.value ? new Date(e.target.value) : null)}
+                        />
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            className="text-xs"
+                            onClick={() => {
+                              if (scheduledDate) {
+                                toast({
+                                  title: "Follow-up Scheduled",
+                                  description: `Follow-up with ${activeSession.customer} scheduled for ${scheduledDate.toLocaleDateString()}`,
+                                  className: "notification-animate"
+                                });
+                                setShowScheduler(false);
+                              }
+                            }}
+                          >
+                            Schedule
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-xs"
+                            onClick={() => setShowScheduler(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Analytics */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <BarChart2 className="w-5 h-5 mr-2" />
+                  Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Total Chats Today</span>
+                    <span className="text-sm">{analytics.totalChats}</span>
+                  </div>
+                  <Progress value={(analytics.totalChats / 100) * 100} className="h-2" />
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Resolved Chats</span>
+                    <span className="text-sm">{analytics.resolvedChats}</span>
+                  </div>
+                  <Progress value={(analytics.resolvedChats / analytics.totalChats) * 100} className="h-2" />
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Average Response Time</span>
+                    <span className="text-sm">{analytics.averageResponseTime}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium">Customer Satisfaction</span>
+                    <span className="text-sm">{analytics.customerSatisfaction}%</span>
+                  </div>
+                  <Progress value={analytics.customerSatisfaction} className="h-2" />
+                </div>
+                
+                <Alert>
+                  <AlertTitle className="text-sm font-medium">Peak Hours</AlertTitle>
+                  <AlertDescription className="text-xs">
+                    Current peak time is between 2:00 PM - 4:00 PM with {Math.round(analytics.totalChats * 0.4)} chats.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline" size="sm" className="w-full text-xs">
+                  <RefreshCw className="w-3 h-3 mr-1" />
+                  Refresh Analytics
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatPage;
