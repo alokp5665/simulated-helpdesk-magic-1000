@@ -32,7 +32,6 @@ import {
   Calendar
 } from "lucide-react";
 
-// Types for our chat application
 interface Message {
   id: string;
   content: string;
@@ -54,11 +53,9 @@ interface ChatSession {
   messages: Message[];
 }
 
-// Indian Hindu names for our simulation
 const AGENT_NAMES = ["Aarav Sharma", "Priya Patel", "Vikram Agarwal", "Neha Kapoor", "Arjun Mehta"];
 const CUSTOMER_NAMES = ["Ravi Singh", "Ananya Desai", "Karan Malhotra", "Divya Gupta", "Siddharth Joshi"];
 
-// Customer message templates
 const CUSTOMER_MESSAGES = [
   "I need help with my recent order",
   "My package hasn't arrived yet",
@@ -72,7 +69,6 @@ const CUSTOMER_MESSAGES = [
   "I need to return an item",
 ];
 
-// Agent message templates
 const AGENT_MESSAGES = [
   "I'd be happy to help you with that",
   "Let me check that for you right away",
@@ -86,7 +82,6 @@ const AGENT_MESSAGES = [
   "Let me connect you with our specialized department",
 ];
 
-// Sentiment analysis function
 const analyzeSentiment = (message: string): "positive" | "neutral" | "negative" => {
   const positiveWords = ["happy", "thanks", "good", "great", "excellent", "appreciate", "helpful", "resolved"];
   const negativeWords = ["bad", "unhappy", "issue", "problem", "wrong", "disappointed", "terrible", "poor"];
@@ -116,11 +111,9 @@ const ChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // Create initial sessions
   useEffect(() => {
     const initialSessions: ChatSession[] = [];
     
-    // Create 3 initial chat sessions
     for (let i = 0; i < 3; i++) {
       const customerId = Math.floor(Math.random() * CUSTOMER_NAMES.length);
       const agentId = Math.floor(Math.random() * AGENT_NAMES.length);
@@ -135,7 +128,6 @@ const ChatPage = () => {
         messages: []
       };
       
-      // Add 3-6 messages to each chat
       const messageCount = 3 + Math.floor(Math.random() * 4);
       for (let j = 0; j < messageCount; j++) {
         const isAgent = j % 2 === 1;
@@ -162,7 +154,6 @@ const ChatPage = () => {
     setActiveSession(initialSessions[0]);
     setQueueCount(Math.floor(Math.random() * 5) + 1);
     
-    // Update analytics
     setAnalytics({
       totalChats: 23 + Math.floor(Math.random() * 30),
       resolvedChats: 18 + Math.floor(Math.random() * 20),
@@ -171,24 +162,19 @@ const ChatPage = () => {
     });
   }, []);
   
-  // Simulate new messages and update chat state
   useEffect(() => {
     if (!activeSession) return;
     
-    // Simulate customer typing every 8-15 seconds
     const typingInterval = setInterval(() => {
       if (Math.random() > 0.7) {
         setIsTyping(activeSession.customer);
         
-        // After typing for 1-3 seconds, send the message
         setTimeout(() => {
           setIsTyping(null);
           
-          // 50% chance to actually send a message
           if (Math.random() > 0.5) {
             const newCustomerMessage = CUSTOMER_MESSAGES[Math.floor(Math.random() * CUSTOMER_MESSAGES.length)];
             
-            // Add the new message to the active session
             const updatedSession = { ...activeSession };
             updatedSession.messages.push({
               id: `msg-${Date.now()}`,
@@ -201,33 +187,27 @@ const ChatPage = () => {
             });
             updatedSession.lastActive = new Date();
             
-            // Update the session
             setActiveSession(updatedSession);
             
-            // Also update in all sessions
             setAllSessions(prev => 
               prev.map(session => 
                 session.id === activeSession.id ? updatedSession : session
               )
             );
             
-            // Show notification
             toast({
               title: "New message",
               description: `${activeSession.customer}: ${newCustomerMessage.substring(0, 30)}${newCustomerMessage.length > 30 ? '...' : ''}`,
               className: "notification-animate"
             });
             
-            // Simulate agent typing response after 1-2 seconds
             setTimeout(() => {
               setIsTyping(activeSession.agent);
               
-              // After typing for 1-3 seconds, send the response
               setTimeout(() => {
                 setIsTyping(null);
                 const newAgentMessage = AGENT_MESSAGES[Math.floor(Math.random() * AGENT_MESSAGES.length)];
                 
-                // Add the agent response
                 const respondedSession = { ...updatedSession };
                 respondedSession.messages.push({
                   id: `msg-${Date.now()}`,
@@ -240,10 +220,8 @@ const ChatPage = () => {
                 });
                 respondedSession.lastActive = new Date();
                 
-                // Update the session
                 setActiveSession(respondedSession);
                 
-                // Also update in all sessions
                 setAllSessions(prev => 
                   prev.map(session => 
                     session.id === activeSession.id ? respondedSession : session
@@ -256,7 +234,6 @@ const ChatPage = () => {
       }
     }, 8000 + Math.random() * 7000);
     
-    // Simulate new customer in queue every 20-40 seconds
     const queueInterval = setInterval(() => {
       if (Math.random() > 0.6) {
         const newQueueCount = queueCount + 1;
@@ -270,7 +247,6 @@ const ChatPage = () => {
       }
     }, 20000 + Math.random() * 20000);
     
-    // Simulate a new chat session every 30-60 seconds
     const newChatInterval = setInterval(() => {
       if (Math.random() > 0.7 && queueCount > 0) {
         const customerId = Math.floor(Math.random() * CUSTOMER_NAMES.length);
@@ -305,7 +281,6 @@ const ChatPage = () => {
       }
     }, 30000 + Math.random() * 30000);
     
-    // Clean up intervals
     return () => {
       clearInterval(typingInterval);
       clearInterval(queueInterval);
@@ -313,16 +288,13 @@ const ChatPage = () => {
     };
   }, [activeSession, queueCount, toast]);
   
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeSession?.messages]);
   
-  // Handle sending a new message
   const handleSendMessage = () => {
     if (!newMessage.trim() || !activeSession) return;
     
-    // Add the message to the active session
     const updatedSession = { ...activeSession };
     updatedSession.messages.push({
       id: `msg-${Date.now()}`,
@@ -335,31 +307,25 @@ const ChatPage = () => {
     });
     updatedSession.lastActive = new Date();
     
-    // Update the session
     setActiveSession(updatedSession);
     
-    // Also update in all sessions
     setAllSessions(prev => 
       prev.map(session => 
         session.id === activeSession.id ? updatedSession : session
       )
     );
     
-    // Clear the input
     setNewMessage("");
     
-    // Simulate customer typing response after 2-5 seconds
     setTimeout(() => {
       if (Math.random() > 0.3) {
         setIsTyping(activeSession.customer);
         
-        // After typing for 1-3 seconds, send the response
         setTimeout(() => {
           setIsTyping(null);
           
           const newCustomerMessage = CUSTOMER_MESSAGES[Math.floor(Math.random() * CUSTOMER_MESSAGES.length)];
           
-          // Add the customer response
           const respondedSession = { ...updatedSession };
           respondedSession.messages.push({
             id: `msg-${Date.now()}`,
@@ -372,17 +338,14 @@ const ChatPage = () => {
           });
           respondedSession.lastActive = new Date();
           
-          // Update the session
           setActiveSession(respondedSession);
           
-          // Also update in all sessions
           setAllSessions(prev => 
             prev.map(session => 
               session.id === activeSession.id ? respondedSession : session
             )
           );
           
-          // Show notification
           toast({
             title: "New message",
             description: `${activeSession.customer}: ${newCustomerMessage.substring(0, 30)}${newCustomerMessage.length > 30 ? '...' : ''}`,
@@ -393,21 +356,17 @@ const ChatPage = () => {
     }, 2000 + Math.random() * 3000);
   };
   
-  // Handle resolving a chat
   const handleResolveChat = () => {
     if (!activeSession) return;
     
-    // Mark the session as resolved
     const updatedSession = { ...activeSession, status: "resolved" as const };
     
-    // Update in all sessions
     setAllSessions(prev => 
       prev.map(session => 
         session.id === activeSession.id ? updatedSession : session
       )
     );
     
-    // Set a new active session if available
     const nextActiveSession = allSessions.find(session => 
       session.id !== activeSession.id && session.status === "waiting"
     );
@@ -415,14 +374,12 @@ const ChatPage = () => {
     if (nextActiveSession) {
       setActiveSession(nextActiveSession);
       
-      // Update the next session's status
       setAllSessions(prev => 
         prev.map(session => 
           session.id === nextActiveSession.id ? { ...session, status: "active" as const } : session
         )
       );
       
-      // Reduce queue count if we're taking from the queue
       if (nextActiveSession.status === "waiting") {
         setQueueCount(prev => Math.max(0, prev - 1));
       }
@@ -442,7 +399,6 @@ const ChatPage = () => {
       });
     }
     
-    // Update analytics
     setAnalytics(prev => ({
       ...prev,
       resolvedChats: prev.resolvedChats + 1,
@@ -450,11 +406,9 @@ const ChatPage = () => {
     }));
   };
   
-  // Handle transferring a chat
   const handleTransferChat = () => {
     if (!activeSession) return;
     
-    // Find a new agent
     const currentAgentIndex = AGENT_NAMES.indexOf(activeSession.agent);
     let newAgentIndex;
     
@@ -464,14 +418,12 @@ const ChatPage = () => {
     
     const newAgent = AGENT_NAMES[newAgentIndex];
     
-    // Mark the session as transferred and assign new agent
     const updatedSession = { 
       ...activeSession, 
       status: "transferred" as const,
       agent: newAgent
     };
     
-    // Add a system message about the transfer
     updatedSession.messages.push({
       id: `msg-transfer-${Date.now()}`,
       content: `Chat transferred to ${newAgent}`,
@@ -482,14 +434,12 @@ const ChatPage = () => {
       read: true
     });
     
-    // Update in all sessions
     setAllSessions(prev => 
       prev.map(session => 
         session.id === activeSession.id ? updatedSession : session
       )
     );
     
-    // Set a new active session if available
     const nextActiveSession = allSessions.find(session => 
       session.id !== activeSession.id && session.status === "waiting"
     );
@@ -497,7 +447,6 @@ const ChatPage = () => {
     if (nextActiveSession) {
       setActiveSession(nextActiveSession);
       
-      // Update the next session's status
       setAllSessions(prev => 
         prev.map(session => 
           session.id === nextActiveSession.id ? { ...session, status: "active" as const } : session
@@ -520,12 +469,10 @@ const ChatPage = () => {
     }
   };
   
-  // Handle switching to a different chat
   const handleSwitchChat = (sessionId: string) => {
     const session = allSessions.find(s => s.id === sessionId);
     if (!session) return;
     
-    // If current active session exists, mark it as waiting
     if (activeSession) {
       setAllSessions(prev => 
         prev.map(s => 
@@ -534,18 +481,15 @@ const ChatPage = () => {
       );
     }
     
-    // Mark the new session as active
     setAllSessions(prev => 
       prev.map(s => 
         s.id === sessionId ? { ...s, status: "active" as const } : s
       )
     );
     
-    // Set as active session
     setActiveSession(session);
   };
   
-  // Get sentiment class for styling
   const getSentimentClass = (sentiment: "positive" | "neutral" | "negative" | undefined) => {
     switch (sentiment) {
       case "positive": return "bg-green-500";
@@ -561,9 +505,7 @@ const ChatPage = () => {
       
       <main className="pl-64 pt-16">
         <div className="p-6 max-w-7xl mx-auto">
-          {/* Bento Grid Layout */}
           <div className="bentoGrid">
-            {/* Chat Window - Spans 8 columns */}
             <Card className="col-span-8 row-span-2 glass-card hover-scale depth-effect shadow-2xl">
               <CardHeader className="border-b border-border/30">
                 <CardTitle className="flex items-center justify-between">
@@ -650,7 +592,6 @@ const ChatPage = () => {
                           </div>
                         ))}
                         
-                        {/* Typing indicator */}
                         {isTyping && (
                           <div className="flex justify-start fade-in">
                             <div className="flex items-start max-w-[80%] space-x-2">
@@ -678,7 +619,6 @@ const ChatPage = () => {
                           </div>
                         )}
                         
-                        {/* Scroll anchor */}
                         <div ref={messagesEndRef} />
                       </div>
                     </ScrollArea>
@@ -728,7 +668,6 @@ const ChatPage = () => {
               )}
             </Card>
             
-            {/* Chat List - Spans 4 columns */}
             <Card className="col-span-4 glass-card hover-scale">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -800,7 +739,6 @@ const ChatPage = () => {
               </CardContent>
             </Card>
             
-            {/* Customer Info - Spans 2 columns */}
             <Card className="col-span-2 glass-card hover-scale">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -818,4 +756,22 @@ const ChatPage = () => {
                           {activeSession.customer.split(" ").map(n => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="font-medium text-lg">{activeSession
+                      <h3 className="font-medium text-lg">{activeSession.customer}</h3>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[150px]">
+                    <User className="h-12 w-12 text-muted-foreground opacity-20 mb-2" />
+                    <p className="text-muted-foreground text-center">No customer selected</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default ChatPage;
