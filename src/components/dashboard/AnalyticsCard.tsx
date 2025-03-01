@@ -8,6 +8,7 @@ interface AnalyticsCardProps {
   icon: React.ReactNode;
   description?: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export const AnalyticsCard = ({
@@ -16,6 +17,7 @@ export const AnalyticsCard = ({
   icon,
   description,
   className,
+  children,
 }: AnalyticsCardProps) => {
   return (
     <Card className={cn("hover-scale glass-card", className)}>
@@ -28,6 +30,7 @@ export const AnalyticsCard = ({
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
+        {children}
       </CardContent>
     </Card>
   );
