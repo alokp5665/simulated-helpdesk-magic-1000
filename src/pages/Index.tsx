@@ -19,6 +19,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const generateRandomData = (points: number) => {
   return Array.from({ length: points }).map((_, i) => ({
@@ -28,6 +30,7 @@ const generateRandomData = (points: number) => {
 };
 
 const Index = () => {
+  const navigate = useNavigate();
   const [ticketData, setTicketData] = useState({
     resolved: 0,
     inProgress: 0,
@@ -58,6 +61,10 @@ const Index = () => {
       clearInterval(chartInterval);
     };
   }, []);
+
+  const goToContact = () => {
+    navigate("/contact");
+  };
 
   return (
     <div className="min-h-screen bg-background">

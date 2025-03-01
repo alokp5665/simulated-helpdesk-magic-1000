@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 
 // Mock chatbot responses data
 const chatbotResponses = [
@@ -169,6 +170,7 @@ type Message = {
 };
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
   const [isChatbotMinimized, setIsChatbotMinimized] = useState(false);
@@ -184,6 +186,10 @@ const HomePage = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const goToContact = () => {
+    navigate("/contact");
+  };
 
   // Change the tip every 10 seconds
   useEffect(() => {
@@ -254,7 +260,7 @@ const HomePage = () => {
                 <div>
                   <h1 className="text-4xl font-bold mb-4 text-foreground">
                     <span className="relative">
-                      PrimeCare Helpdesk
+                      Welcome to EduCare
                       <div className="absolute -top-4 -right-4">
                         <div className="text-xs font-normal bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                           Enterprise Edition
@@ -280,11 +286,12 @@ const HomePage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-4 mt-6">
-                    <Button size="lg" className="gap-2">
+                    <Button 
+                      size="lg" 
+                      className="gap-2"
+                      onClick={goToContact}
+                    >
                       Get Started <ArrowRight className="h-4 w-4" />
-                    </Button>
-                    <Button size="lg" variant="outline" className="gap-2">
-                      Watch Demo <Sparkles className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -326,7 +333,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -348,7 +355,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -370,7 +377,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -392,7 +399,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -414,7 +421,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -436,7 +443,7 @@ const HomePage = () => {
                   </p>
                 </CardContent>
                 <CardFooter>
-                  <Button variant="ghost" className="w-full justify-between">
+                  <Button variant="ghost" className="w-full justify-between" onClick={goToContact}>
                     Learn More <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -509,7 +516,7 @@ const HomePage = () => {
                             <span>Self-service knowledge base</span>
                           </li>
                         </ul>
-                        <Button className="mt-6 w-fit">Learn More</Button>
+                        <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
                       </div>
                     </CardContent>
                     <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
@@ -562,7 +569,7 @@ const HomePage = () => {
                             <span>Service catalog for common requests</span>
                           </li>
                         </ul>
-                        <Button className="mt-6 w-fit">Learn More</Button>
+                        <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
                       </div>
                     </CardContent>
                     <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
@@ -615,7 +622,7 @@ const HomePage = () => {
                             <span>Secure document handling</span>
                           </li>
                         </ul>
-                        <Button className="mt-6 w-fit">Learn More</Button>
+                        <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
                       </div>
                     </CardContent>
                     <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
@@ -668,7 +675,7 @@ const HomePage = () => {
                             <span>Service history and reporting</span>
                           </li>
                         </ul>
-                        <Button className="mt-6 w-fit">Learn More</Button>
+                        <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
                       </div>
                     </CardContent>
                     <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
@@ -710,14 +717,14 @@ const HomePage = () => {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button size="lg" className="gap-2">
-                        Start Free Trial <ArrowRight className="h-4 w-4" />
+                        Buy Now <ArrowRight className="h-4 w-4" />
                       </Button>
                       <Button size="lg" variant="outline" className="gap-2">
-                        Schedule Demo <Sparkles className="h-4 w-4" />
+                        Upgrade <Sparkles className="h-4 w-4" />
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground mt-4">
-                      No credit card required. Free 14-day trial with full access to all features.
+                      You're Using Unlimited Free Trial
                     </p>
                   </div>
                 </CardContent>
