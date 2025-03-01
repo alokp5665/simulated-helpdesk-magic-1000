@@ -314,7 +314,7 @@ const Index = () => {
   const [isHoveringWave1, setIsHoveringWave1] = useState(false);
   const [isHoveringWave2, setIsHoveringWave2] = useState(false);
 
-  // Simulate real-time updates
+  // Simulate real-time updates for ocean wave charts
   useEffect(() => {
     if (isLoading) return;
     
@@ -329,9 +329,6 @@ const Index = () => {
     }, 4000);
     
     return () => {
-      clearInterval(ticketInterval);
-      clearInterval(chartInterval);
-      clearInterval(feedInterval);
       clearInterval(oceanWaveInterval);
     };
   }, [isLoading, isHoveringWave1, isHoveringWave2]);
@@ -766,4 +763,6 @@ const Index = () => {
                               <defs>
                                 <linearGradient id="colorResponse" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.5}/>
-                                  <stop offset="95%" stopColor="#14b8a6
+                                  <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                                </linearGradient>
+                              </defs>
