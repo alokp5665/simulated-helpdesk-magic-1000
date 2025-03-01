@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -350,30 +349,30 @@ const EmailPage = () => {
           setQueueCount(prev => Math.max(0, prev - 1));
           
           // Show notification
-          toast({
-            title: (
-              <div className="flex items-center">
-                <MailPlus className="mr-2 h-4 w-4 text-indigo-500" />
-                <span>New Email Received</span>
-              </div>
-            ),
-            description: `From: ${from.split('@')[0]} - ${newEmail.subject.substring(0, 30)}${newEmail.subject.length > 30 ? '...' : ''}`,
-            className: "notification-animate"
-          });
+          toast(
+            <div className="flex items-center">
+              <MailPlus className="mr-2 h-4 w-4 text-indigo-500" />
+              <span>New Email Received</span>
+            </div>,
+            {
+              description: `From: ${from.split('@')[0]} - ${newEmail.subject.substring(0, 30)}${newEmail.subject.length > 30 ? '...' : ''}`,
+              className: "notification-animate"
+            }
+          );
           
           // Show high priority alert sometimes
           if (newEmail.priority === "high") {
             setTimeout(() => {
-              toast({
-                title: (
-                  <div className="flex items-center">
-                    <AlertCircle className="mr-2 h-4 w-4 text-red-500" />
-                    <span>High Priority Email</span>
-                  </div>
-                ),
-                description: `Urgent attention required: ${from}`,
-                className: "notification-animate bg-red-50 border-red-200"
-              });
+              toast(
+                <div className="flex items-center">
+                  <AlertCircle className="mr-2 h-4 w-4 text-red-500" />
+                  <span>High Priority Email</span>
+                </div>,
+                {
+                  description: `Urgent attention required: ${from}`,
+                  className: "notification-animate bg-red-50 border-red-200"
+                }
+              );
             }, 1000);
           }
         }, 2000 + Math.random() * 2000);
@@ -386,24 +385,23 @@ const EmailPage = () => {
   // Handle sending a new email
   const handleSendEmail = () => {
     if (!newEmail.to || !newEmail.subject || !newEmail.content) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please fill in all fields",
         className: "bg-red-50 border-red-200"
       });
       return;
     }
 
-    toast({
-      title: (
-        <div className="flex items-center">
-          <Send className="mr-2 h-4 w-4 text-green-500" />
-          <span>Email Sent Successfully</span>
-        </div>
-      ),
-      description: `To: ${newEmail.to}`,
-      className: "notification-animate bg-green-50 border-green-200"
-    });
+    toast(
+      <div className="flex items-center">
+        <Send className="mr-2 h-4 w-4 text-green-500" />
+        <span>Email Sent Successfully</span>
+      </div>,
+      {
+        description: `To: ${newEmail.to}`,
+        className: "notification-animate bg-green-50 border-green-200"
+      }
+    );
 
     setNewEmail({ to: "", subject: "", content: "" });
     setShowCompose(false);
@@ -428,16 +426,16 @@ const EmailPage = () => {
     if (status === "resolved") {
       const email = emails.find(e => e.id === emailId);
       if (email && !email.isResolved) {
-        toast({
-          title: (
-            <div className="flex items-center">
-              <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-              <span>Email Resolved</span>
-            </div>
-          ),
-          description: `${email.subject} has been marked as resolved`,
-          className: "notification-animate bg-green-50 border-green-200"
-        });
+        toast(
+          <div className="flex items-center">
+            <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+            <span>Email Resolved</span>
+          </div>,
+          {
+            description: `${email.subject} has been marked as resolved`,
+            className: "notification-animate bg-green-50 border-green-200"
+          }
+        );
       }
     }
   };
@@ -452,8 +450,7 @@ const EmailPage = () => {
       setEmails(prev => [...prev].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
       setIsRefreshing(false);
       
-      toast({
-        title: "Refreshed",
+      toast("Refreshed", {
         description: "Email list has been updated",
         className: "notification-animate"
       });
@@ -463,8 +460,7 @@ const EmailPage = () => {
   // Handle scheduling an email
   const handleScheduleEmail = () => {
     if (!newEmail.to || !newEmail.subject || !newEmail.content || !scheduledDate) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please fill in all fields including the schedule date",
         className: "bg-red-50 border-red-200"
       });
@@ -478,8 +474,7 @@ const EmailPage = () => {
 
     // Check if the scheduled time is in the past
     if (scheduledDateTime <= new Date()) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Please select a future date and time",
         className: "bg-red-50 border-red-200"
       });
@@ -496,16 +491,16 @@ const EmailPage = () => {
       }
     ]);
 
-    toast({
-      title: (
-        <div className="flex items-center">
-          <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
-          <span>Email Scheduled</span>
-        </div>
-      ),
-      description: `To: ${newEmail.to} on ${format(scheduledDateTime, "PPP 'at' p")}`,
-      className: "notification-animate bg-indigo-50 border-indigo-200"
-    });
+    toast(
+      <div className="flex items-center">
+        <CalendarIcon className="mr-2 h-4 w-4 text-indigo-500" />
+        <span>Email Scheduled</span>
+      </div>,
+      {
+        description: `To: ${newEmail.to} on ${format(scheduledDateTime, "PPP 'at' p")}`,
+        className: "notification-animate bg-indigo-50 border-indigo-200"
+      }
+    );
 
     setNewEmail({ to: "", subject: "", content: "" });
     setScheduledDate(null);
@@ -523,16 +518,16 @@ const EmailPage = () => {
     setTimeout(() => {
       setIsTyping(false);
       
-      toast({
-        title: (
-          <div className="flex items-center">
-            <Reply className="mr-2 h-4 w-4 text-blue-500" />
-            <span>Reply Sent</span>
-          </div>
-        ),
-        description: `Your reply to ${selectedEmail.from.split('@')[0]} has been sent`,
-        className: "notification-animate bg-blue-50 border-blue-200"
-      });
+      toast(
+        <div className="flex items-center">
+          <Reply className="mr-2 h-4 w-4 text-blue-500" />
+          <span>Reply Sent</span>
+        </div>,
+        {
+          description: `Your reply to ${selectedEmail.from.split('@')[0]} has been sent`,
+          className: "notification-animate bg-blue-50 border-blue-200"
+        }
+      );
       
       // Add the reply to the current email thread
       const updatedEmails = emails.map(email => {
@@ -568,16 +563,16 @@ const EmailPage = () => {
             // Generate automatic reply from the customer
             const autoReply = "Thank you for your prompt response. I appreciate your help!";
             
-            toast({
-              title: (
-                <div className="flex items-center">
-                  <Mail className="mr-2 h-4 w-4 text-indigo-500" />
-                  <span>New Reply Received</span>
-                </div>
-              ),
-              description: `From: ${selectedEmail.from.split('@')[0]} - "${autoReply.substring(0, 30)}${autoReply.length > 30 ? '...' : ''}"`,
-              className: "notification-animate"
-            });
+            toast(
+              <div className="flex items-center">
+                <Mail className="mr-2 h-4 w-4 text-indigo-500" />
+                <span>New Reply Received</span>
+              </div>,
+              {
+                description: `From: ${selectedEmail.from.split('@')[0]} - "${autoReply.substring(0, 30)}${autoReply.length > 30 ? '...' : ''}"`,
+                className: "notification-animate"
+              }
+            );
           }, 2000 + Math.random() * 1000);
         }
       }, 3000 + Math.random() * 2000);
@@ -594,16 +589,16 @@ const EmailPage = () => {
     setTimeout(() => {
       setIsForwarding(false);
       
-      toast({
-        title: (
-          <div className="flex items-center">
-            <Forward className="mr-2 h-4 w-4 text-purple-500" />
-            <span>Email Forwarded</span>
-          </div>
-        ),
-        description: `Email forwarded to ${forwardTo}`,
-        className: "notification-animate bg-purple-50 border-purple-200"
-      });
+      toast(
+        <div className="flex items-center">
+          <Forward className="mr-2 h-4 w-4 text-purple-500" />
+          <span>Email Forwarded</span>
+        </div>,
+        {
+          description: `Email forwarded to ${forwardTo}`,
+          className: "notification-animate bg-purple-50 border-purple-200"
+        }
+      );
       
       setForwardTo("");
       setForwardContent("");
@@ -834,675 +829,3 @@ const EmailPage = () => {
                     className="whitespace-nowrap"
                   >
                     <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Resolved
-                  </Button>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                    <div className="h-2 w-2 bg-green-500 rounded-full mr-1"></div>
-                    {sentimentStats.positive}
-                  </Badge>
-                  <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
-                    <div className="h-2 w-2 bg-gray-500 rounded-full mr-1"></div>
-                    {sentimentStats.neutral}
-                  </Badge>
-                  <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">
-                    <div className="h-2 w-2 bg-red-500 rounded-full mr-1"></div>
-                    {sentimentStats.negative}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Email Queue Info */}
-          {queueCount > 0 && (
-            <div className="flex justify-between items-center mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-100 dark:border-indigo-800 notification-animate">
-              <div className="flex items-center space-x-2">
-                <BellRing className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />
-                <span className="text-indigo-700 dark:text-indigo-300 font-medium">
-                  {queueCount} new email{queueCount !== 1 ? 's' : ''} in queue
-                </span>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => setQueueCount(0)}
-              >
-                Dismiss
-              </Button>
-            </div>
-          )}
-
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800 animate-pulse">
-              <div className="flex items-center space-x-2">
-                <div className="flex space-x-1">
-                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
-                  <div className="h-2 w-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
-                </div>
-                <span className="text-blue-700 dark:text-blue-300 font-medium">
-                  {currentTypingEmail ? `${currentTypingEmail.split('@')[0]} is typing...` : 'Someone is typing...'}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Main Content - Bento Grid */}
-          <div className="bentoGrid">
-            {/* Email List */}
-            <Card className="col-span-12 lg:col-span-4 glass-card hover-scale shadow-lg border-0">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Mail className="mr-2 h-5 w-5 text-indigo-600" />
-                    <span>Inbox</span>
-                    <Badge variant="default" className="ml-2">
-                      {filteredEmails.length}
-                    </Badge>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <ScrollArea className="h-[600px] pr-4" ref={emailListRef}>
-                  <div className="space-y-4">
-                    {filteredEmails.length > 0 ? (
-                      filteredEmails.map((email, index) => (
-                        <div
-                          key={email.id}
-                          onClick={() => {
-                            setSelectedEmail(email);
-                            
-                            // Mark as read if unread
-                            if (!email.isRead) {
-                              toggleEmailStatus(email.id, "read");
-                            }
-                            
-                            // Scroll content to top when selecting a new email
-                            if (contentRef.current) {
-                              contentRef.current.scrollTop = 0;
-                            }
-                          }}
-                          className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                            !email.isRead ? 
-                              "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800" : 
-                              selectedEmail?.id === email.id ?
-                                "bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700" :
-                                "bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800"
-                          } premium-hover`}
-                          style={{animationDelay: `${index * 100}ms`}}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className={`font-medium text-gray-900 dark:text-gray-100 truncate ${!email.isRead ? "font-semibold" : ""}`}>
-                              {email.subject}
-                            </h3>
-                            <div className="flex items-center space-x-2">
-                              {email.priority && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge className={getPriorityColor(email.priority)}>
-                                        {email.priority}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Priority: {email.priority}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
-                              {email.isStarred && (
-                                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                              )}
-                              {email.isResolved && (
-                                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2 mb-2">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                              {email.from.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="truncate">
-                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate font-medium">
-                                {email.from.split('@')[0]}
-                              </p>
-                              <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
-                                {email.from}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
-                            {email.content.substring(0, 100)}{email.content.length > 100 ? '...' : ''}
-                          </p>
-                          
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="flex items-center space-x-2">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <span className="text-xs text-gray-500 dark:text-gray-500 flex items-center">
-                                      <Clock className="h-3 w-3 mr-1" />
-                                      {format(email.timestamp, 'MMM d, h:mm a')}
-                                    </span>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>{format(email.timestamp, 'PPPp')}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                              
-                              {email.thread && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Badge variant="outline" className="text-xs py-0 h-5">
-                                        <MessageSquare className="h-3 w-3 mr-1" />
-                                        {email.thread.count}
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>
-                                        {email.thread.count} message{email.thread.count !== 1 ? 's' : ''} in thread<br />
-                                        Last activity: {format(email.thread.lastEmail, 'PPP')}
-                                      </p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
-                              
-                              {email.sentiment && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span>
-                                        {email.sentiment === 'positive' ? (
-                                          <Heart className="h-3.5 w-3.5 text-green-500" />
-                                        ) : email.sentiment === 'negative' ? (
-                                          <AlertCircle className="h-3.5 w-3.5 text-red-500" />
-                                        ) : (
-                                          <Circle className="h-3.5 w-3.5 text-gray-400" />
-                                        )}
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Sentiment: {email.sentiment}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleEmailStatus(email.id, "read");
-                                }}
-                              >
-                                {email.isRead ? (
-                                  <CheckCircle2 className="h-3.5 w-3.5" />
-                                ) : (
-                                  <Circle className="h-3.5 w-3.5" />
-                                )}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleEmailStatus(email.id, "starred");
-                                }}
-                              >
-                                <Star className={`h-3.5 w-3.5 ${email.isStarred ? "fill-yellow-400 text-yellow-400" : ""}`} />
-                              </Button>
-                            </div>
-                          </div>
-                          
-                          {email.tags && email.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">
-                              {email.tags.map(tag => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex flex-col items-center justify-center p-8 text-center space-y-3">
-                        <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
-                          <Mail className="h-6 w-6" />
-                        </div>
-                        <h3 className="font-medium text-gray-900 dark:text-gray-100">No emails found</h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No emails match your current filters. Try adjusting your search criteria.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Email Content */}
-            <Card className="col-span-12 lg:col-span-8 glass-card hover-scale shadow-lg border-0">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <MessageSquare className="mr-2 h-5 w-5 text-indigo-600" />
-                    <span>{selectedEmail ? "Email Content" : "Select an email"}</span>
-                  </div>
-                  
-                  {selectedEmail && (
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleEmailStatus(selectedEmail.id, "resolved")}
-                        className="gap-1"
-                      >
-                        <CheckCircle2 className={`h-4 w-4 ${
-                          selectedEmail.isResolved ? "text-green-500" : ""
-                        }`} />
-                        {selectedEmail.isResolved ? "Resolved" : "Mark as Resolved"}
-                      </Button>
-                      
-                      <Button variant="ghost" size="sm">
-                        <Archive className="h-4 w-4" />
-                      </Button>
-                      
-                      <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pb-2">
-                <ScrollArea className="h-[600px] pr-4" ref={contentRef}>
-                  {selectedEmail ? (
-                    <div className="space-y-4 animate-fade-in">
-                      <div className="flex items-center justify-between border-b pb-4">
-                        <div>
-                          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{selectedEmail.subject}</h2>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                              {selectedEmail.from.charAt(0).toUpperCase()}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium">{selectedEmail.from.split('@')[0]}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{selectedEmail.from}</p>
-                            </div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {format(selectedEmail.timestamp, 'PPpp')}
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col items-end space-y-2">
-                          {selectedEmail.sentiment && (
-                            <Badge className={`${getSentimentColor(selectedEmail.sentiment)}`}>
-                              Sentiment: {selectedEmail.sentiment}
-                            </Badge>
-                          )}
-                          
-                          {selectedEmail.priority && (
-                            <Badge className={`${getPriorityColor(selectedEmail.priority)}`}>
-                              Priority: {selectedEmail.priority}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="min-h-[200px] p-4 rounded-lg bg-white dark:bg-gray-900/50 border dark:border-gray-800">
-                        <p className="whitespace-pre-wrap text-gray-700 dark:text-gray-300">{selectedEmail.content}</p>
-                        
-                        {selectedEmail.thread && selectedEmail.thread.count > 1 && (
-                          <div className="mt-6 pt-6 border-t border-dashed">
-                            <div className="flex items-center justify-between mb-3">
-                              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Thread History</h3>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="h-6 gap-1 text-xs"
-                              >
-                                <Clock8 className="h-3 w-3" />
-                                {format(selectedEmail.thread.lastEmail, 'MMM d, h:mm a')}
-                              </Button>
-                            </div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 italic">
-                              This thread contains {selectedEmail.thread.count} previous messages. 
-                              Last activity was on {format(selectedEmail.thread.lastEmail, 'PPPP')}.
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center space-x-3 pt-2">
-                        <Button 
-                          variant={showReplyInput ? "secondary" : "outline"}
-                          onClick={() => {
-                            setShowReplyInput(!showReplyInput);
-                            setShowForwardInput(false);
-                          }}
-                          className="premium-hover"
-                        >
-                          <Reply className="mr-2 h-4 w-4" />
-                          Reply
-                        </Button>
-                        
-                        <Button 
-                          variant={showForwardInput ? "secondary" : "outline"}
-                          onClick={() => {
-                            setShowForwardInput(!showForwardInput);
-                            setShowReplyInput(false);
-                          }}
-                          className="premium-hover"
-                        >
-                          <Forward className="mr-2 h-4 w-4" />
-                          Forward
-                        </Button>
-                      </div>
-                      
-                      {showReplyInput && (
-                        <div className="space-y-3 animate-fade-in pt-2">
-                          <Textarea
-                            placeholder="Type your reply here..."
-                            value={replyContent}
-                            onChange={(e) => setReplyContent(e.target.value)}
-                            className="min-h-[150px] contact-field"
-                          />
-                          <div className="flex justify-between">
-                            <div className="flex space-x-2">
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => setReplyContent(AUTOMATED_RESPONSES[Math.floor(Math.random() * AUTOMATED_RESPONSES.length)])}
-                              >
-                                Use Template
-                              </Button>
-                            </div>
-                            <div className="flex space-x-2">
-                              <Button 
-                                variant="ghost" 
-                                onClick={() => {
-                                  setShowReplyInput(false);
-                                  setReplyContent("");
-                                }}
-                              >
-                                Cancel
-                              </Button>
-                              <Button 
-                                onClick={handleReply}
-                                disabled={!replyContent.trim()}
-                                className="premium-hover"
-                              >
-                                <Send className="mr-2 h-4 w-4" />
-                                Send Reply
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {showForwardInput && (
-                        <div className="space-y-3 animate-fade-in pt-2">
-                          <div className="space-y-3">
-                            <Input
-                              placeholder="Recipient email address"
-                              value={forwardTo}
-                              onChange={(e) => setForwardTo(e.target.value)}
-                              className="contact-field"
-                            />
-                            
-                            <Textarea
-                              placeholder="Add a message (optional)"
-                              value={forwardContent}
-                              onChange={(e) => setForwardContent(e.target.value)}
-                              className="min-h-[150px] contact-field"
-                            />
-                            
-                            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                              <div className="text-sm font-medium mb-2">Forwarded Content:</div>
-                              <div className="text-sm text-gray-600 dark:text-gray-400">
-                                <p><strong>From:</strong> {selectedEmail.from}</p>
-                                <p><strong>Subject:</strong> {selectedEmail.subject}</p>
-                                <p><strong>Date:</strong> {format(selectedEmail.timestamp, 'PPpp')}</p>
-                                <Separator className="my-2" />
-                                <p className="whitespace-pre-wrap">{selectedEmail.content.substring(0, 100)}...</p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex justify-end space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              onClick={() => {
-                                setShowForwardInput(false);
-                                setForwardTo("");
-                                setForwardContent("");
-                              }}
-                            >
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={handleForward}
-                              disabled={!forwardTo || isForwarding}
-                              className={`premium-hover ${isForwarding ? 'animate-pulse' : ''}`}
-                            >
-                              <Forward className="mr-2 h-4 w-4" />
-                              {isForwarding ? 'Forwarding...' : 'Forward Email'}
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-[500px] text-center space-y-4 text-gray-500 dark:text-gray-400">
-                      <div className="h-16 w-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                        <Mail className="h-8 w-8" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Select an email</h3>
-                        <p className="max-w-md mt-2">
-                          Choose an email from the list to view its content and take action
-                        </p>
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => setShowCompose(true)}
-                        className="mt-4"
-                      >
-                        <MailPlus className="mr-2 h-4 w-4" />
-                        Compose New Email
-                      </Button>
-                    </div>
-                  )}
-                </ScrollArea>
-              </CardContent>
-            </Card>
-            
-            {/* Email Statistics Row */}
-            <Card className="col-span-12 glass-card hover-scale shadow-lg border-0 bg-white/70 dark:bg-gray-900/50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Users className="h-5 w-5 mr-2 text-indigo-600" />
-                    Email Analytics
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setShowAnalytics(!showAnalytics)}>
-                    {showAnalytics ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              
-              {showAnalytics && (
-                <CardContent className="py-4 animate-fade-in">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-indigo-700 dark:text-indigo-300 font-medium">Total Emails</p>
-                          <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100">{emails.length}</p>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-800 flex items-center justify-center">
-                          <Mail className="h-6 w-6 text-indigo-600 dark:text-indigo-300" />
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center space-x-1">
-                        <span className="text-xs text-indigo-600 dark:text-indigo-400">
-                          {queueCount} in queue
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-green-700 dark:text-green-300 font-medium">Resolved</p>
-                          <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                            {emails.filter(e => e.isResolved).length}
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
-                          <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-300" />
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <Progress
-                          value={(emails.filter(e => e.isResolved).length / emails.length) * 100}
-                          className="h-1.5 bg-green-100 dark:bg-green-900"
-                        />
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">
-                          {Math.round((emails.filter(e => e.isResolved).length / emails.length) * 100)}% completion rate
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-yellow-700 dark:text-yellow-300 font-medium">Response Time</p>
-                          <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">4.2h</p>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-800 flex items-center justify-center">
-                          <Clock className="h-6 w-6 text-yellow-600 dark:text-yellow-300" />
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center space-x-1">
-                        <span className="text-xs text-yellow-600 dark:text-yellow-400">
-                          15% faster than last week
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20 p-4 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm text-purple-700 dark:text-purple-300 font-medium">Sentiment Score</p>
-                          <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">
-                            {Math.round((sentimentStats.positive / (sentimentStats.positive + sentimentStats.neutral + sentimentStats.negative || 1)) * 100)}%
-                          </p>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">
-                          <Heart className="h-6 w-6 text-purple-600 dark:text-purple-300" />
-                        </div>
-                      </div>
-                      <div className="mt-2 flex items-center space-x-1">
-                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                          <div className="flex h-1.5 rounded-full">
-                            <div
-                              style={{ width: `${(sentimentStats.positive / (emails.length || 1)) * 100}%` }}
-                              className="bg-green-500"
-                            />
-                            <div
-                              style={{ width: `${(sentimentStats.neutral / (emails.length || 1)) * 100}%` }}
-                              className="bg-gray-400"
-                            />
-                            <div
-                              style={{ width: `${(sentimentStats.negative / (emails.length || 1)) * 100}%` }}
-                              className="bg-red-500"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              )}
-              
-              <CardFooter className="pt-2 pb-4">
-                <div className="w-full flex flex-wrap items-center justify-between">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    Last updated: {format(new Date(), "MMM d, h:mm a")}
-                  </div>
-                  
-                  {scheduledEmails.length > 0 && (
-                    <div>
-                      <Badge variant="outline" className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300">
-                        <CalendarIcon className="h-3 w-3 mr-1" />
-                        {scheduledEmails.length} scheduled email{scheduledEmails.length !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
-                  )}
-                </div>
-              </CardFooter>
-            </Card>
-          </div>
-        </div>
-      </main>
-
-      {/* Compose Email Popover */}
-      <Popover open={showCompose} onOpenChange={setShowCompose}>
-        <PopoverTrigger asChild>
-          <div />
-        </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-4" align="end">
-          <div className="space-y-4">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Compose Email</h3>
-            <Input
-              placeholder="To"
-              value={newEmail.to}
-              onChange={(e) => setNewEmail({ ...newEmail, to: e.target.value })}
-              className="contact-field"
-            />
-            <Input
-              placeholder="Subject"
-              value={newEmail.subject}
-              onChange={(e) => setNewEmail({ ...newEmail, subject: e.target.value })}
-              className="contact-field"
-            />
-            <Textarea
-              placeholder="Content"
-              value={newEmail.content}
-              onChange={(e) => setNewEmail({ ...newEmail, content: e.target.value })}
-              className="min-h-[200px] contact-field"
-            />
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowCompose(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSendEmail} className="premium-hover">
-                <Send className="mr-2 h-4 w-4" />
-                Send
-              </Button>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
-};
-
-export default EmailPage;
