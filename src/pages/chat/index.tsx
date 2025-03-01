@@ -1,4 +1,3 @@
-<lov-code>
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
