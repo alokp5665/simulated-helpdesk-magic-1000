@@ -2,7 +2,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, MessageSquare, PanelRight, Users, Star } from "lucide-react";
+import { CheckCircle2, MessageSquare, PanelRight, Users, Star, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const SolutionTabs = () => {
@@ -215,7 +215,7 @@ export const SolutionTabs = () => {
               <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
                 <div className="p-6 glass-card text-center max-w-xs rounded-lg">
                   <div className="p-3 bg-white rounded-full w-fit mx-auto mb-4">
-                    <RefreshCcw className="h-6 w-6 text-primary" />
+                    <RefreshCw className="h-6 w-6 text-primary" />
                   </div>
                   <h4 className="text-lg font-bold mb-2">Field Operations Optimization</h4>
                   <p className="text-sm text-muted-foreground mb-4">
