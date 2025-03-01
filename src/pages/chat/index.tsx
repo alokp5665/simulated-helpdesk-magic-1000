@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -399,7 +398,7 @@ const ChatPage = () => {
     if (!activeSession) return;
     
     // Mark the session as resolved
-    const updatedSession = { ...activeSession, status: "resolved" };
+    const updatedSession = { ...activeSession, status: "resolved" as const };
     
     // Update in all sessions
     setAllSessions(prev => 
@@ -419,7 +418,7 @@ const ChatPage = () => {
       // Update the next session's status
       setAllSessions(prev => 
         prev.map(session => 
-          session.id === nextActiveSession.id ? { ...session, status: "active" } : session
+          session.id === nextActiveSession.id ? { ...session, status: "active" as const } : session
         )
       );
       
@@ -468,7 +467,7 @@ const ChatPage = () => {
     // Mark the session as transferred and assign new agent
     const updatedSession = { 
       ...activeSession, 
-      status: "transferred",
+      status: "transferred" as const,
       agent: newAgent
     };
     
@@ -501,7 +500,7 @@ const ChatPage = () => {
       // Update the next session's status
       setAllSessions(prev => 
         prev.map(session => 
-          session.id === nextActiveSession.id ? { ...session, status: "active" } : session
+          session.id === nextActiveSession.id ? { ...session, status: "active" as const } : session
         )
       );
       
@@ -530,7 +529,7 @@ const ChatPage = () => {
     if (activeSession) {
       setAllSessions(prev => 
         prev.map(s => 
-          s.id === activeSession.id && s.status === "active" ? { ...s, status: "waiting" } : s
+          s.id === activeSession.id && s.status === "active" ? { ...s, status: "waiting" as const } : s
         )
       );
     }
@@ -538,7 +537,7 @@ const ChatPage = () => {
     // Mark the new session as active
     setAllSessions(prev => 
       prev.map(s => 
-        s.id === sessionId ? { ...s, status: "active" } : s
+        s.id === sessionId ? { ...s, status: "active" as const } : s
       )
     );
     
@@ -819,223 +818,4 @@ const ChatPage = () => {
                           {activeSession.customer.split(" ").map(n => n[0]).join("")}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="font-medium text-lg">{activeSession.customer}</h3>
-                      <p className="text-sm text-muted-foreground">Premium Customer</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-muted-foreground">Status</div>
-                      <div className="font-medium capitalize">{activeSession.status}</div>
-                      
-                      <div className="text-muted-foreground">Started</div>
-                      <div className="font-medium">
-                        {activeSession.startTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                      </div>
-                      
-                      <div className="text-muted-foreground">Messages</div>
-                      <div className="font-medium">{activeSession.messages.length}</div>
-                      
-                      <div className="text-muted-foreground">Agent</div>
-                      <div className="font-medium">{activeSession.agent}</div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="flex flex-col space-y-2">
-                      <div className="text-sm flex justify-between">
-                        <span className="text-muted-foreground">Order History</span>
-                        <span className="font-medium">12 orders</span>
-                      </div>
-                      <div className="text-sm flex justify-between">
-                        <span className="text-muted-foreground">Total Spent</span>
-                        <span className="font-medium">₹24,350</span>
-                      </div>
-                      <div className="text-sm flex justify-between">
-                        <span className="text-muted-foreground">Last Purchase</span>
-                        <span className="font-medium">3 days ago</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <User className="h-12 w-12 text-muted-foreground opacity-20 mb-2" />
-                    <p className="text-muted-foreground text-center">No customer selected</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Agent Info - Spans 2 columns */}
-            <Card className="col-span-2 glass-card hover-scale">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span>Agent</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {activeSession ? (
-                  <div className="space-y-4">
-                    <div className="flex flex-col items-center">
-                      <Avatar className="h-16 w-16 ring-2 ring-offset-2 ring-primary/20 mb-3">
-                        <AvatarImage src="/placeholder.svg" />
-                        <AvatarFallback className="text-lg bg-primary text-primary-foreground">
-                          {activeSession.agent.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <h3 className="font-medium text-lg">{activeSession.agent}</h3>
-                      <p className="text-sm text-muted-foreground">Senior Support Agent</p>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground">Response Rate</span>
-                          <span>98%</span>
-                        </div>
-                        <Progress value={98} className="h-2" />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground">Customer Satisfaction</span>
-                          <span>92%</span>
-                        </div>
-                        <Progress value={92} className="h-2" />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-muted-foreground">Avg Response Time</span>
-                          <span>1m 15s</span>
-                        </div>
-                        <Progress value={85} className="h-2" />
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="flex justify-between">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">{activeSession.messages.filter(m => m.sender === "agent").length}</div>
-                        <div className="text-xs text-muted-foreground">Responses</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">4</div>
-                        <div className="text-xs text-muted-foreground">Active Chats</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold">23</div>
-                        <div className="text-xs text-muted-foreground">Today's Chats</div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <Users className="h-12 w-12 text-muted-foreground opacity-20 mb-2" />
-                    <p className="text-muted-foreground text-center">No agent assigned</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Stats Grid - Spans full width */}
-            <Card className="col-span-4 glass-card hover-scale">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BarChart2 className="h-5 w-5 text-primary" />
-                  <span>Chat Analytics</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                  <div className="rounded-lg bg-primary/10 p-3 premium-card premium-hover">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Total Chats</div>
-                    <div className="text-2xl font-bold gradient-text">{analytics.totalChats}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Today</div>
-                  </div>
-                  
-                  <div className="rounded-lg bg-green-500/10 p-3 premium-card premium-hover">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Resolved Chats</div>
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">{analytics.resolvedChats}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Today</div>
-                  </div>
-                  
-                  <div className="rounded-lg bg-blue-500/10 p-3 premium-card premium-hover">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Avg Response Time</div>
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{analytics.averageResponseTime}</div>
-                    <div className="text-xs text-muted-foreground mt-1">Today</div>
-                  </div>
-                  
-                  <div className="rounded-lg bg-purple-500/10 p-3 premium-card premium-hover">
-                    <div className="text-sm font-medium text-muted-foreground mb-1">Customer Satisfaction</div>
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{analytics.customerSatisfaction}%</div>
-                    <div className="text-xs text-muted-foreground mt-1">Today</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Scheduled Chats - Spans 4 columns */}
-            <Card className="col-span-4 glass-card hover-scale">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <span>Scheduled Chats</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex justify-between items-center p-3 rounded-lg bg-secondary/30 premium-card premium-hover">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src="/placeholder.svg" />
-                          <AvatarFallback>{CUSTOMER_NAMES[i].split(" ").map(n => n[0]).join("")}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-medium">{CUSTOMER_NAMES[i]}</h4>
-                          <p className="text-xs text-muted-foreground">Product Demo and Pricing Discussion</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-300">
-                          <Clock8 className="h-3 w-3 mr-1" />
-                          {new Date(Date.now() + (i + 1) * 3600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                        </Badge>
-                        <div className="flex space-x-1">
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <PhoneCall className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <MessageSquare className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="h-8 w-8 p-0">
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <div className="mt-4">
-                    <Button variant="outline" className="w-full">
-                      <Clock className="h-4 w-4 mr-2" />
-                      Schedule New Chat
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default ChatPage;
+                      <h3 className="font-medium text-lg">{activeSession
