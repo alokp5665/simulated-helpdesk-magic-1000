@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
@@ -143,6 +142,12 @@ const Index = () => {
     yearly: generateSmoothData(12, 70, 90),
   });
   
+  // New state for ticket volume and response time analytics
+  const [ticketVolumeData, setTicketVolumeData] = useState(generateSmoothData(24, 50, 40));
+  const [responseTimeTrendData, setResponseTimeTrendData] = useState(generateSmoothData(24, 40, 30));
+  const [isTicketVolumeHovered, setIsTicketVolumeHovered] = useState(false);
+  const [isResponseTimeHovered, setIsResponseTimeHovered] = useState(false);
+  
   const [emailFeed, setEmailFeed] = useState<any[]>([]);
   const [socialFeed, setSocialFeed] = useState<any[]>([]);
   const [agentFeed, setAgentFeed] = useState<any[]>([]);
@@ -267,6 +272,15 @@ const Index = () => {
         monthly: generateSmoothData(30, 60, 80),
         yearly: generateSmoothData(12, 70, 90),
       });
+      
+      // Update ticket volume and response time data only if not being hovered
+      if (!isTicketVolumeHovered) {
+        setTicketVolumeData(generateSmoothData(24, 50, 40));
+      }
+      
+      if (!isResponseTimeHovered) {
+        setResponseTimeTrendData(generateSmoothData(24, 40, 30));
+      }
     }, 4000);
     
     // Simulate feed updates
@@ -284,7 +298,7 @@ const Index = () => {
       clearInterval(chartInterval);
       clearInterval(feedInterval);
     };
-  }, [isLoading]);
+  }, [isLoading, isTicketVolumeHovered, isResponseTimeHovered]);
 
   // Animation variants
   const containerVariants = {
@@ -752,97 +766,3 @@ const Index = () => {
                                 axisLine={false}
                                 tickLine={false}
                                 tick={{ fontSize: 10 }}
-                              />
-                              <ChartTooltip
-                                content={<ChartTooltipContent indicator="dot" />}
-                              />
-                              <Area
-                                type="monotone"
-                                dataKey="value"
-                                name="response"
-                                stroke="#14b8a6"
-                                strokeWidth={2}
-                                fill="url(#colorResponse)"
-                                dot={false}
-                                activeDot={{ r: 5 }}
-                                className="ocean-wave"
-                              />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </ChartContainer>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                {/* Top Performers */}
-                <Card className="glass-card hover-scale overflow-hidden border border-purple-200/20 bg-white/90">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <Award className="h-4 w-4 text-purple-500" />
-                      <span>Top Performers</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="overflow-auto max-h-[200px] custom-scrollbar">
-                    {isLoading ? (
-                      Array(3).fill(null).map((_, i) => (
-                        <div key={i} className="mb-3 animate-pulse">
-                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                          <div className="h-3 bg-muted rounded w-1/2"></div>
-                        </div>
-                      ))
-                    ) : (
-                      topPerformers.map((performer, i) => (
-                        <motion.div 
-                          key={i}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="mb-3 p-3 bg-purple-50/50 rounded-lg border border-purple-100/20 hover:bg-purple-50/80 transition-all duration-200"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div className="flex items-center gap-2">
-                              <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-500">
-                                {i === 0 ? (
-                                  <Award className="h-4 w-4" />
-                                ) : (
-                                  <Users className="h-4 w-4" />
-                                )}
-                              </div>
-                              <span className="font-medium text-sm">{performer.name}</span>
-                            </div>
-                            <div className="bg-purple-100 text-purple-700 text-xs font-medium px-2 py-0.5 rounded-full">
-                              #{i+1}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span>Tickets</span>
-                                <span className="font-medium">{performer.tickets}</span>
-                              </div>
-                              <Progress value={performer.tickets * 5} className="h-1 bg-purple-100" />
-                            </div>
-                            <div>
-                              <div className="flex justify-between mb-1">
-                                <span>Satisfaction</span>
-                                <span className="font-medium">{performer.satisfaction}%</span>
-                              </div>
-                              <Progress value={performer.satisfaction} className="h-1 bg-purple-100" />
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default Index;
