@@ -1,3 +1,4 @@
+
 /* Premium animations for SocialPage */
 @keyframes pulse-slow {
   0% {
@@ -299,6 +300,119 @@
 
 .call-pulse {
   animation: call-pulse 2s infinite;
+}
+
+/* Agent dashboard specific styles */
+.agent-status-dot {
+  position: relative;
+  display: inline-block;
+}
+
+.agent-status-dot::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: currentColor;
+  top: 50%;
+  right: -12px;
+  transform: translateY(-50%);
+}
+
+.agent-status-dot.online::after {
+  background-color: #10b981;
+  box-shadow: 0 0 6px #10b981;
+  animation: pulse-slow 2s infinite;
+}
+
+.agent-status-dot.offline::after {
+  background-color: #6b7280;
+}
+
+.agent-status-dot.busy::after {
+  background-color: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+/* Agent card hover effect */
+.agent-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform: perspective(1000px) rotateX(0) rotateY(0);
+}
+
+.agent-card:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+}
+
+/* Achievement badge glow */
+.achievement-badge {
+  position: relative;
+  overflow: hidden;
+}
+
+.achievement-badge::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.6s;
+  transform: rotate(30deg);
+}
+
+.achievement-badge:hover::after {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+/* Performance metrics animation */
+@keyframes count-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.metric-value {
+  display: inline-block;
+  animation: count-up 1s ease-out forwards;
+}
+
+/* Ticket priority indicators */
+.priority-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.priority-high {
+  background: linear-gradient(45deg, #ef4444, #b91c1c);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.priority-medium {
+  background: linear-gradient(45deg, #f59e0b, #d97706);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.priority-low {
+  background: linear-gradient(45deg, #10b981, #059669);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
 }
 
 /* Bento grid layout for EmailPage */
