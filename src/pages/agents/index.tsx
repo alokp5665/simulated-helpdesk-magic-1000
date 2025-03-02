@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -13,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Users,
   User,
@@ -29,7 +29,9 @@ import {
   BarChart3,
   UserCheck,
   Calendar,
-  Search
+  Search,
+  Plus,
+  Activity as ActivityIcon
 } from "lucide-react";
 
 // Types
@@ -838,7 +840,7 @@ const AgentsPage = () => {
                 <Card className="bg-white/60 border-purple-100/40">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5 text-primary" />
+                      <ActivityIcon className="h-5 w-5 text-primary" />
                       <span>Activity Feed</span>
                     </CardTitle>
                   </CardHeader>
