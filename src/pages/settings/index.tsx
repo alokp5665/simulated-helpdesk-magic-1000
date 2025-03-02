@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -31,6 +30,7 @@ import {
   Trash2,
   BookOpen,
   AlertTriangle,
+  Save,
 } from "lucide-react";
 
 const SettingsPage = () => {
@@ -44,16 +44,69 @@ const SettingsPage = () => {
     confirmPassword: "",
   });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+
   const [integrations, setIntegrations] = useState({
     googleCalendar: true,
     slack: false,
     lms: true,
   });
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    // Basic phone validation - allows different formats with optional country code
+    const phoneRegex = /^(?:\+?\d{1,4}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleProfileUpdate = () => {
-    toast.success("Profile Updated Successfully", {
-      description: "Your profile changes have been saved.",
+    // Reset errors
+    setErrors({
+      name: "",
+      email: "",
+      phone: "",
     });
+
+    let isValid = true;
+
+    // Validate name
+    if (!formData.name.trim()) {
+      setErrors(prev => ({ ...prev, name: "Name is required" }));
+      isValid = false;
+    }
+
+    // Validate email
+    if (!validateEmail(formData.email)) {
+      setErrors(prev => ({ ...prev, email: "Invalid email format" }));
+      isValid = false;
+    }
+
+    // Validate phone
+    if (!validatePhone(formData.phone)) {
+      setErrors(prev => ({ ...prev, phone: "Invalid phone number format" }));
+      isValid = false;
+    }
+
+    if (isValid) {
+      // Save profile data (in a real app, this would be an API call)
+      localStorage.setItem('userData', JSON.stringify(formData));
+      
+      toast.success("Profile Updated Successfully", {
+        description: "Your profile changes have been saved.",
+      });
+    } else {
+      toast.error("Please fix the errors in the form", {
+        description: "There are validation errors that need to be addressed.",
+      });
+    }
   };
 
   const handlePasswordUpdate = () => {
@@ -130,8 +183,9 @@ const SettingsPage = () => {
                         <Input
                           value={formData.name}
                           onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                          className="pl-9"
+                          className={`pl-9 ${errors.name ? "border-red-500 focus:ring-red-500" : ""}`}
                         />
+                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                       </div>
                     </div>
                     <div className="grid gap-2">
@@ -142,8 +196,9 @@ const SettingsPage = () => {
                           type="email"
                           value={formData.email}
                           onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                          className="pl-9"
+                          className={`pl-9 ${errors.email ? "border-red-500 focus:ring-red-500" : ""}`}
                         />
+                        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                       </div>
                     </div>
                     <div className="grid gap-2">
@@ -153,12 +208,13 @@ const SettingsPage = () => {
                         <Input
                           value={formData.phone}
                           onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                          className="pl-9"
+                          className={`pl-9 ${errors.phone ? "border-red-500 focus:ring-red-500" : ""}`}
                         />
+                        {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                       </div>
                     </div>
                     <Button onClick={handleProfileUpdate} className="w-full">
-                      Save Changes
+                      <Save className="h-4 w-4 mr-2" /> Save Changes
                     </Button>
                   </div>
                 </div>

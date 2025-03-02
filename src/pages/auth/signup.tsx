@@ -5,30 +5,136 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ArrowRight, Github, Twitter } from "lucide-react";
+import { Shield, ArrowRight, Github, Twitter, Users } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
+  const [selectedRole, setSelectedRole] = useState("Admin");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    name: "",
+    company: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    terms: "",
+  });
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset errors
+    setErrors({
+      name: "",
+      company: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      terms: "",
+    });
+
+    // Validate fields
+    let isValid = true;
+    
+    if (!name.trim()) {
+      setErrors(prev => ({ ...prev, name: "Full name is required" }));
+      isValid = false;
+    }
+    
+    if (!company.trim()) {
+      setErrors(prev => ({ ...prev, company: "Company name is required" }));
+      isValid = false;
+    }
+    
+    if (!email.trim()) {
+      setErrors(prev => ({ ...prev, email: "Email is required" }));
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setErrors(prev => ({ ...prev, email: "Invalid email format" }));
+      isValid = false;
+    }
+    
+    if (!password.trim()) {
+      setErrors(prev => ({ ...prev, password: "Password is required" }));
+      isValid = false;
+    } else if (password.length < 8) {
+      setErrors(prev => ({ ...prev, password: "Password must be at least 8 characters" }));
+      isValid = false;
+    }
+    
+    if (password !== confirmPassword) {
+      setErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
+      isValid = false;
+    }
+    
+    if (!termsAccepted) {
+      setErrors(prev => ({ ...prev, terms: "You must accept the terms and conditions" }));
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
     setIsLoading(true);
     
     // Simulate signup process
     setTimeout(() => {
+      // Store user data in localStorage for future logins
+      const newUser = {
+        name,
+        email,
+        password,
+        company,
+        role: selectedRole,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Get existing users or initialize empty array
+      const existingUsers = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+      
+      // Check if email already exists
+      if (existingUsers.some((user: any) => user.email === email)) {
+        setIsLoading(false);
+        toast({
+          title: "Signup Failed",
+          description: "An account with this email already exists.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Add new user and save back to localStorage
+      const updatedUsers = [...existingUsers, newUser];
+      localStorage.setItem("registeredUsers", JSON.stringify(updatedUsers));
+      
       setIsLoading(false);
       toast({
         title: "Account created",
-        description: "Welcome to EduCare. Your account has been created successfully.",
+        description: `Welcome to EduCare. Your ${selectedRole} account has been created successfully.`,
       });
-      // Redirect to dashboard after successful signup
-      navigate("/dashboard");
+      
+      // Redirect to login page after successful signup
+      navigate("/auth/login");
     }, 1500);
   };
 
@@ -62,9 +168,13 @@ const SignupPage = () => {
                     placeholder="John Doe"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                    required
+                    className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                      errors.name ? "border-red-500" : ""
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="text-red-400 text-xs mt-1">{errors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="company" className="block text-sm font-medium text-indigo-200 mb-1">
@@ -75,9 +185,13 @@ const SignupPage = () => {
                     placeholder="Acme Inc."
                     value={company}
                     onChange={(e) => setCompany(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                    required
+                    className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                      errors.company ? "border-red-500" : ""
+                    }`}
                   />
+                  {errors.company && (
+                    <p className="text-red-400 text-xs mt-1">{errors.company}</p>
+                  )}
                 </div>
               </div>
               
@@ -91,9 +205,32 @@ const SignupPage = () => {
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                  required
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Select Role
+                </label>
+                <Select 
+                  value={selectedRole} 
+                  onValueChange={setSelectedRole}
+                >
+                  <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="Agent">Agent</SelectItem>
+                    <SelectItem value="Support">Support</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div>
@@ -106,16 +243,47 @@ const SignupPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                  required
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                    errors.password ? "border-red-500" : ""
+                  }`}
                 />
-                <p className="mt-1 text-xs text-indigo-300/70">
-                  Must be at least 8 characters and include a number and symbol
-                </p>
+                {errors.password ? (
+                  <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+                ) : (
+                  <p className="mt-1 text-xs text-indigo-300/70">
+                    Must be at least 8 characters and include a number and symbol
+                  </p>
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Confirm Password
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                    errors.confirmPassword ? "border-red-500" : ""
+                  }`}
+                />
+                {errors.confirmPassword && (
+                  <p className="text-red-400 text-xs mt-1">{errors.confirmPassword}</p>
+                )}
               </div>
               
               <div className="flex items-start">
-                <Checkbox id="terms" className="border-white/20 data-[state=checked]:bg-indigo-500 mt-1" />
+                <Checkbox 
+                  id="terms" 
+                  className={`border-white/20 data-[state=checked]:bg-indigo-500 mt-1 ${
+                    errors.terms ? "border-red-500" : ""
+                  }`}
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                />
                 <label htmlFor="terms" className="ml-2 text-sm text-indigo-200">
                   I agree to the{" "}
                   <a href="#" className="text-indigo-300 hover:text-white">
@@ -127,6 +295,9 @@ const SignupPage = () => {
                   </a>
                 </label>
               </div>
+              {errors.terms && (
+                <p className="text-red-400 text-xs mt-1">{errors.terms}</p>
+              )}
               
               <Button
                 type="submit"

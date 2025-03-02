@@ -1,40 +1,153 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ArrowRight, Github, Twitter } from "lucide-react";
+import { Shield, ArrowRight, Github, Twitter, User, Users } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState("Admin");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
+
+  // Get saved email from localStorage if "Remember me" was selected
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    }
+  }, []);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset errors
+    setErrors({
+      email: "",
+      password: "",
+    });
+
+    // Validate fields
+    let isValid = true;
+    
+    if (!email.trim()) {
+      setErrors(prev => ({ ...prev, email: "Email is required" }));
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setErrors(prev => ({ ...prev, email: "Invalid email format" }));
+      isValid = false;
+    }
+    
+    if (!password.trim()) {
+      setErrors(prev => ({ ...prev, password: "Password is required" }));
+      isValid = false;
+    }
+
+    if (!isValid) {
+      return;
+    }
+
     setIsLoading(true);
+    
+    // Check hardcoded credentials
+    const adminCredentials = { email: "admin@educare.com", password: "password123" };
     
     // Simulate login process
     setTimeout(() => {
       setIsLoading(false);
-      toast({
-        title: "Login successful",
-        description: "Welcome back to EduCare",
-      });
-      // Redirect to dashboard after successful login
-      navigate("/dashboard");
+      
+      if (email === adminCredentials.email && password === adminCredentials.password) {
+        // Save email to localStorage if "Remember me" is checked
+        if (rememberMe) {
+          localStorage.setItem("rememberedEmail", email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
+        
+        // Set logged in user role
+        localStorage.setItem("userRole", selectedRole);
+        
+        toast({
+          title: `${selectedRole} Login Successful`,
+          description: `Welcome back to EduCare as ${selectedRole}`,
+        });
+        
+        // Redirect to dashboard after successful login
+        navigate("/dashboard");
+      } else {
+        // Check if user exists in localStorage (for users created via signup)
+        const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+        const user = users.find((u: any) => u.email === email && u.password === password);
+        
+        if (user) {
+          // Save email to localStorage if "Remember me" is checked
+          if (rememberMe) {
+            localStorage.setItem("rememberedEmail", email);
+          } else {
+            localStorage.removeItem("rememberedEmail");
+          }
+          
+          // Set logged in user role
+          localStorage.setItem("userRole", selectedRole);
+          
+          toast({
+            title: `${selectedRole} Login Successful`,
+            description: `Welcome back to EduCare as ${selectedRole}`,
+          });
+          
+          // Redirect to dashboard after successful login
+          navigate("/dashboard");
+        } else {
+          toast({
+            title: "Login Failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }
     }, 1500);
   };
 
   const handleResetPassword = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!resetEmail.trim() || !validateEmail(resetEmail)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // Simulate password reset process
@@ -160,9 +273,13 @@ const LoginPage = () => {
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                  required
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-400 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
               
               <div>
@@ -187,13 +304,41 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full"
-                  required
+                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
+                    errors.password ? "border-red-500" : ""
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-red-400 text-xs mt-1">{errors.password}</p>
+                )}
+              </div>
+              
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium text-indigo-200 mb-1">
+                  Select Role
+                </label>
+                <Select 
+                  value={selectedRole} 
+                  onValueChange={setSelectedRole}
+                >
+                  <SelectTrigger className="w-full bg-white/5 border-white/10 text-white">
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="Agent">Agent</SelectItem>
+                    <SelectItem value="Support">Support</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="flex items-center">
-                <Checkbox id="remember" className="border-white/20 data-[state=checked]:bg-indigo-500" />
+                <Checkbox 
+                  id="remember" 
+                  className="border-white/20 data-[state=checked]:bg-indigo-500" 
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                />
                 <label htmlFor="remember" className="ml-2 text-sm text-indigo-200">
                   Remember me
                 </label>
