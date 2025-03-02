@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -50,6 +51,7 @@ import EmailMetricsComponent from "./EmailMetrics";
 import ComposeEmail from "./ComposeEmail";
 import ReplyEmail from "./ReplyEmail";
 
+// Sample initial emails with Indian names
 const SAMPLE_EMAILS: Email[] = [
   {
     id: "1",
@@ -166,10 +168,12 @@ const EmailPage = () => {
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Initialize with sample emails
   useEffect(() => {
     setEmails(SAMPLE_EMAILS);
     setEmailMetrics(calculateEmailMetrics(SAMPLE_EMAILS));
     
+    // Initial notification
     setTimeout(() => {
       toast("Welcome to Premium Email Dashboard", {
         description: "Your personalized email experience is ready",
@@ -184,13 +188,28 @@ const EmailPage = () => {
     };
   }, []);
 
+  // Start email simulation after initial render
   useEffect(() => {
+    // Simulate receiving new email every 4 seconds
     intervalRef.current = setInterval(() => {
       const newEmail = generateRandomEmail(Date.now().toString());
       
       setEmails(prev => [newEmail, ...prev]);
       
+      // Update metrics
       setEmailMetrics(calculateEmailMetrics([newEmail, ...emails]));
+      
+      // Show notification
+      toast(
+        <div className="flex items-center">
+          <span className="font-medium">New Email from {newEmail.sender.name}</span>
+        </div>, 
+        {
+          description: newEmail.subject,
+          icon: <Bell className="h-4 w-4 text-blue-500" />,
+          position: "top-right"
+        }
+      );
     }, 4000);
 
     return () => {
@@ -210,6 +229,7 @@ const EmailPage = () => {
         );
         toast(email.starred ? "Email unmarked" : "Email marked as important");
         
+        // Update selected email if it's the one being modified
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail({ ...selectedEmail, starred: !selectedEmail.starred });
         }
@@ -223,6 +243,7 @@ const EmailPage = () => {
         );
         toast(email.flagged ? "Flag removed" : "Email flagged");
         
+        // Update selected email
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail({ ...selectedEmail, flagged: !selectedEmail.flagged });
         }
@@ -236,6 +257,7 @@ const EmailPage = () => {
         );
         toast("Email archived");
         
+        // If the archived email was selected, clear selection
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail(null);
         }
@@ -249,6 +271,7 @@ const EmailPage = () => {
         );
         toast("Email moved to trash");
         
+        // If the deleted email was selected, clear selection
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail(null);
         }
@@ -262,6 +285,7 @@ const EmailPage = () => {
         );
         toast("Email marked as read");
         
+        // Update selected email
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail({ 
             ...selectedEmail, 
@@ -279,6 +303,7 @@ const EmailPage = () => {
         );
         toast("Email marked as unread");
         
+        // Update selected email
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail({ ...selectedEmail, read: false, status: "unread" });
         }
@@ -292,11 +317,13 @@ const EmailPage = () => {
         );
         toast("Email marked as resolved");
         
+        // Update metrics
         setEmailMetrics(prev => ({
           ...prev,
           resolved: prev.resolved + 1
         }));
         
+        // Update selected email
         if (selectedEmail && selectedEmail.id === email.id) {
           setSelectedEmail({ ...selectedEmail, status: "resolved", read: true });
         }
@@ -336,6 +363,7 @@ const EmailPage = () => {
 
   const handleReplyEmail = () => {
     if (selectedEmail) {
+      // Mark the email as read and resolved
       handleEmailAction("mark_resolved", selectedEmail);
     }
   };
@@ -352,11 +380,15 @@ const EmailPage = () => {
     }
   };
 
+  // Apply filters to emails
   const filteredEmails = emails.filter(email => {
+    // Filter by folder
     if (email.folder !== currentFolder) return false;
     
+    // Filter by status
     if (statusFilter !== "all" && email.status !== statusFilter) return false;
     
+    // Filter by date
     if (dateFilter) {
       const emailDate = new Date(email.date);
       if (
@@ -368,6 +400,7 @@ const EmailPage = () => {
       }
     }
     
+    // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       return (
@@ -381,6 +414,7 @@ const EmailPage = () => {
     return true;
   });
 
+  // Get status badge color
   const getStatusColor = (status: string) => {
     switch (status) {
       case "unread":
@@ -401,6 +435,7 @@ const EmailPage = () => {
       
       <main className="pl-64 pt-16">
         <div className="p-6 max-w-[1600px] mx-auto">
+          {/* Header with Analytics Toggle */}
           <motion.div 
             className="flex justify-between items-center mb-6"
             initial={{ opacity: 0, y: -20 }}
@@ -443,6 +478,7 @@ const EmailPage = () => {
             </div>
           </motion.div>
           
+          {/* Email Analytics Section */}
           <AnimatePresence>
             {showingMetrics && (
               <motion.div 
@@ -458,6 +494,7 @@ const EmailPage = () => {
           </AnimatePresence>
           
           <div className="grid gap-6 grid-cols-12">
+            {/* Email Navigation */}
             <motion.div 
               className="col-span-12 md:col-span-3"
               initial={{ opacity: 0, x: -20 }}
@@ -592,6 +629,7 @@ const EmailPage = () => {
               </Card>
             </motion.div>
             
+            {/* Email List and Content */}
             <motion.div 
               className="col-span-12 md:col-span-9"
               initial={{ opacity: 0, x: 20 }}
@@ -630,6 +668,7 @@ const EmailPage = () => {
                 </CardHeader>
                 
                 <div className="grid grid-cols-12 h-[calc(100vh-13rem)]">
+                  {/* Email List */}
                   <div className="col-span-12 md:col-span-5 border-r">
                     <ScrollArea className="h-full">
                       <AnimatePresence initial={false}>
@@ -731,6 +770,7 @@ const EmailPage = () => {
                     </ScrollArea>
                   </div>
                   
+                  {/* Email Content */}
                   <div className="col-span-12 md:col-span-7">
                     {selectedEmail ? (
                       <motion.div 
@@ -930,12 +970,14 @@ const EmailPage = () => {
         </div>
       </main>
       
+      {/* Email Composition Dialog */}
       <ComposeEmail 
         isOpen={isComposeOpen} 
         onClose={() => setIsComposeOpen(false)} 
         onSend={handleComposeEmail}
       />
       
+      {/* Reply Email Dialog */}
       <ReplyEmail 
         isOpen={isReplyOpen}
         onClose={() => setIsReplyOpen(false)}
