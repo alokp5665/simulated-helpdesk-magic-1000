@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
@@ -15,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
 
 // Mock data for knowledge base
 const articles = [
@@ -542,11 +542,13 @@ const KnowledgeBasePage = () => {
                       </div>
                       <div>
                         <h4 className="font-medium">Email Support</h4>
-                        <p className="text-sm text-muted-foreground">support@primecare.com</p>
+                        <p className="text-sm text-muted-foreground">support@educare.com</p>
                       </div>
                     </div>
                   </div>
-                  <Button className="mt-6">Contact Support</Button>
+                  <Link to="/contact">
+                    <Button className="mt-6">Contact Support</Button>
+                  </Link>
                 </CardContent>
                 <div className="hidden md:block relative">
                   <div className="absolute inset-0 bg-primary/20 z-0"></div>
