@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -22,7 +21,7 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState("Admin");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -32,7 +31,6 @@ const LoginPage = () => {
     password: "",
   });
 
-  // Get saved email from localStorage if "Remember me" was selected
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
@@ -49,13 +47,11 @@ const LoginPage = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Reset errors
     setErrors({
       email: "",
       password: "",
     });
 
-    // Validate fields
     let isValid = true;
     
     if (!email.trim()) {
@@ -77,22 +73,21 @@ const LoginPage = () => {
 
     setIsLoading(true);
     
-    // Check hardcoded credentials
-    const adminCredentials = { email: "admin@educare.com", password: "password123" };
+    const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+    const user = users.find((u: any) => u.email === email && u.password === password);
     
-    // Simulate login process
     setTimeout(() => {
       setIsLoading(false);
       
-      if (email === adminCredentials.email && password === adminCredentials.password) {
-        // Save email to localStorage if "Remember me" is checked
+      const adminCredentials = { email: "admin@educare.com", password: "password123" };
+      
+      if (email === adminCredentials.email && password === adminCredentials.password || user) {
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", email);
         } else {
           localStorage.removeItem("rememberedEmail");
         }
         
-        // Set logged in user role
         localStorage.setItem("userRole", selectedRole);
         
         toast({
@@ -100,38 +95,13 @@ const LoginPage = () => {
           description: `Welcome back to EduCare as ${selectedRole}`,
         });
         
-        // Redirect to dashboard after successful login
         navigate("/dashboard");
       } else {
-        // Check if user exists in localStorage (for users created via signup)
-        const users = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
-        const user = users.find((u: any) => u.email === email && u.password === password);
-        
-        if (user) {
-          // Save email to localStorage if "Remember me" is checked
-          if (rememberMe) {
-            localStorage.setItem("rememberedEmail", email);
-          } else {
-            localStorage.removeItem("rememberedEmail");
-          }
-          
-          // Set logged in user role
-          localStorage.setItem("userRole", selectedRole);
-          
-          toast({
-            title: `${selectedRole} Login Successful`,
-            description: `Welcome back to EduCare as ${selectedRole}`,
-          });
-          
-          // Redirect to dashboard after successful login
-          navigate("/dashboard");
-        } else {
-          toast({
-            title: "Login Failed",
-            description: "Invalid email or password. Please try again.",
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Login Failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        });
       }
     }, 1500);
   };
@@ -150,7 +120,6 @@ const LoginPage = () => {
     
     setIsLoading(true);
     
-    // Simulate password reset process
     setTimeout(() => {
       setIsLoading(false);
       setResetSent(true);
