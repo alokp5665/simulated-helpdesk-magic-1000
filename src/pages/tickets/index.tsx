@@ -1,1008 +1,784 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  Ticket, 
-  Filter, 
-  Clock, 
-  CheckCircle2, 
-  Circle, 
-  PlayCircle, 
-  Plus, 
-  User, 
-  X, 
-  MessageSquare
-} from "lucide-react";
-import { motion } from "framer-motion";
-import { toast } from "sonner";
-import { format } from "date-fns";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { TypographyMuted } from "@/components/ui/typography";
+import {
+  Search,
+  MessagesSquare,
+  Phone,
+  CheckCircle,
+  Clock,
+  Tag,
+  ArrowDown,
+  MoreVertical,
+  Filter,
+  CalendarDays,
+  UserRound,
+  RefreshCcw,
+  Users,
+  AlertTriangle,
+  Ban,
+  PlusCircle,
+  Check,
+  X,
+  Paperclip,
+  AlignLeft,
+  Menu
+} from "lucide-react";
 
-type TicketStatus = "Open" | "In Progress" | "Resolved";
-type TicketPriority = "Low" | "Medium" | "High" | "Critical";
+// Replace existing names with Indian-origin Hindu names
+const FIRST_NAMES = [
+  "Aditya", "Ananya", "Arjun", "Divya", "Ishaan", "Kavya", "Krishna", "Lakshmi", 
+  "Neha", "Nikhil", "Priya", "Rahul", "Rishi", "Rohan", "Samaira", "Sanjay", 
+  "Shreya", "Tanvi", "Vikram", "Vivaan"
+];
 
-interface Agent {
-  id: number;
-  name: string;
-  avatar: string;
-  status: "online" | "offline" | "away";
-}
+const LAST_NAMES = [
+  "Agarwal", "Chakraborty", "Desai", "Gupta", "Iyer", "Joshi", "Kapoor", "Malhotra", 
+  "Nair", "Patel", "Reddy", "Sharma", "Singh", "Trivedi", "Verma", "Yadav", 
+  "Bhatia", "Choudhury", "Mehta", "Raj"
+];
 
-interface TicketComment {
-  id: number;
-  userId: number;
-  username: string;
-  content: string;
-  timestamp: Date;
-}
+// Products with issues
+const PRODUCTS = [
+  "SaaS Analytics Dashboard",
+  "CRM Suite Pro",
+  "Enterprise Security Suite",
+  "Cloud Storage Manager",
+  "Customer Portal",
+  "API Gateway",
+  "Mobile App Accounts",
+  "Payment Processing System",
+  "Data Visualization Tool",
+  "Multi-factor Authentication"
+];
 
-interface TicketData {
-  id: number;
-  title: string;
-  description: string;
-  status: TicketStatus;
-  priority: TicketPriority;
+// Types
+interface Ticket {
+  id: string;
+  subject: string;
+  customer: {
+    name: string;
+    email: string;
+    imageUrl?: string;
+  };
+  assignee?: {
+    name: string;
+    imageUrl?: string;
+  };
+  status: "open" | "pending" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
   createdAt: Date;
   updatedAt: Date;
-  assignee: Agent | null;
-  createdBy: string;
-  comments: TicketComment[];
+  tags: string[];
+  product: string;
+  messages: TicketMessage[];
 }
 
-// Mock data
-const mockAgents: Agent[] = [
-  { id: 1, name: "Alex Johnson", avatar: "/placeholder.svg", status: "online" },
-  { id: 2, name: "Samantha Lee", avatar: "/placeholder.svg", status: "online" },
-  { id: 3, name: "Marcus Chen", avatar: "/placeholder.svg", status: "away" },
-  { id: 4, name: "Priya Sharma", avatar: "/placeholder.svg", status: "offline" },
-  { id: 5, name: "Jordan Smith", avatar: "/placeholder.svg", status: "online" },
-];
+interface TicketMessage {
+  id: string;
+  content: string;
+  timestamp: Date;
+  sender: {
+    name: string;
+    type: "customer" | "agent" | "system";
+    imageUrl?: string;
+  };
+  attachments?: {
+    name: string;
+    type: string;
+    size: string;
+  }[];
+}
 
-// Initial tickets data
-const initialTickets: TicketData[] = [
-  {
-    id: 1,
-    title: "Website login issue",
-    description: "Users are unable to log in with correct credentials",
-    status: "Open",
-    priority: "High",
-    createdAt: new Date(Date.now() - 86400000), // 1 day ago
-    updatedAt: new Date(Date.now() - 43200000), // 12 hours ago
-    assignee: mockAgents[0],
-    createdBy: "customer@example.com",
-    comments: [
-      {
-        id: 1,
-        userId: 1,
-        username: "Alex Johnson",
-        content: "I'll look into this issue right away.",
-        timestamp: new Date(Date.now() - 50000000),
-      },
-    ],
-  },
-  {
-    id: 2,
-    title: "Payment processing failed",
-    description: "Transaction gateway errors when completing checkout",
-    status: "In Progress",
-    priority: "Critical",
-    createdAt: new Date(Date.now() - 172800000), // 2 days ago
-    updatedAt: new Date(Date.now() - 21600000), // 6 hours ago
-    assignee: mockAgents[1],
-    createdBy: "merchant@example.com",
-    comments: [],
-  },
-  {
-    id: 3,
-    title: "Mobile app crashes on startup",
-    description: "iOS users reporting immediate crash after latest update",
-    status: "In Progress",
-    priority: "High",
-    createdAt: new Date(Date.now() - 259200000), // 3 days ago
-    updatedAt: new Date(Date.now() - 86400000), // 1 day ago
-    assignee: mockAgents[2],
-    createdBy: "developer@example.com",
-    comments: [],
-  },
-  {
-    id: 4,
-    title: "Feature request: Dark mode",
-    description: "Multiple users requesting dark mode implementation",
-    status: "Open",
-    priority: "Medium",
-    createdAt: new Date(Date.now() - 432000000), // 5 days ago
-    updatedAt: new Date(Date.now() - 345600000), // 4 days ago
-    assignee: null,
-    createdBy: "user_feedback@example.com",
-    comments: [],
-  },
-  {
-    id: 5,
-    title: "Email notifications not sending",
-    description: "Notifications for order confirmations are delayed",
-    status: "Resolved",
-    priority: "Medium",
-    createdAt: new Date(Date.now() - 518400000), // 6 days ago
-    updatedAt: new Date(Date.now() - 172800000), // 2 days ago
-    assignee: mockAgents[3],
-    createdBy: "support@example.com",
-    comments: [
-      {
-        id: 2,
-        userId: 4,
-        username: "Priya Sharma",
-        content: "Fixed the SMTP configuration issue that was causing delays.",
-        timestamp: new Date(Date.now() - 172800000),
-      },
-      {
-        id: 3,
-        userId: 1,
-        username: "Alex Johnson",
-        content: "Confirmed resolution. Email delivery times now normal.",
-        timestamp: new Date(Date.now() - 130000000),
-      },
-    ],
-  },
-  {
-    id: 6,
-    title: "Product image not loading",
-    description: "Product gallery shows missing images on certain products",
-    status: "Resolved",
-    priority: "Low",
-    createdAt: new Date(Date.now() - 604800000), // 7 days ago
-    updatedAt: new Date(Date.now() - 259200000), // 3 days ago
-    assignee: mockAgents[4],
-    createdBy: "content_manager@example.com",
-    comments: [],
-  },
-];
+// Util functions
+const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
-// Ticket status icons and colors
-const statusConfig = {
-  "Open": { icon: Circle, color: "text-blue-500", bg: "bg-blue-100" },
-  "In Progress": { icon: PlayCircle, color: "text-amber-500", bg: "bg-amber-100" },
-  "Resolved": { icon: CheckCircle2, color: "text-green-500", bg: "bg-green-100" },
+const generateRandomDate = (startDate: Date, endDate: Date): Date => {
+  const startTimestamp = startDate.getTime();
+  const endTimestamp = endDate.getTime();
+  const randomTimestamp = startTimestamp + Math.random() * (endTimestamp - startTimestamp);
+  return new Date(randomTimestamp);
 };
 
-// Get priority class
-const getPriorityClass = (priority: TicketPriority) => {
-  switch (priority) {
-    case "Critical":
-      return "bg-red-100 text-red-700";
-    case "High":
-      return "bg-orange-100 text-orange-700";
-    case "Medium":
-      return "bg-yellow-100 text-yellow-700";
-    case "Low":
-      return "bg-green-100 text-green-700";
-    default:
-      return "bg-gray-100 text-gray-700";
+const generateRandomName = (): string => {
+  return `${getRandomElement(FIRST_NAMES)} ${getRandomElement(LAST_NAMES)}`;
+};
+
+const generateRandomEmail = (name: string): string => {
+  const [firstName, lastName] = name.split(" ");
+  return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@example.com`;
+};
+
+const generateTicket = (id: string): Ticket => {
+  const customerName = generateRandomName();
+  const assigneeName = generateRandomName();
+  const status = getRandomElement(["open", "pending", "resolved", "closed"] as const);
+  const priority = getRandomElement(["low", "medium", "high", "urgent"] as const);
+  const product = getRandomElement(PRODUCTS);
+  const createdAt = generateRandomDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date());
+  const updatedAt = generateRandomDate(createdAt, new Date());
+  const tags = Array.from({ length: Math.floor(Math.random() * 3) + 1 }, () => {
+    return getRandomElement([
+      "billing", "technical", "feature-request", "bug", "account", "subscription", "security", "payment"
+    ]);
+  });
+
+  const messages = Array.from(
+    { length: Math.floor(Math.random() * 5) + 1 },
+    (_, i): TicketMessage => {
+      const isFirst = i === 0;
+      const sender = {
+        name: isFirst ? customerName : Math.random() > 0.5 ? customerName : assigneeName,
+        type: isFirst || Math.random() > 0.5 ? "customer" : "agent" as "customer" | "agent" | "system",
+        imageUrl: undefined,
+      };
+
+      return {
+        id: `msg-${id}-${i}`,
+        content: generateRandomMessage(sender.type, product),
+        timestamp: generateRandomDate(createdAt, updatedAt),
+        sender,
+        attachments: Math.random() > 0.7 ? generateRandomAttachments() : undefined,
+      };
+    }
+  ).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
+  return {
+    id,
+    subject: generateRandomSubject(product),
+    customer: {
+      name: customerName,
+      email: generateRandomEmail(customerName),
+    },
+    assignee: status !== "open" ? { name: assigneeName } : undefined,
+    status,
+    priority,
+    createdAt,
+    updatedAt,
+    tags,
+    product,
+    messages,
+  };
+};
+
+const generateRandomSubject = (product: string): string => {
+  const subjects = [
+    `Issue with ${product} access`,
+    `${product} login problem`,
+    `Can't configure ${product} settings`,
+    `${product} data not syncing`,
+    `Need help with ${product} integration`,
+    `${product} performance issues`,
+    `Error message in ${product}`,
+    `${product} not loading correctly`,
+    `Question about ${product} billing`,
+    `${product} feature not working`,
+  ];
+  return getRandomElement(subjects);
+};
+
+const generateRandomMessage = (type: "customer" | "agent" | "system", product: string): string => {
+  if (type === "customer") {
+    const messages = [
+      `I'm having an issue with ${product}. It's not working as expected.`,
+      `The ${product} dashboard keeps showing an error when I try to access my reports. Can you help?`,
+      `I need help setting up ${product} for my team. The documentation isn't clear.`,
+      `${product} is very slow lately. Is there a known issue?`,
+      `I'm getting a strange error message when using ${product}: "Error code 5023".`,
+      `My account on ${product} seems to be locked. I need immediate assistance.`,
+      `We're having trouble with the API integration for ${product}. The endpoints are returning 404.`,
+      `Is there a way to customize the reports in ${product}? I need more detailed analytics.`,
+      `The recent update to ${product} broke our workflow. We need a fix ASAP.`,
+      `I'd like to upgrade our plan for ${product}. What are the options?`
+    ];
+    return getRandomElement(messages);
+  } else if (type === "agent") {
+    const messages = [
+      `I understand you're having an issue with ${product}. I'll help you troubleshoot it.`,
+      `Thanks for reporting this problem with ${product}. Let me check our systems.`,
+      `I can definitely help you set up ${product} for your team. Let's go through it step by step.`,
+      `We're aware of the performance issues with ${product} and our engineering team is working on it.`,
+      `That error code in ${product} usually indicates a permission issue. Let me reset that for you.`,
+      `I've unlocked your account on ${product}. Please try logging in again.`,
+      `Let me check the API documentation for ${product} to help with your integration issue.`,
+      `Yes, there are several ways to customize reports in ${product}. I can show you how.`,
+      `I apologize for the inconvenience with the recent update. Let me provide a workaround.`,
+      `I'd be happy to discuss upgrade options for ${product}. What specific features are you interested in?`
+    ];
+    return getRandomElement(messages);
+  } else {
+    const messages = [
+      `Ticket opened for ${product} issue.`,
+      `Status changed to pending.`,
+      `Ticket assigned to support team.`,
+      `Ticket priority updated to high.`,
+      `Customer requested callback.`,
+      `Ticket escalated to level 2 support.`,
+      `Automated system check completed for ${product}.`,
+      `Maintenance notification: ${product} will undergo scheduled maintenance.`,
+      `Ticket merged with related issue #5789.`,
+      `Customer satisfaction survey sent.`
+    ];
+    return getRandomElement(messages);
   }
 };
 
-const TicketsPage = () => {
-  const navigate = useNavigate();
-  const [tickets, setTickets] = useState<TicketData[]>(initialTickets);
-  const [filteredTickets, setFilteredTickets] = useState<TicketData[]>(initialTickets);
-  const [activeStatus, setActiveStatus] = useState<TicketStatus | "All">("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [newTicketData, setNewTicketData] = useState({
-    title: "",
-    description: "",
-    priority: "Medium" as TicketPriority,
+const generateRandomAttachments = () => {
+  const attachmentTypes = [
+    { type: "image/png", ext: "png" },
+    { type: "image/jpg", ext: "jpg" },
+    { type: "application/pdf", ext: "pdf" },
+    { type: "text/csv", ext: "csv" },
+    { type: "application/zip", ext: "zip" }
+  ];
+  
+  const attachmentNames = [
+    "screenshot",
+    "error_log",
+    "system_info",
+    "account_details",
+    "invoice",
+    "configuration",
+    "debug_info"
+  ];
+  
+  const count = Math.floor(Math.random() * 2) + 1;
+  
+  return Array.from({ length: count }, () => {
+    const type = getRandomElement(attachmentTypes);
+    const name = `${getRandomElement(attachmentNames)}.${type.ext}`;
+    const sizes = ["12KB", "347KB", "1.2MB", "5.4MB", "892KB"];
+    
+    return {
+      name,
+      type: type.type,
+      size: getRandomElement(sizes)
+    };
   });
-  const [selectedTicket, setSelectedTicket] = useState<TicketData | null>(null);
-  const [newComment, setNewComment] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [ticketCreationProgress, setTicketCreationProgress] = useState(0);
+};
 
-  // Filter tickets based on status and search query
+const TicketsPage = () => {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState("all");
+  
+  // Generate tickets on component mount
   useEffect(() => {
-    let result = [...tickets];
+    const initialTickets = Array.from({ length: 50 }, (_, i) => 
+      generateTicket(`ticket-${i + 1}`)
+    );
+    setTickets(initialTickets);
+    setFilteredTickets(initialTickets);
+    setSelectedTicket(initialTickets[0]);
+  }, []);
+  
+  // Filter tickets based on search term
+  useEffect(() => {
+    let result = tickets;
     
-    // Filter by status
-    if (activeStatus !== "All") {
-      result = result.filter(ticket => ticket.status === activeStatus);
-    }
-    
-    // Filter by search query
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        ticket => 
-          ticket.title.toLowerCase().includes(query) || 
-          ticket.description.toLowerCase().includes(query)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(ticket => 
+        ticket.subject.toLowerCase().includes(term) ||
+        ticket.customer.name.toLowerCase().includes(term) ||
+        ticket.customer.email.toLowerCase().includes(term) ||
+        ticket.product.toLowerCase().includes(term) ||
+        ticket.tags.some(tag => tag.toLowerCase().includes(term))
       );
     }
     
+    if (currentTab !== "all") {
+      result = result.filter(ticket => ticket.status === currentTab);
+    }
+    
+    if (activeFilter) {
+      switch(activeFilter) {
+        case "high-priority":
+          result = result.filter(ticket => ticket.priority === "high" || ticket.priority === "urgent");
+          break;
+        case "unassigned":
+          result = result.filter(ticket => !ticket.assignee);
+          break;
+        case "recent":
+          result = result.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+          break;
+        default:
+          break;
+      }
+    }
+    
     setFilteredTickets(result);
-  }, [tickets, activeStatus, searchQuery]);
-
-  // Function to update ticket status
-  const updateTicketStatus = (ticketId: number, status: TicketStatus) => {
-    const updatedTickets = tickets.map(ticket => {
-      if (ticket.id === ticketId) {
-        return {
-          ...ticket,
-          status,
-          updatedAt: new Date()
-        };
-      }
-      return ticket;
-    });
     
-    setTickets(updatedTickets);
-    toast.success(`Ticket #${ticketId} status updated to ${status}`);
-  };
-
-  // Function to assign ticket to agent
-  const assignTicket = (ticketId: number, agent: Agent) => {
-    const updatedTickets = tickets.map(ticket => {
-      if (ticket.id === ticketId) {
-        return {
-          ...ticket,
-          assignee: agent,
-          updatedAt: new Date()
-        };
-      }
-      return ticket;
-    });
-    
-    setTickets(updatedTickets);
-    toast.success(`Ticket #${ticketId} assigned to ${agent.name}`);
-  };
-
-  // Function to add comment to ticket
-  const addComment = (ticketId: number) => {
-    if (!newComment.trim()) return;
-    
-    const updatedTickets = tickets.map(ticket => {
-      if (ticket.id === ticketId) {
-        const updatedComments = [
-          ...ticket.comments,
-          {
-            id: Date.now(),
-            userId: 1, // Assuming current user
-            username: "Alex Johnson", // Assuming current user
-            content: newComment,
-            timestamp: new Date()
-          }
-        ];
-        
-        return {
-          ...ticket,
-          comments: updatedComments,
-          updatedAt: new Date()
-        };
-      }
-      return ticket;
-    });
-    
-    setTickets(updatedTickets);
-    setNewComment("");
-    toast.success("Comment added successfully");
-  };
-
-  // Create new ticket
-  const handleCreateTicket = () => {
-    if (!newTicketData.title || !newTicketData.description) {
-      toast.error("Please fill all required fields");
-      return;
+    // Update selected ticket if it's no longer in filtered results
+    if (selectedTicket && !result.find(t => t.id === selectedTicket.id)) {
+      setSelectedTicket(result.length > 0 ? result[0] : null);
     }
-
-    // Simulate progress for a more premium feel
-    const interval = setInterval(() => {
-      setTicketCreationProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 25;
-      });
-    }, 300);
-
-    setTimeout(() => {
-      const newTicket: TicketData = {
-        id: tickets.length + 1,
-        title: newTicketData.title,
-        description: newTicketData.description,
-        status: "Open",
-        priority: newTicketData.priority,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        assignee: null,
-        createdBy: "current_user@example.com",
-        comments: []
-      };
-      
-      setTickets([newTicket, ...tickets]);
-      setNewTicketData({ title: "", description: "", priority: "Medium" });
-      setIsDialogOpen(false);
-      setTicketCreationProgress(0);
-      
-      toast.success("Ticket created successfully", {
-        description: `Ticket #${newTicket.id} has been created and is awaiting assignment.`
-      });
-    }, 1500);
+  }, [searchTerm, tickets, currentTab, activeFilter, selectedTicket]);
+  
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
   };
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { 
-        staggerChildren: 0.1,
-        delayChildren: 0.2
-      } 
-    }
+  
+  const handleTicketSelect = (ticket: Ticket) => {
+    setSelectedTicket(ticket);
   };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
-      opacity: 1, 
-      transition: { type: "spring", stiffness: 100 }
-    }
+  
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
   };
-
-  const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5 } }
+  
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter === activeFilter ? null : filter);
   };
-
+  
+  const handleStatusChange = (ticketId: string, newStatus: "open" | "pending" | "resolved" | "closed") => {
+    setTickets(prev => 
+      prev.map(ticket => 
+        ticket.id === ticketId 
+          ? { 
+              ...ticket, 
+              status: newStatus,
+              updatedAt: new Date(),
+              messages: [
+                ...ticket.messages,
+                {
+                  id: `msg-status-${Date.now()}`,
+                  content: `Status changed to ${newStatus}`,
+                  timestamp: new Date(),
+                  sender: {
+                    name: "System",
+                    type: "system"
+                  }
+                }
+              ]
+            }
+          : ticket
+      )
+    );
+  };
+  
+  const handleAssign = (ticketId: string, assigneeName: string) => {
+    setTickets(prev => 
+      prev.map(ticket => 
+        ticket.id === ticketId 
+          ? { 
+              ...ticket, 
+              assignee: { name: assigneeName },
+              updatedAt: new Date(),
+              messages: [
+                ...ticket.messages,
+                {
+                  id: `msg-assign-${Date.now()}`,
+                  content: `Ticket assigned to ${assigneeName}`,
+                  timestamp: new Date(),
+                  sender: {
+                    name: "System",
+                    type: "system"
+                  }
+                }
+              ]
+            }
+          : ticket
+      )
+    );
+  };
+  
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
+    <div className="flex flex-col h-screen">
       <TopBar />
-      <Sidebar />
-      
-      <main className="pt-20 pl-64 pr-4 pb-10">
-        <motion.div 
-          className="mx-auto max-w-7xl" 
-          initial="hidden" 
-          animate="visible" 
-          variants={containerVariants}
-        >
-          {/* Header Section */}
-          <motion.div 
-            className="flex justify-between items-center mb-6" 
-            variants={fadeIn}
-          >
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Ticket Management</h1>
-              <p className="text-gray-600 mt-1">Manage, track and resolve support tickets</p>
-            </div>
-            
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="group hover:shadow-lg transition-all duration-300">
-                  <Plus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform duration-300" />
-                  Create Ticket
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
+        <div className="flex-1 flex flex-col pl-64">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-3xl font-bold">Tickets</h1>
+              <div className="flex gap-3">
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" /> Filter
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[525px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Support Ticket</DialogTitle>
-                  <DialogDescription>
-                    Fill in the details below to create a new support ticket.
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="title" className="text-sm font-medium">
-                      Title
-                    </label>
-                    <Input
-                      id="title"
-                      placeholder="Brief description of the issue"
-                      value={newTicketData.title}
-                      onChange={(e) => setNewTicketData({...newTicketData, title: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <label htmlFor="description" className="text-sm font-medium">
-                      Description
-                    </label>
-                    <Textarea
-                      id="description"
-                      placeholder="Detailed explanation of the issue"
-                      rows={5}
-                      value={newTicketData.description}
-                      onChange={(e) => setNewTicketData({...newTicketData, description: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div className="grid gap-2">
-                    <label htmlFor="priority" className="text-sm font-medium">
-                      Priority
-                    </label>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className={`w-full justify-start ${getPriorityClass(newTicketData.priority)} border-0`}>
-                          {newTicketData.priority}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-56">
-                        <DropdownMenuItem onClick={() => setNewTicketData({...newTicketData, priority: "Low"})}>
-                          Low
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setNewTicketData({...newTicketData, priority: "Medium"})}>
-                          Medium
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setNewTicketData({...newTicketData, priority: "High"})}>
-                          High
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setNewTicketData({...newTicketData, priority: "Critical"})}>
-                          Critical
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  
-                  {ticketCreationProgress > 0 && (
-                    <div className="mt-2">
-                      <Progress value={ticketCreationProgress} className="h-2" />
-                      <p className="text-xs text-center mt-1 text-gray-500">
-                        {ticketCreationProgress === 100 ? 'Completing...' : 'Processing...'}
-                      </p>
-                    </div>
-                  )}
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit" onClick={handleCreateTicket} disabled={ticketCreationProgress > 0}>
-                    Create Ticket
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </motion.div>
-          
-          {/* Search and Filter Section */}
-          <motion.div 
-            className="flex flex-wrap gap-4 mb-8" 
-            variants={fadeIn}
-          >
-            <div className="relative flex-grow max-w-md">
-              <Input
-                placeholder="Search tickets..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 backdrop-blur-sm bg-white/80 border-gray-200 focus:border-blue-500 transition-all"
-              />
-              <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Button variant="outline">
+                  <RefreshCcw className="h-4 w-4 mr-2" /> Refresh
+                </Button>
+                <Button variant="default">
+                  <PlusCircle className="h-4 w-4 mr-2" /> New Ticket
+                </Button>
+              </div>
             </div>
             
-            <Tabs 
-              defaultValue="All" 
-              value={activeStatus} 
-              onValueChange={(value) => setActiveStatus(value as TicketStatus | "All")}
-              className="flex-grow"
-            >
-              <TabsList className="w-full bg-white/80 backdrop-blur-sm border border-gray-200 p-1 rounded-md">
-                <TabsTrigger 
-                  value="All" 
-                  className="flex-1 data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
-                >
-                  All Tickets
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="Open"
-                  className="flex-1 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700"
-                >
-                  <Circle className="h-4 w-4 mr-1 text-blue-500" />
-                  Open
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="In Progress"
-                  className="flex-1 data-[state=active]:bg-amber-100 data-[state=active]:text-amber-700"
-                >
-                  <PlayCircle className="h-4 w-4 mr-1 text-amber-500" />
-                  In Progress
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="Resolved"
-                  className="flex-1 data-[state=active]:bg-green-100 data-[state=active]:text-green-700"
-                >
-                  <CheckCircle2 className="h-4 w-4 mr-1 text-green-500" />
-                  Resolved
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </motion.div>
-          
-          {/* Main Content - Bento Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Tickets List */}
-            <motion.div 
-              className="lg:col-span-2"
-              variants={itemVariants}
-            >
-              <Card className="h-full shadow-md hover:shadow-lg transition-shadow duration-300 backdrop-blur-sm bg-white/90">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center">
-                    <Ticket className="mr-2 h-5 w-5 text-primary" />
-                    Support Tickets
-                    <span className="ml-2 px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-                      {filteredTickets.length}
-                    </span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <ScrollArea className="h-[600px] pr-4">
-                    {filteredTickets.length > 0 ? (
-                      <motion.div 
-                        className="space-y-4"
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
+            <div className="grid grid-cols-12 gap-6">
+              {/* Tickets List */}
+              <div className="col-span-5">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="relative mb-2">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Search tickets..."
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                    </div>
+                    <Tabs defaultValue="all" value={currentTab} onValueChange={handleTabChange}>
+                      <TabsList className="w-full">
+                        <TabsTrigger className="flex-1" value="all">
+                          All
+                        </TabsTrigger>
+                        <TabsTrigger className="flex-1" value="open">
+                          Open
+                        </TabsTrigger>
+                        <TabsTrigger className="flex-1" value="pending">
+                          Pending
+                        </TabsTrigger>
+                        <TabsTrigger className="flex-1" value="resolved">
+                          Resolved
+                        </TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="px-4 py-2 border-b bg-muted/50 flex gap-1.5">
+                      <Button
+                        size="sm"
+                        variant={activeFilter === "high-priority" ? "default" : "outline"}
+                        className="h-7 text-xs"
+                        onClick={() => handleFilterChange("high-priority")}
                       >
-                        {filteredTickets.map((ticket) => {
-                          const StatusIcon = statusConfig[ticket.status].icon;
-                          return (
-                            <motion.div 
-                              key={ticket.id}
-                              variants={itemVariants}
-                              whileHover={{ scale: 1.01 }}
-                              className="group bg-white rounded-lg border border-gray-200 p-4 shadow-sm hover:shadow-md transition-all cursor-pointer"
-                              onClick={() => setSelectedTicket(ticket)}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex items-start space-x-3">
-                                  <div className={`p-2 rounded-full ${statusConfig[ticket.status].bg} mt-1`}>
-                                    <StatusIcon className={`h-5 w-5 ${statusConfig[ticket.status].color}`} />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium group-hover:text-primary transition-colors">
-                                      {ticket.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 mt-1 line-clamp-2">
-                                      {ticket.description}
-                                    </p>
-                                    <div className="mt-2 flex items-center text-xs text-gray-500">
-                                      <Clock className="h-3 w-3 mr-1" />
-                                      <span>
-                                        Created {format(ticket.createdAt, "MMM dd, yyyy")}
-                                      </span>
-                                      <span className="mx-2">•</span>
-                                      <span className={`px-2 py-1 rounded-full ${getPriorityClass(ticket.priority)}`}>
-                                        {ticket.priority}
-                                      </span>
-                                      {ticket.comments.length > 0 && (
-                                        <>
-                                          <span className="mx-2">•</span>
-                                          <MessageSquare className="h-3 w-3 mr-1" />
-                                          <span>{ticket.comments.length}</span>
-                                        </>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                                {ticket.assignee ? (
-                                  <div className="flex flex-col items-end">
-                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium">
-                                      {ticket.assignee.name.split(' ').map(n => n[0]).join('')}
-                                    </div>
-                                    <span className="text-xs text-gray-500 mt-1">
-                                      {ticket.assignee.name}
-                                    </span>
-                                  </div>
-                                ) : (
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-xs" 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      assignTicket(ticket.id, mockAgents[Math.floor(Math.random() * mockAgents.length)]);
-                                    }}
-                                  >
-                                    Assign
-                                  </Button>
-                                )}
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </motion.div>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                          <Ticket className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <h3 className="text-lg font-medium text-gray-900">No tickets found</h3>
-                        <p className="text-gray-500 mt-1 max-w-sm">
-                          No tickets match your current filters. Try adjusting your search or create a new ticket.
-                        </p>
-                        <Button 
-                          className="mt-4"
-                          onClick={() => {
-                            setIsDialogOpen(true);
-                          }}
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create New Ticket
-                        </Button>
-                      </div>
-                    )}
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            {/* Ticket Details / Live Feed */}
-            <motion.div variants={itemVariants}>
-              <Card className="h-full shadow-md hover:shadow-lg transition-shadow duration-300 backdrop-blur-sm bg-white/90">
-                <CardHeader className="pb-3">
-                  <CardTitle>
-                    {selectedTicket ? 'Ticket Details' : 'Live Ticket Feed'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  {selectedTicket ? (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="mb-6">
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-lg font-medium">#{selectedTicket.id}: {selectedTicket.title}</h3>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => setSelectedTicket(null)}
-                            className="h-8 w-8 p-0"
+                        High Priority
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={activeFilter === "unassigned" ? "default" : "outline"}
+                        className="h-7 text-xs"
+                        onClick={() => handleFilterChange("unassigned")}
+                      >
+                        Unassigned
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={activeFilter === "recent" ? "default" : "outline"}
+                        className="h-7 text-xs"
+                        onClick={() => handleFilterChange("recent")}
+                      >
+                        Recent
+                      </Button>
+                    </div>
+                    <ScrollArea className="h-[calc(100vh-320px)]">
+                      {filteredTickets.length > 0 ? (
+                        filteredTickets.map(ticket => (
+                          <div
+                            key={ticket.id}
+                            className={`border-b px-4 py-3 cursor-pointer hover:bg-muted/50 flex flex-col gap-2 ${
+                              selectedTicket?.id === ticket.id ? "bg-muted" : ""
+                            }`}
+                            onClick={() => handleTicketSelect(ticket)}
                           >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Close</span>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <div 
+                                  className={`w-2 h-2 rounded-full ${
+                                    ticket.priority === "urgent" ? "bg-red-500" :
+                                    ticket.priority === "high" ? "bg-orange-500" :
+                                    ticket.priority === "medium" ? "bg-yellow-500" :
+                                    "bg-green-500"
+                                  }`}
+                                />
+                                <h3 className="font-medium text-sm truncate">{ticket.subject}</h3>
+                              </div>
+                              <Badge 
+                                variant={
+                                  ticket.status === "open" ? "destructive" :
+                                  ticket.status === "pending" ? "default" :
+                                  ticket.status === "resolved" ? "outline" :
+                                  "secondary"
+                                }
+                                className="text-xs h-5"
+                              >
+                                {ticket.status}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span>#{ticket.id.split('-')[1]}</span>
+                              <span>•</span>
+                              <span>{ticket.customer.name}</span>
+                              <span>•</span>
+                              <span>{ticket.updatedAt.toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {ticket.tags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="text-xs">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-8 text-center text-muted-foreground">
+                          No tickets found matching your criteria
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              {/* Ticket Details */}
+              <div className="col-span-7">
+                {selectedTicket ? (
+                  <Card>
+                    <CardHeader className="pb-3 flex flex-row items-start justify-between">
+                      <div>
+                        <CardTitle>{selectedTicket.subject}</CardTitle>
+                        <CardDescription>
+                          Ticket #{selectedTicket.id.split('-')[1]} • Opened {selectedTicket.createdAt.toLocaleDateString()}
+                        </CardDescription>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          {selectedTicket.tags.map(tag => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          <Badge 
+                            variant={
+                              selectedTicket.priority === "urgent" ? "destructive" :
+                              selectedTicket.priority === "high" ? "default" :
+                              "outline"
+                            }
+                            className="text-xs"
+                          >
+                            {selectedTicket.priority} priority
+                          </Badge>
+                        </div>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Ticket Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>
+                            <MessagesSquare className="h-4 w-4 mr-2" /> Reply
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Phone className="h-4 w-4 mr-2" /> Call Customer
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Users className="h-4 w-4 mr-2" /> Assign
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-500">
+                            <Ban className="h-4 w-4 mr-2" /> Close Ticket
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex items-center justify-between mb-4 p-3 bg-muted/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarFallback>
+                              {selectedTicket.customer.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-medium">{selectedTicket.customer.name}</h4>
+                            <p className="text-sm text-muted-foreground">{selectedTicket.customer.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <UserRound className="h-4 w-4 mr-2" /> View Profile
                           </Button>
                         </div>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className={`px-2 py-1 rounded-full text-xs ${statusConfig[selectedTicket.status].bg} ${statusConfig[selectedTicket.status].color}`}>
-                            {selectedTicket.status}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full text-xs ${getPriorityClass(selectedTicket.priority)}`}>
-                            {selectedTicket.priority}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Created {format(selectedTicket.createdAt, "PPP")}
-                          </span>
+                      </div>
+                      
+                      <div className="border rounded-lg mb-4">
+                        <div className="p-3 border-b bg-muted/50 flex items-center justify-between">
+                          <h3 className="font-medium">Product</h3>
+                          <Badge variant="outline">{selectedTicket.product}</Badge>
                         </div>
-                        <p className="mt-4 text-gray-700">{selectedTicket.description}</p>
-                        
-                        <div className="mt-6">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-medium">Assignee</h4>
-                            {selectedTicket.assignee ? (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" size="sm">Reassign</Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  {mockAgents.map(agent => (
-                                    <DropdownMenuItem 
-                                      key={agent.id}
-                                      onClick={() => {
-                                        if (selectedTicket) {
-                                          assignTicket(selectedTicket.id, agent);
-                                          setSelectedTicket({
-                                            ...selectedTicket,
-                                            assignee: agent,
-                                            updatedAt: new Date()
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      {agent.name}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            ) : (
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button>Assign</Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                  {mockAgents.map(agent => (
-                                    <DropdownMenuItem 
-                                      key={agent.id}
-                                      onClick={() => {
-                                        if (selectedTicket) {
-                                          assignTicket(selectedTicket.id, agent);
-                                          setSelectedTicket({
-                                            ...selectedTicket,
-                                            assignee: agent,
-                                            updatedAt: new Date()
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      {agent.name}
-                                    </DropdownMenuItem>
-                                  ))}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                        <div className="p-3 border-b flex items-center justify-between">
+                          <h3 className="font-medium">Status</h3>
+                          <Select 
+                            value={selectedTicket.status}
+                            onValueChange={(value) => handleStatusChange(
+                              selectedTicket.id, 
+                              value as "open" | "pending" | "resolved" | "closed"
                             )}
-                          </div>
-                          
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="open">Open</SelectItem>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="resolved">Resolved</SelectItem>
+                              <SelectItem value="closed">Closed</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="p-3 border-b flex items-center justify-between">
+                          <h3 className="font-medium">Assignee</h3>
                           {selectedTicket.assignee ? (
-                            <div className="flex items-center gap-3 mt-2 p-3 rounded-lg bg-gray-50">
-                              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium">
-                                {selectedTicket.assignee.name.split(' ').map(n => n[0]).join('')}
-                              </div>
-                              <div>
-                                <p className="font-medium">{selectedTicket.assignee.name}</p>
-                                <p className="text-xs text-gray-500">
-                                  <span className={`inline-block w-2 h-2 rounded-full mr-1 ${selectedTicket.assignee.status === 'online' ? 'bg-green-500' : selectedTicket.assignee.status === 'away' ? 'bg-amber-500' : 'bg-gray-400'}`}></span>
-                                  {selectedTicket.assignee.status.charAt(0).toUpperCase() + selectedTicket.assignee.status.slice(1)}
-                                </p>
-                              </div>
+                            <div className="flex items-center gap-2">
+                              <Avatar className="w-6 h-6">
+                                <AvatarFallback className="text-xs">
+                                  {selectedTicket.assignee.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm">{selectedTicket.assignee.name}</span>
                             </div>
                           ) : (
-                            <p className="text-gray-500 italic mt-2">No agent assigned</p>
+                            <Select onValueChange={(value) => handleAssign(selectedTicket.id, value)}>
+                              <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Assign" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Vikram Sharma">Vikram Sharma</SelectItem>
+                                <SelectItem value="Ananya Patel">Ananya Patel</SelectItem>
+                                <SelectItem value="Rahul Malhotra">Rahul Malhotra</SelectItem>
+                                <SelectItem value="Priya Desai">Priya Desai</SelectItem>
+                              </SelectContent>
+                            </Select>
                           )}
                         </div>
-                        
-                        <div className="mt-6">
-                          <h4 className="font-medium mb-3">Status</h4>
-                          <div className="flex gap-2">
-                            {(["Open", "In Progress", "Resolved"] as TicketStatus[]).map((status) => (
-                              <Button
-                                key={status}
-                                variant={selectedTicket.status === status ? "default" : "outline"}
-                                size="sm"
-                                className={selectedTicket.status === status ? "" : "bg-white"}
-                                onClick={() => {
-                                  if (selectedTicket.status !== status) {
-                                    updateTicketStatus(selectedTicket.id, status);
-                                    setSelectedTicket({
-                                      ...selectedTicket,
-                                      status,
-                                      updatedAt: new Date()
-                                    });
-                                  }
-                                }}
-                              >
-                                {status}
-                              </Button>
-                            ))}
+                        <div className="p-3 flex items-center justify-between">
+                          <h3 className="font-medium">Last Updated</h3>
+                          <div className="flex items-center gap-1 text-sm">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {selectedTicket.updatedAt.toLocaleDateString()} at {selectedTicket.updatedAt.toLocaleTimeString()}
+                            </span>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="border-t border-gray-200 pt-4">
-                        <h4 className="font-medium mb-3">Comments ({selectedTicket.comments.length})</h4>
-                        <ScrollArea className="h-[180px] pr-4 -mr-4">
-                          {selectedTicket.comments.length > 0 ? (
-                            <div className="space-y-4">
-                              {selectedTicket.comments.map((comment) => (
-                                <div key={comment.id} className="p-3 bg-gray-50 rounded-lg">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium">
-                                        {comment.username.split(' ').map(n => n[0]).join('')}
-                                      </div>
-                                      <span className="font-medium text-sm">{comment.username}</span>
-                                    </div>
-                                    <span className="text-xs text-gray-500">
-                                      {format(comment.timestamp, "MMM d, h:mm a")}
-                                    </span>
-                                  </div>
-                                  <p className="text-sm text-gray-700">{comment.content}</p>
+                      <div>
+                        <h3 className="font-medium mb-3">Conversation</h3>
+                        <ScrollArea className="h-[calc(100vh-600px)] pr-4">
+                          {selectedTicket.messages.map((message) => (
+                            <div key={message.id} className="mb-4">
+                              {message.sender.type === "system" ? (
+                                <div className="flex items-center gap-2 py-2 px-3 bg-muted/30 rounded text-xs text-muted-foreground">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  <span>{message.content}</span>
+                                  <span className="text-xs ml-auto">
+                                    {message.timestamp.toLocaleTimeString()}
+                                  </span>
                                 </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <p className="text-gray-500 italic text-sm">No comments yet</p>
-                          )}
-                        </ScrollArea>
-                        
-                        <div className="mt-4">
-                          <Textarea
-                            placeholder="Add a comment..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            className="resize-none"
-                            rows={2}
-                          />
-                          <div className="flex justify-end mt-2">
-                            <Button 
-                              onClick={() => {
-                                if (selectedTicket) {
-                                  addComment(selectedTicket.id);
-                                  // Update selected ticket with new comment
-                                  if (newComment.trim()) {
-                                    const newCommentObj = {
-                                      id: Date.now(),
-                                      userId: 1,
-                                      username: "Alex Johnson",
-                                      content: newComment,
-                                      timestamp: new Date()
-                                    };
-                                    setSelectedTicket({
-                                      ...selectedTicket,
-                                      comments: [...selectedTicket.comments, newCommentObj],
-                                      updatedAt: new Date()
-                                    });
-                                  }
-                                }
-                              }}
-                              disabled={!newComment.trim()}
-                            >
-                              Post Comment
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      className="space-y-4"
-                      variants={containerVariants}
-                      initial="hidden"
-                      animate="visible"
-                    >
-                      <h3 className="text-sm font-medium text-gray-600 mb-2">Recent Activity</h3>
-                      {tickets.slice(0, 5).map((ticket, index) => (
-                        <motion.div 
-                          key={`activity-${ticket.id}`}
-                          variants={itemVariants}
-                          className="p-3 bg-gray-50/80 backdrop-blur-sm rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                          onClick={() => setSelectedTicket(ticket)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className={`p-2 rounded-full ${index % 3 === 0 ? 'bg-blue-100' : index % 3 === 1 ? 'bg-amber-100' : 'bg-green-100'} mt-1`}>
-                              {index % 3 === 0 ? (
-                                <Plus className="h-4 w-4 text-blue-500" />
-                              ) : index % 3 === 1 ? (
-                                <User className="h-4 w-4 text-amber-500" />
                               ) : (
-                                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                                <div className={`flex gap-3 ${message.sender.type === "agent" ? "flex-row-reverse" : ""}`}>
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarFallback className="text-xs">
+                                      {message.sender.name.split(' ').map(n => n[0]).join('')}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className={`flex flex-col max-w-[80%] ${message.sender.type === "agent" ? "items-end" : ""}`}>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-sm font-medium">{message.sender.name}</span>
+                                      <span className="text-xs text-muted-foreground">
+                                        {message.timestamp.toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                    <div className={`rounded-lg p-3 ${
+                                      message.sender.type === "agent" 
+                                        ? "bg-primary text-primary-foreground" 
+                                        : "bg-muted"
+                                    }`}>
+                                      <p className="text-sm">{message.content}</p>
+                                      
+                                      {message.attachments && message.attachments.length > 0 && (
+                                        <div className="mt-2 pt-2 border-t border-primary/20">
+                                          <p className="text-xs mb-1">Attachments:</p>
+                                          <div className="space-y-1">
+                                            {message.attachments.map((attachment, i) => (
+                                              <div 
+                                                key={i}
+                                                className="flex items-center gap-1 text-xs p-1.5 rounded bg-primary/10"
+                                              >
+                                                <Paperclip className="h-3 w-3" />
+                                                <span>{attachment.name}</span>
+                                                <span className="ml-auto">{attachment.size}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
                               )}
                             </div>
-                            <div>
-                              <p className="text-sm">
-                                <span className="font-medium">
-                                  {index % 3 === 0
-                                    ? 'New ticket created'
-                                    : index % 3 === 1
-                                    ? ticket.assignee ? `Assigned to ${ticket.assignee.name}` : 'Awaiting assignment'
-                                    : `Status changed to ${ticket.status}`}
-                                </span>
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1">Ticket #{ticket.id}: {ticket.title}</p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {format(ticket.updatedAt, "MMM d, h:mm a")}
-                              </p>
-                            </div>
+                          ))}
+                        </ScrollArea>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex flex-col">
+                      <div className="relative w-full">
+                        <div className="absolute bottom-full left-0 right-0 p-2 flex gap-1.5">
+                          <Button size="sm" variant="outline" className="h-7 text-xs">
+                            <Check className="h-3 w-3 mr-1" /> Resolve
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs">
+                            <Clock className="h-3 w-3 mr-1" /> Pending
+                          </Button>
+                          <Button size="sm" variant="outline" className="h-7 text-xs">
+                            <X className="h-3 w-3 mr-1" /> Close
+                          </Button>
+                        </div>
+                        <textarea
+                          className="w-full p-3 border rounded-lg resize-none focus:outline-none focus:ring-1 focus:ring-primary min-h-[100px]"
+                          placeholder="Type your reply here..."
+                        />
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex gap-1.5">
+                            <Button size="sm" variant="outline" className="h-7">
+                              <Paperclip className="h-3 w-3 mr-1" /> Attach
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7">
+                              <AlignLeft className="h-3 w-3 mr-1" /> Templates
+                            </Button>
                           </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            {/* Stats Card */}
-            <motion.div variants={itemVariants} className="md:col-span-2 lg:col-span-3">
-              <Card className="shadow-md hover:shadow-lg transition-shadow duration-300 backdrop-blur-sm bg-white/90">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Ticket Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-500 rounded-full text-white">
-                          <Circle className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-blue-600 font-medium">Open Tickets</p>
-                          <p className="text-2xl font-bold text-blue-700">
-                            {tickets.filter(t => t.status === "Open").length}
-                          </p>
+                          <Button size="sm">
+                            Send Reply
+                          </Button>
                         </div>
                       </div>
-                      <div className="mt-2">
-                        <div className="h-2 bg-blue-200 rounded-full">
-                          <div 
-                            className="h-2 bg-blue-500 rounded-full" 
-                            style={{ width: `${(tickets.filter(t => t.status === "Open").length / tickets.length) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-4 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-amber-500 rounded-full text-white">
-                          <PlayCircle className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-amber-600 font-medium">In Progress</p>
-                          <p className="text-2xl font-bold text-amber-700">
-                            {tickets.filter(t => t.status === "In Progress").length}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <div className="h-2 bg-amber-200 rounded-full">
-                          <div 
-                            className="h-2 bg-amber-500 rounded-full" 
-                            style={{ width: `${(tickets.filter(t => t.status === "In Progress").length / tickets.length) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="p-3 bg-green-500 rounded-full text-white">
-                          <CheckCircle2 className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-green-600 font-medium">Resolved</p>
-                          <p className="text-2xl font-bold text-green-700">
-                            {tickets.filter(t => t.status === "Resolved").length}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-2">
-                        <div className="h-2 bg-green-200 rounded-full">
-                          <div 
-                            className="h-2 bg-green-500 rounded-full" 
-                            style={{ width: `${(tickets.filter(t => t.status === "Resolved").length / tickets.length) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <div className="w-full flex items-center justify-between text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <Checkbox id="autoRefresh" />
-                      <label htmlFor="autoRefresh">Auto-refresh</label>
-                    </div>
-                    <p>Last updated: {format(new Date(), "MMM d, h:mm a")}</p>
-                  </div>
-                </CardFooter>
-              </Card>
-            </motion.div>
+                    </CardFooter>
+                  </Card>
+                ) : (
+                  <Card className="h-full flex items-center justify-center">
+                    <CardContent className="text-center">
+                      <Menu className="h-10 w-10 text-muted-foreground mb-4 mx-auto" />
+                      <h3 className="text-lg font-medium mb-1">No ticket selected</h3>
+                      <p className="text-muted-foreground">Select a ticket from the list to view its details</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </div>
-        </motion.div>
-      </main>
+        </div>
+      </div>
     </div>
   );
 };
