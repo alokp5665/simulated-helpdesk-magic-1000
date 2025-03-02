@@ -630,7 +630,7 @@ const EmailPage = () => {
                 </CardHeader>
                 
                 <div className="grid grid-cols-12 h-[calc(100vh-13rem)]">
-                  <div className="col-span-12 md:col-span-5 border-r">
+                  <div className="col-span-12 md:col-span-5 border-r overflow-hidden">
                     <ScrollArea className="h-full">
                       <AnimatePresence initial={false}>
                         {filteredEmails.length > 0 ? (
@@ -731,7 +731,7 @@ const EmailPage = () => {
                     </ScrollArea>
                   </div>
                   
-                  <div className="col-span-12 md:col-span-7">
+                  <div className="col-span-12 md:col-span-7 overflow-hidden">
                     {selectedEmail ? (
                       <motion.div 
                         className="h-full flex flex-col"
@@ -825,125 +825,49 @@ const EmailPage = () => {
                           </div>
                         </div>
                         
-                        <ScrollArea className="flex-1 p-4">
-                          <div className="prose prose-sm max-w-none">
-                            {selectedEmail.content.split("\n").map((line, i) => (
-                              <p key={i} className="my-2">{line}</p>
-                            ))}
-                          </div>
-                          
-                          {selectedEmail.attachments && (
-                            <div className="mt-6">
-                              <h3 className="text-sm font-medium mb-2">
-                                Attachments ({selectedEmail.attachments.length})
-                              </h3>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {selectedEmail.attachments.map((attachment) => (
-                                  <div
-                                    key={attachment.name}
-                                    className="flex items-center gap-2 p-3 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors group"
-                                  >
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-medium truncate">
-                                        {attachment.name}
-                                      </div>
-                                      <div className="text-xs text-gray-500">
-                                        {attachment.size}
-                                      </div>
-                                    </div>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="icon"
-                                      className="opacity-50 group-hover:opacity-100 transition-opacity"
-                                    >
-                                      <Download className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
+                        <ScrollArea className="flex-1">
+                          <div className="p-4">
+                            <div className="prose prose-sm max-w-none">
+                              {selectedEmail.content.split("\n").map((line, i) => (
+                                <p key={i} className="my-2">{line}</p>
+                              ))}
                             </div>
-                          )}
+                            
+                            {selectedEmail.attachments && (
+                              <div className="mt-6">
+                                <h3 className="text-sm font-medium mb-2">
+                                  Attachments ({selectedEmail.attachments.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                  {selectedEmail.attachments.map((attachment) => (
+                                    <div
+                                      key={attachment.name}
+                                      className="flex items-center gap-2 p-3 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors group"
+                                    >
+                                      <div className="flex-1 min-w-0">
+                                        <div className="text-sm font-medium truncate">
+                                          {attachment.name}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {attachment.size}
+                                        </div>
+                                      </div>
+                                      <Button 
+                                        variant="ghost" 
+                                        size="icon"
+                                        className="opacity-50 group-hover:opacity-100 transition-opacity"
+                                      >
+                                        <Download className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </ScrollArea>
                         
                         <div className="p-4 border-t">
                           <div className="flex items-center gap-2">
                             <Button
-                              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-                              onClick={() => setIsReplyOpen(true)}
-                            >
-                              <Reply className="mr-2 h-4 w-4" />
-                              Reply
-                            </Button>
-                            <Button variant="outline">
-                              <Forward className="mr-2 h-4 w-4" />
-                              Forward
-                            </Button>
-                            {selectedEmail.status !== "resolved" && (
-                              <Button 
-                                variant="outline"
-                                className="ml-2 border-green-200 text-green-700 hover:bg-green-50"
-                                onClick={() => handleEmailAction("mark_resolved", selectedEmail)}
-                              >
-                                <CheckCircle2 className="mr-2 h-4 w-4" />
-                                Mark as Resolved
-                              </Button>
-                            )}
-                            <div className="ml-auto">
-                              <Button variant="ghost" size="icon">
-                                <Printer className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div 
-                        className="h-full flex items-center justify-center flex-col text-center p-6"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <div className="w-16 h-16 mb-4 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
-                          <Mail className="h-8 w-8 text-purple-500" />
-                        </div>
-                        <h3 className="text-xl font-medium text-gray-900">Select an email to view</h3>
-                        <p className="text-gray-500 mt-2 max-w-md">
-                          Choose an email from the list to view its content here, or compose a new email to get started.
-                        </p>
-                        <Button 
-                          className="mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
-                          onClick={() => setIsComposeOpen(true)}
-                        >
-                          <Plus className="mr-2 h-4 w-4" />
-                          Compose New Email
-                        </Button>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
-      </main>
-      
-      <ComposeEmail 
-        isOpen={isComposeOpen} 
-        onClose={() => setIsComposeOpen(false)} 
-        onSend={handleComposeEmail}
-      />
-      
-      <ReplyEmail 
-        isOpen={isReplyOpen}
-        onClose={() => setIsReplyOpen(false)}
-        email={selectedEmail}
-        onSend={handleReplyEmail}
-      />
-    </div>
-  );
-};
-
-export default EmailPage;
+                              className
