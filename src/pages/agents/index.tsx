@@ -504,7 +504,7 @@ const AgentsPage = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <TabsContent value="weekly" className="mt-0">
+                    {performanceTab === "weekly" && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {agents.slice(0, 3).map((agent, index) => (
                           <Card key={agent.id} className="border bg-card/50">
@@ -548,9 +548,9 @@ const AgentsPage = () => {
                           </Card>
                         ))}
                       </div>
-                    </TabsContent>
+                    )}
                     
-                    <TabsContent value="monthly" className="mt-0">
+                    {performanceTab === "monthly" && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {agents.slice(3, 6).map((agent, index) => (
                           <Card key={agent.id} className="border bg-card/50">
@@ -594,9 +594,9 @@ const AgentsPage = () => {
                           </Card>
                         ))}
                       </div>
-                    </TabsContent>
+                    )}
                     
-                    <TabsContent value="yearly" className="mt-0">
+                    {performanceTab === "yearly" && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {agents.slice(6, 9).map((agent, index) => (
                           <Card key={agent.id} className="border bg-card/50">
@@ -640,7 +640,7 @@ const AgentsPage = () => {
                           </Card>
                         ))}
                       </div>
-                    </TabsContent>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -854,7 +854,7 @@ const AgentsPage = () => {
                             </span>
                             <div className="p-3 bg-card/50 border rounded-md">
                               <div className="flex items-center gap-2">
-                                <h3 className="text-sm font-medium">{activity.agent}</h3>
+                                <h3 className="font-medium">{activity.agent}</h3>
                                 <span className="text-xs text-muted-foreground">
                                   {activity.timestamp.toLocaleTimeString([], {
                                     hour: '2-digit',
