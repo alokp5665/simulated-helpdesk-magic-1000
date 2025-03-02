@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -56,6 +56,18 @@ const SettingsPage = () => {
     lms: true,
   });
 
+  // Load saved data from localStorage when component mounts
+  useEffect(() => {
+    const savedData = localStorage.getItem('userData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setFormData(prevData => ({
+        ...prevData,
+        ...parsedData
+      }));
+    }
+  }, []);
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -96,7 +108,7 @@ const SettingsPage = () => {
     }
 
     if (isValid) {
-      // Save profile data (in a real app, this would be an API call)
+      // Save profile data to localStorage for persistence
       localStorage.setItem('userData', JSON.stringify(formData));
       
       toast.success("Profile Updated Successfully", {

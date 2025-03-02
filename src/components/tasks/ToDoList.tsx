@@ -59,44 +59,51 @@ const SAMPLE_TASKS = [
 export const ToDoList = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Initial data load with loading simulation
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
-
-    // Simulate random tasks being added
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7 && tasks.length < 8) {
-        const randomTaskIndex = Math.floor(Math.random() * SAMPLE_TASKS.length);
-        const randomTask = SAMPLE_TASKS[randomTaskIndex];
-        
-        const subTasks = randomTask.subTasks.map(title => ({
-          id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-          title,
-          completed: Math.random() > 0.5
-        }));
-        
-        const newTask = {
-          id: Date.now().toString(),
-          title: randomTask.title,
-          completed: false,
-          subTasks
-        };
-        
-        setTasks(prev => [...prev, newTask]);
-        toast.success("New task added");
-      }
-    }, 5000);
-
+    // Initialize with 3 sample tasks immediately
+    const initialTasks = SAMPLE_TASKS.slice(0, 3).map(task => {
+      const subTasks = task.subTasks.map(title => ({
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        title,
+        completed: Math.random() > 0.5
+      }));
+      
+      return {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        title: task.title,
+        completed: false,
+        subTasks
+      };
+    });
+    
+    setTasks(initialTasks);
+    
+    // Add one more task after a short delay
+    const timeout = setTimeout(() => {
+      const randomIndex = Math.floor(Math.random() * SAMPLE_TASKS.length);
+      const randomTask = SAMPLE_TASKS[randomIndex];
+      
+      const subTasks = randomTask.subTasks.map(title => ({
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        title,
+        completed: Math.random() > 0.5
+      }));
+      
+      const newTask = {
+        id: Date.now().toString(),
+        title: randomTask.title,
+        completed: false,
+        subTasks
+      };
+      
+      setTasks(prev => [...prev, newTask]);
+    }, 1000);
+    
     return () => {
-      clearInterval(interval);
-      clearTimeout(timer);
+      clearTimeout(timeout);
     };
-  }, [tasks]);
+  }, []);
 
   const addTask = (title: string) => {
     if (title.trim()) {
@@ -163,76 +170,67 @@ export const ToDoList = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center items-center h-40 flex-col space-y-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-            <p className="text-muted-foreground text-sm">Loading tasks...</p>
-          </div>
-        ) : (
-          <>
-            <div className="flex space-x-2 mb-4">
-              <Input
-                placeholder="Add a new task..."
-                value={newTask}
-                onChange={e => setNewTask(e.target.value)}
-                onKeyPress={e => e.key === "Enter" && addTask(newTask)}
-                className="bg-white/50 backdrop-blur-sm border border-white/10"
-              />
-              <Button onClick={() => addTask(newTask)}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className="space-y-4">
-              {tasks.map(task => (
-                <div
-                  key={task.id}
-                  className="bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-sm transition-all hover:shadow-md group"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        checked={task.completed}
-                        onClick={() => toggleTask(task.id)}
-                      />
-                      <span className={task.completed ? "line-through text-muted-foreground" : "font-medium"}>
-                        {task.title}
-                      </span>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => deleteTask(task.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {task.subTasks && task.subTasks.length > 0 && (
-                    <div className="ml-6 mt-2 space-y-3">
-                      <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
-                        <span>Progress: {task.subTasks.filter(st => st.completed).length}/{task.subTasks.length} Subtasks</span>
-                        <span>{getTaskProgress(task)}%</span>
-                      </div>
-                      <Progress value={getTaskProgress(task)} className="h-2" />
-                      
-                      <div className="space-y-1 pt-1 max-h-[100px] overflow-y-auto scrollbar-thin">
-                        {task.subTasks.map(subTask => (
-                          <div key={subTask.id} className="flex items-center space-x-2 text-sm">
-                            <Checkbox 
-                              checked={subTask.completed}
-                              onClick={() => toggleSubTask(task.id, subTask.id)}
-                              className="h-3 w-3"
-                            />
-                            <span className={subTask.completed ? "line-through text-muted-foreground text-xs" : "text-xs"}>
-                              {subTask.title}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+        <div className="flex space-x-2 mb-4">
+          <Input
+            placeholder="Add a new task..."
+            value={newTask}
+            onChange={e => setNewTask(e.target.value)}
+            onKeyPress={e => e.key === "Enter" && addTask(newTask)}
+            className="bg-white/50 backdrop-blur-sm border border-white/10"
+          />
+          <Button onClick={() => addTask(newTask)}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin">
+          {tasks.map(task => (
+            <div
+              key={task.id}
+              className="bg-white/40 backdrop-blur-md rounded-lg p-4 shadow-sm transition-all hover:shadow-md group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    checked={task.completed}
+                    onClick={() => toggleTask(task.id)}
+                  />
+                  <span className={task.completed ? "line-through text-muted-foreground" : "font-medium"}>
+                    {task.title}
+                  </span>
                 </div>
-              ))}
+                <Button variant="ghost" size="icon" onClick={() => deleteTask(task.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              {task.subTasks && task.subTasks.length > 0 && (
+                <div className="ml-6 mt-2 space-y-3">
+                  <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
+                    <span>Progress: {task.subTasks.filter(st => st.completed).length}/{task.subTasks.length} Subtasks</span>
+                    <span>{getTaskProgress(task)}%</span>
+                  </div>
+                  <Progress value={getTaskProgress(task)} className="h-2" />
+                  
+                  <div className="space-y-1 pt-1 max-h-[100px] overflow-y-auto scrollbar-thin">
+                    {task.subTasks.map(subTask => (
+                      <div key={subTask.id} className="flex items-center space-x-2 text-sm">
+                        <Checkbox 
+                          checked={subTask.completed}
+                          onClick={() => toggleSubTask(task.id, subTask.id)}
+                          className="h-3 w-3"
+                        />
+                        <span className={subTask.completed ? "line-through text-muted-foreground text-xs" : "text-xs"}>
+                          {subTask.title}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </>
-        )}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
