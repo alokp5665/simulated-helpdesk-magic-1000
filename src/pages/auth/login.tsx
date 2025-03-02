@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ArrowRight, Github, Twitter, User, Users } from "lucide-react";
+import { Shield, ArrowRight, Github, Twitter, User, Users, Eye, EyeOff } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -26,6 +26,7 @@ const LoginPage = () => {
   const [resetMode, setResetMode] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [resetSent, setResetSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
     email: "",
     password: "",
@@ -128,6 +129,10 @@ const LoginPage = () => {
         description: "Please check your email inbox",
       });
     }, 1500);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   if (resetMode) {
@@ -267,16 +272,29 @@ const LoginPage = () => {
                     Forgot password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full pr-10 ${
+                      errors.password ? "border-red-500" : ""
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-300 hover:text-white"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className="text-red-400 text-xs mt-1">{errors.password}</p>
                 )}

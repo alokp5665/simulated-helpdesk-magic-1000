@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, ArrowRight, Github, Twitter, Users } from "lucide-react";
+import { Shield, ArrowRight, Github, Twitter, Users, Eye, EyeOff } from "lucide-react";
 import { 
   Select,
   SelectContent,
@@ -25,6 +25,8 @@ const SignupPage = () => {
   const [selectedRole, setSelectedRole] = useState("Admin");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({
     name: "",
     company: "",
@@ -37,6 +39,14 @@ const SignupPage = () => {
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const handleSignup = (e: React.FormEvent) => {
@@ -237,16 +247,29 @@ const SignupPage = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-indigo-200 mb-1">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full pr-10 ${
+                      errors.password ? "border-red-500" : ""
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-300 hover:text-white"
+                    onClick={togglePasswordVisibility}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.password ? (
                   <p className="text-red-400 text-xs mt-1">{errors.password}</p>
                 ) : (
@@ -260,16 +283,29 @@ const SignupPage = () => {
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-indigo-200 mb-1">
                   Confirm Password
                 </label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full ${
-                    errors.confirmPassword ? "border-red-500" : ""
-                  }`}
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={`bg-white/5 border-white/10 text-white placeholder:text-indigo-300/50 w-full pr-10 ${
+                      errors.confirmPassword ? "border-red-500" : ""
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-indigo-300 hover:text-white"
+                    onClick={toggleConfirmPasswordVisibility}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-5 w-5" />
+                    ) : (
+                      <Eye className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
                 {errors.confirmPassword && (
                   <p className="text-red-400 text-xs mt-1">{errors.confirmPassword}</p>
                 )}
