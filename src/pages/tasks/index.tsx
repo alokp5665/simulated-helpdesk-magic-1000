@@ -17,6 +17,53 @@ const TasksPage = () => {
     upcomingDeadlines: 5
   });
 
+  // Add a custom styling for scrollbars
+  useEffect(() => {
+    // Add CSS for custom scrollbars
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(241, 242, 243, 0.5);
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(107, 114, 128, 0.7);
+      }
+      
+      /* Make a special style for the holiday dates */
+      .holiday-date {
+        position: relative;
+      }
+      .holiday-date::after {
+        content: '';
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        background-color: #e11d48;
+        border-radius: 50%;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Set a shorter timeout for the KanbanBoard simulation
+    window.KanbanSimulationTimeout = 2000; // 2 seconds for Kanban simulation
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Animation classes for Bento grid items
   const bentoItemClasses = "animate-fade-in transition-all duration-500 hover:shadow-lg hover:translate-y-[-2px]";
 

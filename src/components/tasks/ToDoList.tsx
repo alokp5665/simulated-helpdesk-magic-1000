@@ -59,9 +59,11 @@ const SAMPLE_TASKS = [
 export const ToDoList = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState("");
+  const [newSubTask, setNewSubTask] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Initialize with 3 sample tasks immediately
+    // Initialize with 3 sample tasks immediately - no loading delay
     const initialTasks = SAMPLE_TASKS.slice(0, 3).map(task => {
       const subTasks = task.subTasks.map(title => ({
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
@@ -79,8 +81,8 @@ export const ToDoList = () => {
     
     setTasks(initialTasks);
     
-    // Add one more task after a short delay
-    const timeout = setTimeout(() => {
+    // Add one more task but with minimal delay
+    setTimeout(() => {
       const randomIndex = Math.floor(Math.random() * SAMPLE_TASKS.length);
       const randomTask = SAMPLE_TASKS[randomIndex];
       
@@ -98,11 +100,7 @@ export const ToDoList = () => {
       };
       
       setTasks(prev => [...prev, newTask]);
-    }, 1000);
-    
-    return () => {
-      clearTimeout(timeout);
-    };
+    }, 200); // Reduced to 200ms
   }, []);
 
   const addTask = (title: string) => {
@@ -111,15 +109,34 @@ export const ToDoList = () => {
         id: Date.now().toString(),
         title: title.trim(),
         completed: false,
-        subTasks: [
-          { id: "st1" + Date.now().toString(), title: "Initial planning", completed: false },
-          { id: "st2" + Date.now().toString(), title: "Implementation", completed: false },
-          { id: "st3" + Date.now().toString(), title: "Review", completed: false }
-        ]
+        subTasks: []
       };
       setTasks(prev => [...prev, newTask]);
       setNewTask("");
       toast.success("New task added");
+    }
+  };
+
+  const addSubTask = (taskId: string, title: string) => {
+    if (title.trim()) {
+      const newSubTask = {
+        id: Date.now().toString(),
+        title: title.trim(),
+        completed: false
+      };
+      
+      setTasks(prev =>
+        prev.map(task =>
+          task.id === taskId ? {
+            ...task,
+            subTasks: [...(task.subTasks || []), newSubTask]
+          } : task
+        )
+      );
+      
+      setNewSubTask("");
+      setEditingTaskId(null);
+      toast.success("New subtask added");
     }
   };
 
@@ -183,7 +200,7 @@ export const ToDoList = () => {
           </Button>
         </div>
         
-        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin">
+        <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin custom-scrollbar">
           {tasks.map(task => (
             <div
               key={task.id}
@@ -227,6 +244,36 @@ export const ToDoList = () => {
                     ))}
                   </div>
                 </div>
+              )}
+              
+              {/* Add subtask input */}
+              {editingTaskId === task.id ? (
+                <div className="ml-6 mt-3 flex space-x-2">
+                  <Input
+                    placeholder="Add subtask..."
+                    value={newSubTask}
+                    onChange={e => setNewSubTask(e.target.value)}
+                    onKeyPress={e => e.key === "Enter" && addSubTask(task.id, newSubTask)}
+                    className="bg-white/50 text-xs h-7 px-2"
+                    size={30}
+                  />
+                  <Button 
+                    onClick={() => addSubTask(task.id, newSubTask)} 
+                    size="sm" 
+                    className="h-7 px-2"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setEditingTaskId(task.id)}
+                  className="text-xs ml-6 mt-1 h-6 px-2"
+                >
+                  Add subtask
+                </Button>
               )}
             </div>
           ))}
