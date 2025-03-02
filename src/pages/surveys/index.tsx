@@ -373,6 +373,14 @@ const SurveysPage = () => {
       description: "Your new survey has been created and is ready to be sent."
     });
   };
+  
+  // Handle downloading report
+  const handleDownloadReport = () => {
+    toast({
+      title: "Report Download Successful",
+      description: "Your report has been downloaded successfully."
+    });
+  };
 
   // Calculate overall statistics
   const totalResponses = surveys.reduce((total, survey) => total + survey.responses.length, 0);
@@ -784,11 +792,8 @@ const SurveysPage = () => {
                   </div>
                 )}
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" size="sm">
-                  View All Agents
-                </Button>
-                <Button variant="outline" size="sm">
+              <CardFooter className="flex justify-end">
+                <Button variant="outline" size="sm" onClick={handleDownloadReport}>
                   Download Report
                 </Button>
               </CardFooter>
@@ -897,7 +902,7 @@ const SurveysPage = () => {
                 </ScrollArea>
               </CardContent>
               <CardFooter className="border-t pt-4">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleCreateSurvey}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Survey
                 </Button>
