@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -16,6 +15,12 @@ interface KanbanTask {
   progress: number;
   deadline?: string;
   subtasks?: { id: string; title: string; completed: boolean }[];
+}
+
+interface KanbanColumns {
+  todo: KanbanTask[];
+  inProgress: KanbanTask[];
+  done: KanbanTask[];
 }
 
 // Pre-defined tasks for simulation
@@ -38,7 +43,7 @@ const SAMPLE_TASKS = [
 ];
 
 // Pre-filled tasks
-const INITIAL_TASKS: Record<string, KanbanTask[]> = {
+const INITIAL_TASKS: KanbanColumns = {
   todo: [
     {
       id: "task-1",
@@ -144,26 +149,19 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
 };
 
 export const KanbanBoard = () => {
-  const [columns, setColumns] = useState<{
-    todo: KanbanTask[];
-    inProgress: KanbanTask[];
-    done: KanbanTask[];
-  }>(INITIAL_TASKS);
+  const [columns, setColumns] = useState<KanbanColumns>(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Simulated loading state
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 2000);
     
-    // Simulate random task movement
     const interval = setInterval(() => {
       const randomAction = Math.random();
       
       if (randomAction > 0.7) {
-        // Add new task
         const randomTaskIndex = Math.floor(Math.random() * SAMPLE_TASKS.length);
         const randomTaskObj = SAMPLE_TASKS[randomTaskIndex];
         const subtasks = getRandomSubtasks(randomTaskObj.subtasks || []);
@@ -188,7 +186,6 @@ export const KanbanBoard = () => {
           icon: <ListTodo className="h-4 w-4" />
         });
       } else if (columns.todo.length > 0 && randomAction > 0.4) {
-        // Move task to in progress
         const taskToMove = columns.todo[0];
         setColumns(prev => ({
           ...prev,
@@ -200,10 +197,8 @@ export const KanbanBoard = () => {
           icon: <Timer className="h-4 w-4" />
         });
       } else if (columns.inProgress.length > 0 && randomAction <= 0.4) {
-        // Complete task
         const taskToComplete = columns.inProgress[0];
         
-        // Update all subtasks to completed
         const updatedSubtasks = taskToComplete.subtasks?.map(st => ({
           ...st,
           completed: true
@@ -224,7 +219,7 @@ export const KanbanBoard = () => {
           icon: <CheckCircle2 className="h-4 w-4" />
         });
       }
-    }, 8000); // Changed to 8 seconds from 2 seconds as requested
+    }, 8000);
 
     return () => {
       clearInterval(interval);
@@ -237,7 +232,6 @@ export const KanbanBoard = () => {
 
     const { source, destination } = result;
     
-    // Animation for task movement
     const animateTaskMovement = (task: KanbanTask, newStatus: "todo" | "inProgress" | "done") => {
       let statusMessage = "";
       let icon = <ListTodo className="h-4 w-4" />;
@@ -259,30 +253,29 @@ export const KanbanBoard = () => {
     };
     
     if (source.droppableId === destination.droppableId) {
-      const column = columns[source.droppableId as keyof typeof columns];
-      const copiedTasks = [...column];
-      const [removed] = copiedTasks.splice(source.index, 1);
-      copiedTasks.splice(destination.index, 0, removed);
+      const sourceKey = source.droppableId as keyof KanbanColumns;
+      const column = [...columns[sourceKey]];
+      const [removed] = column.splice(source.index, 1);
+      column.splice(destination.index, 0, removed);
       
       setColumns({
         ...columns,
-        [source.droppableId]: copiedTasks
+        [sourceKey]: column
       });
     } else {
-      const sourceColumn = columns[source.droppableId as keyof typeof columns];
-      const destColumn = columns[destination.droppableId as keyof typeof columns];
-      const copiedSourceTasks = [...sourceColumn];
-      const copiedDestTasks = [...destColumn];
-      const [removed] = copiedSourceTasks.splice(source.index, 1);
+      const sourceKey = source.droppableId as keyof KanbanColumns;
+      const destKey = destination.droppableId as keyof KanbanColumns;
       
-      // Update task status and potentially update progress
+      const sourceColumn = [...columns[sourceKey]];
+      const destColumn = [...columns[destKey]];
+      const [removed] = sourceColumn.splice(source.index, 1);
+      
       const updatedTask = {
         ...removed,
-        status: destination.droppableId as KanbanTask["status"]
+        status: destKey
       };
       
-      // If moved to done, set progress to 100%
-      if (destination.droppableId === "done") {
+      if (destKey === "done") {
         updatedTask.progress = 100;
         updatedTask.subtasks = updatedTask.subtasks?.map(st => ({
           ...st,
@@ -290,15 +283,14 @@ export const KanbanBoard = () => {
         }));
       }
       
-      copiedDestTasks.splice(destination.index, 0, updatedTask);
+      destColumn.splice(destination.index, 0, updatedTask);
       
       setColumns({
         ...columns,
-        [source.droppableId]: copiedSourceTasks,
-        [destination.droppableId]: copiedDestTasks
+        [sourceKey]: sourceColumn,
+        [destKey]: destColumn
       });
       
-      // Animate and notify the task movement
       animateTaskMovement(updatedTask, updatedTask.status);
     }
   };
@@ -368,7 +360,6 @@ export const KanbanBoard = () => {
       <CardContent>
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* To Do Column */}
             <div className="bg-yellow-500/5 rounded-lg p-4 transition-all">
               <ColumnHeader 
                 icon={ListTodo} 
@@ -427,7 +418,6 @@ export const KanbanBoard = () => {
               </Droppable>
             </div>
 
-            {/* In Progress Column */}
             <div className="bg-blue-500/5 rounded-lg p-4 transition-all">
               <ColumnHeader 
                 icon={Timer} 
@@ -486,7 +476,6 @@ export const KanbanBoard = () => {
               </Droppable>
             </div>
 
-            {/* Done Column */}
             <div className="bg-green-500/5 rounded-lg p-4 transition-all">
               <ColumnHeader 
                 icon={CheckCircle2} 
