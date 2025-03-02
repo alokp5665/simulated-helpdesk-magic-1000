@@ -57,8 +57,116 @@ const SAMPLE_TASKS = [
     content: "Write progress reports",
     priority: "high",
     subtasks: ["Gather achievement data", "Assess performance", "Draft individualized comments"]
+  },
+  // New sample tasks for simulation
+  {
+    content: "Review Customer Survey Results",
+    priority: "medium",
+    subtasks: ["Analyze data", "Identify trends", "Prepare report"]
+  },
+  {
+    content: "Schedule Social Media Post",
+    priority: "low",
+    subtasks: ["Create content", "Select images", "Set publishing schedule"]
+  },
+  {
+    content: "Update Agent Training Materials",
+    priority: "high",
+    subtasks: ["Review current materials", "Update procedures", "Create new examples"]
   }
 ];
+
+// Pre-filled tasks for each column
+const INITIAL_TASKS = {
+  todo: [
+    {
+      id: "initial-todo-1",
+      content: "Update Knowledge Base Article",
+      status: "todo" as const,
+      priority: "medium" as const,
+      progress: 0,
+      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toLocaleDateString(),
+      subtasks: [
+        { id: "st-1-1", title: "Research latest information", completed: false },
+        { id: "st-1-2", title: "Draft new content", completed: false },
+        { id: "st-1-3", title: "Review with team", completed: false }
+      ]
+    },
+    {
+      id: "initial-todo-2",
+      content: "Respond to Customer Feedback",
+      status: "todo" as const,
+      priority: "high" as const,
+      progress: 0,
+      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1).toLocaleDateString(),
+      subtasks: [
+        { id: "st-2-1", title: "Analyze feedback", completed: false },
+        { id: "st-2-2", title: "Prepare responses", completed: false },
+        { id: "st-2-3", title: "Follow up with customers", completed: false }
+      ]
+    }
+  ],
+  inProgress: [
+    {
+      id: "initial-progress-1",
+      content: "Fix Login Issue on Mobile App",
+      status: "inProgress" as const,
+      priority: "high" as const,
+      progress: 60,
+      deadline: new Date(Date.now() + 1000 * 60 * 60 * 12).toLocaleDateString(),
+      subtasks: [
+        { id: "st-3-1", title: "Reproduce the issue", completed: true },
+        { id: "st-3-2", title: "Debug authentication flow", completed: true },
+        { id: "st-3-3", title: "Implement fix", completed: false },
+        { id: "st-3-4", title: "Test on all devices", completed: false }
+      ]
+    },
+    {
+      id: "initial-progress-2",
+      content: "Create New Dashboard Widget",
+      status: "inProgress" as const,
+      priority: "medium" as const,
+      progress: 35,
+      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
+      subtasks: [
+        { id: "st-4-1", title: "Design widget layout", completed: true },
+        { id: "st-4-2", title: "Implement frontend", completed: false },
+        { id: "st-4-3", title: "Connect data sources", completed: false },
+        { id: "st-4-4", title: "Add interactivity", completed: false }
+      ]
+    }
+  ],
+  done: [
+    {
+      id: "initial-done-1",
+      content: "Resolve Ticket #1234",
+      status: "done" as const,
+      priority: "high" as const,
+      progress: 100,
+      deadline: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toLocaleDateString(),
+      subtasks: [
+        { id: "st-5-1", title: "Analyze issue", completed: true },
+        { id: "st-5-2", title: "Communicate with customer", completed: true },
+        { id: "st-5-3", title: "Resolve problem", completed: true },
+        { id: "st-5-4", title: "Document solution", completed: true }
+      ]
+    },
+    {
+      id: "initial-done-2",
+      content: "Deploy New Feature Update",
+      status: "done" as const,
+      priority: "medium" as const,
+      progress: 100,
+      deadline: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toLocaleDateString(),
+      subtasks: [
+        { id: "st-6-1", title: "Finalize code", completed: true },
+        { id: "st-6-2", title: "Run tests", completed: true },
+        { id: "st-6-3", title: "Deploy to production", completed: true },
+        { id: "st-6-4", title: "Monitor performance", completed: true }
+      ]
+    }
+  ]
+};
 
 const getRandomSubtasks = (subtasks: string[]) => {
   return subtasks.map((title, index) => ({
@@ -75,11 +183,7 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
 };
 
 export const KanbanBoard = () => {
-  const [columns, setColumns] = useState({
-    todo: [] as KanbanTask[],
-    inProgress: [] as KanbanTask[],
-    done: [] as KanbanTask[]
-  });
+  const [columns, setColumns] = useState(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -87,7 +191,10 @@ export const KanbanBoard = () => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 5000);
+    }, 2000);
+    
+    // Get simulation timeout value from window or use default 2 seconds
+    const simulationTimeout = window.KanbanSimulationTimeout || 2000;
     
     // Simulate random task movement
     const interval = setInterval(() => {
@@ -154,7 +261,7 @@ export const KanbanBoard = () => {
           icon: <CheckCircle2 className="h-4 w-4" />
         });
       }
-    }, 8000);
+    }, simulationTimeout);
 
     return () => {
       clearInterval(interval);
