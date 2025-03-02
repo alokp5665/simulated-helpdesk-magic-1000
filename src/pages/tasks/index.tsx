@@ -63,8 +63,8 @@ const TasksPage = () => {
     `;
     document.head.appendChild(style);
     
-    // Set a shorter timeout for the KanbanBoard simulation
-    window.KanbanSimulationTimeout = 2000; // 2 seconds for Kanban simulation
+    // Set a timeout for the KanbanBoard simulation - now 8 seconds
+    window.KanbanSimulationTimeout = 8000; // 8 seconds for Kanban simulation
     
     return () => {
       document.head.removeChild(style);
