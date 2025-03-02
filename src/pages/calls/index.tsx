@@ -1153,9 +1153,9 @@ const CallsPage = () => {
         </div>
       </main>
       
-      {/* Schedule Call Dialog */}
+      {/* Schedule Call Dialog - Updated to plain white background */}
       <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
-        <DialogContent className="glass-card">
+        <DialogContent className="bg-white">
           <DialogHeader>
             <DialogTitle>Schedule a Call</DialogTitle>
           </DialogHeader>
