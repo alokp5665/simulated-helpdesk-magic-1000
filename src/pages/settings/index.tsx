@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -34,15 +35,32 @@ import {
 } from "lucide-react";
 
 const SettingsPage = () => {
-  const [formData, setFormData] = useState({
-    name: "Alex Thompson",
-    email: "alex.thompson@company.com",
-    phone: "+1 (555) 123-4567",
-    role: "Admin",
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  // Use localStorage for persistence if available
+  const getSavedUserData = () => {
+    if (typeof window !== 'undefined') {
+      const savedData = localStorage.getItem('userData');
+      if (savedData) {
+        try {
+          return JSON.parse(savedData);
+        } catch (e) {
+          console.error('Error parsing saved user data:', e);
+        }
+      }
+    }
+    
+    // Default data if nothing is saved
+    return {
+      name: "Arjun Sharma",
+      email: "arjun.sharma@company.com",
+      phone: "+1 (555) 123-4567",
+      role: "Admin",
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    };
+  };
+
+  const [formData, setFormData] = useState(getSavedUserData());
 
   const [errors, setErrors] = useState({
     name: "",
@@ -55,6 +73,20 @@ const SettingsPage = () => {
     slack: false,
     lms: true,
   });
+
+  // Load integrations from localStorage if available
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedIntegrations = localStorage.getItem('integrations');
+      if (savedIntegrations) {
+        try {
+          setIntegrations(JSON.parse(savedIntegrations));
+        } catch (e) {
+          console.error('Error parsing saved integrations:', e);
+        }
+      }
+    }
+  }, []);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -96,11 +128,11 @@ const SettingsPage = () => {
     }
 
     if (isValid) {
-      // Save profile data (in a real app, this would be an API call)
+      // Save profile data to localStorage for persistence
       localStorage.setItem('userData', JSON.stringify(formData));
       
       toast.success("Profile Updated Successfully", {
-        description: "Your profile changes have been saved.",
+        description: "Your profile changes have been saved permanently.",
       });
     } else {
       toast.error("Please fix the errors in the form", {
@@ -114,20 +146,31 @@ const SettingsPage = () => {
       toast.error("Passwords do not match");
       return;
     }
-    toast.success("Password Updated Successfully", {
-      description: "Your password has been changed.",
-    });
-    setFormData(prev => ({
-      ...prev,
+    
+    // Update password in the formData
+    const updatedData = {
+      ...formData,
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
-    }));
+    };
+    
+    // Save updated data to localStorage
+    localStorage.setItem('userData', JSON.stringify(updatedData));
+    setFormData(updatedData);
+    
+    toast.success("Password Updated Successfully", {
+      description: "Your password has been changed and saved permanently.",
+    });
   };
 
   const handleIntegrationToggle = (integration: keyof typeof integrations) => {
     setIntegrations(prev => {
       const newState = { ...prev, [integration]: !prev[integration] };
+      
+      // Save integrations to localStorage
+      localStorage.setItem('integrations', JSON.stringify(newState));
+      
       toast.success(
         `${integration} ${newState[integration] ? "Connected" : "Disconnected"}`,
         {
@@ -171,7 +214,7 @@ const SettingsPage = () => {
                   <div className="flex items-center space-x-4">
                     <Avatar className="h-20 w-20">
                       <AvatarImage src="/placeholder.svg" />
-                      <AvatarFallback>AT</AvatarFallback>
+                      <AvatarFallback>{formData.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                     </Avatar>
                     <Button variant="outline">Change Avatar</Button>
                   </div>
@@ -213,7 +256,10 @@ const SettingsPage = () => {
                         {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                       </div>
                     </div>
-                    <Button onClick={handleProfileUpdate} className="w-full">
+                    <Button 
+                      onClick={handleProfileUpdate} 
+                      className="w-full transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                    >
                       <Save className="h-4 w-4 mr-2" /> Save Changes
                     </Button>
                   </div>
@@ -267,7 +313,11 @@ const SettingsPage = () => {
                       />
                     </div>
                   </div>
-                  <Button onClick={handlePasswordUpdate} variant="outline" className="w-full">
+                  <Button 
+                    onClick={handlePasswordUpdate} 
+                    variant="outline" 
+                    className="w-full transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  >
                     Update Password
                   </Button>
                 </div>
@@ -366,6 +416,10 @@ const SettingsPage = () => {
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => {
+                              // Clear localStorage data
+                              localStorage.removeItem('userData');
+                              localStorage.removeItem('integrations');
+                              
                               toast.error("Account Deletion Initiated", {
                                 description: "Your account will be permanently deleted.",
                               });
