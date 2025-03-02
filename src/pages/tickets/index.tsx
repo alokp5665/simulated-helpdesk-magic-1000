@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -11,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
-import { TypographyMuted } from "@/components/ui/typography";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Search,
   MessagesSquare,
@@ -36,7 +35,6 @@ import {
   Menu
 } from "lucide-react";
 
-// Replace existing names with Indian-origin Hindu names
 const FIRST_NAMES = [
   "Aditya", "Ananya", "Arjun", "Divya", "Ishaan", "Kavya", "Krishna", "Lakshmi", 
   "Neha", "Nikhil", "Priya", "Rahul", "Rishi", "Rohan", "Samaira", "Sanjay", 
@@ -49,7 +47,6 @@ const LAST_NAMES = [
   "Bhatia", "Choudhury", "Mehta", "Raj"
 ];
 
-// Products with issues
 const PRODUCTS = [
   "SaaS Analytics Dashboard",
   "CRM Suite Pro",
@@ -63,7 +60,6 @@ const PRODUCTS = [
   "Multi-factor Authentication"
 ];
 
-// Types
 interface Ticket {
   id: string;
   subject: string;
@@ -101,7 +97,6 @@ interface TicketMessage {
   }[];
 }
 
-// Util functions
 const getRandomElement = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const generateRandomDate = (startDate: Date, endDate: Date): Date => {
@@ -276,7 +271,6 @@ const TicketsPage = () => {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [currentTab, setCurrentTab] = useState("all");
   
-  // Generate tickets on component mount
   useEffect(() => {
     const initialTickets = Array.from({ length: 50 }, (_, i) => 
       generateTicket(`ticket-${i + 1}`)
@@ -286,7 +280,6 @@ const TicketsPage = () => {
     setSelectedTicket(initialTickets[0]);
   }, []);
   
-  // Filter tickets based on search term
   useEffect(() => {
     let result = tickets;
     
@@ -323,7 +316,6 @@ const TicketsPage = () => {
     
     setFilteredTickets(result);
     
-    // Update selected ticket if it's no longer in filtered results
     if (selectedTicket && !result.find(t => t.id === selectedTicket.id)) {
       setSelectedTicket(result.length > 0 ? result[0] : null);
     }
@@ -420,7 +412,6 @@ const TicketsPage = () => {
             </div>
             
             <div className="grid grid-cols-12 gap-6">
-              {/* Tickets List */}
               <div className="col-span-5">
                 <Card>
                   <CardHeader className="pb-3">
@@ -538,7 +529,6 @@ const TicketsPage = () => {
                 </Card>
               </div>
               
-              {/* Ticket Details */}
               <div className="col-span-7">
                 {selectedTicket ? (
                   <Card>
