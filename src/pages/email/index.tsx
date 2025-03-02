@@ -37,7 +37,8 @@ import {
   CalendarIcon,
   X,
   Bell,
-  AlertCircle
+  AlertCircle,
+  BarChart3
 } from "lucide-react";
 
 import { Email, EmailMetrics } from "./types";
@@ -461,7 +462,7 @@ const EmailPage = () => {
                   </>
                 ) : (
                   <>
-                    <BarChart className="h-4 w-4" />
+                    <BarChart3 className="h-4 w-4" />
                     Show Analytics
                   </>
                 )}
