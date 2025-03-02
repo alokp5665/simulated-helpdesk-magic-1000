@@ -2,635 +2,368 @@
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import { 
-  MessageSquare, 
-  TicketCheck, 
-  Users2, 
-  ClipboardCheck, 
-  Clock, 
-  Award, 
-  Star, 
-  Bell, 
-  Calendar as CalendarIcon, 
-  ChevronUp, 
-  ChevronDown, 
-  Send, 
-  CheckCircle2, 
-  Trophy, 
-  Zap,
-  BarChart4,
-  PieChart,
-  LineChart,
-  Timer
-} from "lucide-react";
-import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import {
+  Users,
+  User,
+  Ticket,
+  MessageSquare,
+  ChevronRight,
+  Clock,
+  Bell,
+  CheckCircle2,
+  AlertCircle,
+  TrendingUp,
+  ChartBar,
+  BarChart,
+  BarChart3,
+  UserCheck,
+  Calendar,
+  Search
+} from "lucide-react";
 
+// Types
 interface Agent {
   id: string;
   name: string;
   avatar: string;
-  isOnline: boolean;
-  department: string;
-  expertise: string;
+  status: "online" | "offline" | "busy" | "away";
+  role: string;
+  performance: number;
+  ticketsResolved: number;
+  responseTime: number;
+  customers: number;
   lastActive?: Date;
-  metrics?: {
-    ticketsResolved: number;
-    responseTime: number;
-    satisfaction: number;
-  };
-  rewards?: {
-    points: number;
-    badges: string[];
-  };
-  availability?: {
-    status: "Available" | "Busy" | "On Break" | "Offline";
-    startTime: string;
-    endTime: string;
-  };
 }
 
 interface Ticket {
   id: string;
   title: string;
+  customer: string;
+  status: "open" | "in_progress" | "pending" | "resolved";
   priority: "low" | "medium" | "high";
-  status: "open" | "in-progress" | "resolved";
-  assignedTo?: Agent;
-  assignedBy: string;
-  createdAt: Date;
+  assignedTo?: string;
+  created: Date;
 }
 
-interface Message {
+interface Activity {
   id: string;
-  senderId: string;
-  receiverId: string;
-  content: string;
-  timestamp: Date;
-}
-
-interface ActivityLog {
-  id: string;
-  agentId: string;
+  agent: string;
   action: string;
-  details: string;
   timestamp: Date;
+  ticketId?: string;
 }
 
 interface Reminder {
   id: string;
-  agentId: string;
-  message: string;
-  timestamp: Date;
+  title: string;
+  dueDate: Date;
+  priority: "low" | "medium" | "high";
+  completed: boolean;
 }
 
-// Updated names to Indian Hindu names
-const AGENTS: Agent[] = [
-  { 
-    id: "1", 
-    name: "Aditya Sharma", 
-    avatar: "/placeholder.svg", 
-    isOnline: true, 
-    department: "Support", 
-    expertise: "Technical",
-    metrics: {
-      ticketsResolved: 15,
-      responseTime: 4.8,
-      satisfaction: 4.9
-    },
-    rewards: {
-      points: 1250,
-      badges: ["FastResponder", "Customer Hero", "Team Player"]
-    },
-    availability: {
-      status: "Available",
-      startTime: "9:00 AM",
-      endTime: "5:00 PM"
-    }
+interface Message {
+  id: string;
+  sender: string;
+  content: string;
+  timestamp: Date;
+  ticketId?: string;
+}
+
+// Helper constants
+const FIRST_NAMES = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "Rahul", "Priya", "Anita", "Vikram", "Suresh"];
+const LAST_NAMES = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Sharma", "Patel", "Desai", "Gupta", "Kumar"];
+const CUSTOMER_NAMES = ["Apple Inc.", "Google LLC", "Microsoft Corp", "Amazon", "Tesla Motors", "Samsung", "Meta Platforms", "Netflix", "Salesforce", "Uber", "Airbnb", "Spotify", "Walmart", "Target", "Starbucks"];
+const TICKET_SUBJECTS = [
+  "Account login issues",
+  "Payment processing failed",
+  "Unable to reset password",
+  "Feature request: dark mode",
+  "Data sync not working",
+  "Mobile app crashing",
+  "Subscription renewal problem",
+  "Missing order details",
+  "Billing discrepancy",
+  "Service downtime report"
+];
+
+const AGENT_ACTIONS = [
+  "resolved a ticket",
+  "was assigned a new ticket",
+  "replied to a customer",
+  "escalated an issue",
+  "created a knowledge article",
+  "closed a case",
+  "transferred a ticket",
+  "added a note",
+  "scheduled a follow-up",
+  "updated ticket status"
+];
+
+const REMINDER_SUBJECTS = [
+  "Follow up with customer",
+  "Team meeting",
+  "Review pending tickets",
+  "Submit daily report",
+  "Training session",
+  "Update knowledge base",
+  "Client call",
+  "Performance review",
+  "Quality assessment",
+  "Update ticket status"
+];
+
+const CHAT_MESSAGES = [
+  {
+    ticketId: "T-1234",
+    title: "Payment processing failed for premium customer",
+    messages: [
+      { 
+        sender: "John Smith", 
+        content: "Hey team, I'm looking at ticket T-1234 about a payment processing failure. The customer is pretty upset. @Sarah Johnson can you take a look at the payment logs?" 
+      },
+      { 
+        sender: "Sarah Johnson", 
+        content: "I'll check the logs right away. From what I can see initially, it looks like their card was declined by the payment gateway. @Michael Chen, have you seen this error code before?" 
+      },
+      { 
+        sender: "Michael Chen", 
+        content: "Yes, that error usually means the card issuer blocked the transaction. I suggest we: 1) Verify customer details, 2) Ask them to contact their bank, 3) Offer alternative payment methods." 
+      },
+      { 
+        sender: "John Smith", 
+        content: "Great suggestions, Michael. I'll contact the customer with these options. Sarah, can you prepare a detailed report of the transaction attempts for reference?" 
+      },
+      { 
+        sender: "Sarah Johnson", 
+        content: "Already on it. I'll have the report ready in 15 minutes and share it with you both." 
+      }
+    ]
   },
-  { 
-    id: "2", 
-    name: "Neeraj Patel", 
-    avatar: "/placeholder.svg", 
-    isOnline: false, 
-    department: "Technical", 
-    expertise: "Backend",
-    metrics: {
-      ticketsResolved: 12,
-      responseTime: 5.2,
-      satisfaction: 4.7
-    },
-    rewards: {
-      points: 980,
-      badges: ["Bug Crusher", "Knowledge Expert"]
-    },
-    availability: {
-      status: "Offline",
-      startTime: "10:00 AM",
-      endTime: "6:00 PM"
-    }
+  {
+    ticketId: "T-2345",
+    title: "Data sync not working after recent update",
+    messages: [
+      { 
+        sender: "Michael Chen", 
+        content: "Has anyone looked at ticket T-2345 about data sync issues? We've received multiple reports since the latest update." 
+      },
+      { 
+        sender: "Sarah Johnson", 
+        content: "I'm checking it now. Looks like there might be an issue with the new API endpoints. @John Smith, didn't you work on the sync mechanism recently?" 
+      },
+      { 
+        sender: "John Smith", 
+        content: "Yes, I did. Let me review the logs. There might be a compatibility issue with older client versions. I'll push a hotfix to address this within the next hour." 
+      },
+      { 
+        sender: "Michael Chen", 
+        content: "Should we notify all affected customers about the expected fix?" 
+      },
+      { 
+        sender: "John Smith", 
+        content: "Good idea. I'll draft a notification once I've confirmed the exact issue. Sarah, could you identify all impacted accounts so we can target the communication?" 
+      },
+      { 
+        sender: "Sarah Johnson", 
+        content: "Will do. I'll prepare a list of affected accounts categorized by priority level." 
+      }
+    ]
   },
-  { 
-    id: "3", 
-    name: "Kavita Desai", 
-    avatar: "/placeholder.svg", 
-    isOnline: true, 
-    department: "Sales", 
-    expertise: "Enterprise",
-    metrics: {
-      ticketsResolved: 18,
-      responseTime: 3.5,
-      satisfaction: 4.8
-    },
-    rewards: {
-      points: 1420,
-      badges: ["Sales Star", "Enterprise Expert", "Customer Delight"]
-    },
-    availability: {
-      status: "Busy",
-      startTime: "8:30 AM",
-      endTime: "4:30 PM"
-    }
-  },
-  { 
-    id: "4", 
-    name: "Arjun Singh", 
-    avatar: "/placeholder.svg", 
-    isOnline: true, 
-    department: "Support", 
-    expertise: "Mobile",
-    metrics: {
-      ticketsResolved: 14,
-      responseTime: 4.2,
-      satisfaction: 4.6
-    },
-    rewards: {
-      points: 1100,
-      badges: ["Mobile Guru", "Quick Resolver"]
-    },
-    availability: {
-      status: "Available",
-      startTime: "9:00 AM",
-      endTime: "5:00 PM"
-    }
-  },
-  { 
-    id: "5", 
-    name: "Divya Gupta", 
-    avatar: "/placeholder.svg", 
-    isOnline: false, 
-    department: "Technical", 
-    expertise: "Frontend",
-    metrics: {
-      ticketsResolved: 16,
-      responseTime: 3.8,
-      satisfaction: 4.9
-    },
-    rewards: {
-      points: 1350,
-      badges: ["UI Wizard", "Customer Champion"]
-    },
-    availability: {
-      status: "On Break",
-      startTime: "9:30 AM",
-      endTime: "5:30 PM"
-    }
-  },
-  { 
-    id: "6", 
-    name: "Rohan Malhotra", 
-    avatar: "/placeholder.svg", 
-    isOnline: true, 
-    department: "Support", 
-    expertise: "General",
-    metrics: {
-      ticketsResolved: 13,
-      responseTime: 5.0,
-      satisfaction: 4.7
-    },
-    rewards: {
-      points: 950,
-      badges: ["Reliable Support", "Team Player"]
-    },
-    availability: {
-      status: "Available",
-      startTime: "8:00 AM",
-      endTime: "4:00 PM"
-    }
-  },
-  { 
-    id: "7", 
-    name: "Anjali Reddy", 
-    avatar: "/placeholder.svg", 
-    isOnline: true, 
-    department: "Technical", 
-    expertise: "Security",
-    metrics: {
-      ticketsResolved: 11,
-      responseTime: 6.1,
-      satisfaction: 4.5
-    },
-    rewards: {
-      points: 870,
-      badges: ["Security Specialist"]
-    },
-    availability: {
-      status: "Busy",
-      startTime: "10:00 AM",
-      endTime: "6:00 PM"
-    }
+  {
+    ticketId: "T-3456",
+    title: "Feature request implementation timeline",
+    messages: [
+      { 
+        sender: "Sarah Johnson", 
+        content: "We have a priority feature request from Enterprise customer Acme Corp. They're asking about dark mode implementation timeline. Thoughts on when we can deliver this?" 
+      },
+      { 
+        sender: "John Smith", 
+        content: "I've reviewed the request. It's on our roadmap for next quarter, but given their status, we might want to expedite. @Michael Chen, how busy is the front-end team right now?" 
+      },
+      { 
+        sender: "Michael Chen", 
+        content: "We're focused on the accessibility improvements this sprint, but I could allocate resources for this starting next week. It should take about 2-3 weeks to implement properly." 
+      },
+      { 
+        sender: "Sarah Johnson", 
+        content: "That's great news! I'll let them know we can start work on it next week with an expected delivery in 3 weeks. Would be nice to under-promise and over-deliver." 
+      },
+      { 
+        sender: "John Smith", 
+        content: "Agreed. Michael, can you prepare a brief implementation plan that I can share with the account manager? Just the high-level milestones and testing approach." 
+      },
+      { 
+        sender: "Michael Chen", 
+        content: "Sure thing. I'll have that ready by tomorrow morning. I'll also include some mockups so they can see what we're planning." 
+      }
+    ]
   }
 ];
 
-const SAMPLE_TICKETS = [
-  "Mobile app sync issue",
-  "Dashboard loading slow",
-  "Payment gateway error",
-  "API integration failure",
-  "User authentication bug",
-  "Database connection error",
-  "Push notification issue",
-  "Search functionality broken",
-  "Checkout process failing",
-  "Account verification error",
-  "Premium subscription issue",
-  "Data migration problem",
-  "Report generation failure",
-  "User profile update error",
-  "Service access denied"
-];
+// Helper functions
+const randomDate = (start: Date, end: Date) => {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+};
 
-const SAMPLE_MESSAGES = [
-  "Can you look into ticket #4532?",
-  "Customer needs urgent assistance",
-  "I've fixed the database issue",
-  "Team sync at 4 PM IST",
-  "Need help with this case",
-  "Taking a quick break",
-  "Documentation update needed",
-  "Great work on that fix!",
-  "Who can help with this security issue?",
-  "The new update is causing issues",
-  "I'll be out tomorrow, can someone cover?",
-  "Has anyone seen similar errors before?",
-  "Customer is very satisfied with the solution",
-  "Need more details to proceed with this ticket",
-  "The server is back online now",
-  "Let's discuss this in the team meeting",
-  "This is a recurring issue, needs permanent fix",
-  "Can someone review my solution?",
-  "This ticket might need escalation",
-  "I've created a knowledge base article for this",
-  "Customer wants a call back ASAP",
-  "Similar issues reported by multiple users",
-  "The workaround seems to be working",
-  "Great response time on that ticket!",
-  "The bug has been identified and fixed",
-  "Thanks for the assistance with the complex case",
-  "This will require a code update",
-  "Can we schedule a team brainstorming?",
-  "Let's improve our documentation on this",
-  "The new process is working well so far"
-];
+const randomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
-const ACTIVITY_TYPES = [
-  "resolved ticket",
-  "responded to",
-  "updated",
-  "escalated",
-  "assigned",
-  "created knowledge article for",
-  "closed",
-  "reopened",
-  "tagged team member on"
-];
+const randomElement = <T,>(array: T[]): T => {
+  return array[Math.floor(Math.random() * array.length)];
+};
 
-const BADGE_TYPES = [
-  { name: "FastResponder", icon: "⚡" },
-  { name: "Customer Hero", icon: "🛡️" },
-  { name: "Team Player", icon: "🤝" },
-  { name: "Knowledge Expert", icon: "📚" },
-  { name: "Bug Crusher", icon: "🐞" },
-  { name: "Solution Master", icon: "🧩" },
-  { name: "Top Performer", icon: "🏆" },
-  { name: "Reliable Support", icon: "🔄" },
-  { name: "Security Specialist", icon: "🔒" },
-  { name: "UI Wizard", icon: "✨" }
-];
+const generateRandomAgent = (): Agent => {
+  const firstName = randomElement(FIRST_NAMES);
+  const lastName = randomElement(LAST_NAMES);
+  const name = `${firstName} ${lastName}`;
+  const roles = ["Support Agent", "Customer Success", "Technical Support", "Billing Specialist", "Product Support"];
+  
+  return {
+    id: `agent-${Math.random().toString(36).substring(2, 10)}`,
+    name,
+    avatar: `/placeholder.svg`,
+    status: randomElement(["online", "offline", "busy", "away"]),
+    role: randomElement(roles),
+    performance: randomInt(60, 98),
+    ticketsResolved: randomInt(20, 150),
+    responseTime: randomInt(5, 60),
+    customers: randomInt(10, 50),
+    lastActive: randomDate(new Date(Date.now() - 86400000 * 3), new Date()) // Last 3 days
+  };
+};
 
+const generateRandomTicket = (): Ticket => {
+  return {
+    id: `T-${randomInt(1000, 9999)}`,
+    title: randomElement(TICKET_SUBJECTS),
+    customer: randomElement(CUSTOMER_NAMES),
+    status: randomElement(["open", "in_progress", "pending", "resolved"]),
+    priority: randomElement(["low", "medium", "high"]),
+    created: randomDate(new Date(Date.now() - 86400000 * 14), new Date()) // Last 14 days
+  };
+};
+
+const generateRandomActivity = (agents: Agent[]): Activity => {
+  const agent = randomElement(agents);
+  return {
+    id: `activity-${Math.random().toString(36).substring(2, 10)}`,
+    agent: agent.name,
+    action: randomElement(AGENT_ACTIONS),
+    timestamp: randomDate(new Date(Date.now() - 86400000 * 2), new Date()), // Last 2 days
+    ticketId: `T-${randomInt(1000, 9999)}`
+  };
+};
+
+const generateRandomReminder = (): Reminder => {
+  return {
+    id: `reminder-${Math.random().toString(36).substring(2, 10)}`,
+    title: randomElement(REMINDER_SUBJECTS),
+    dueDate: randomDate(new Date(), new Date(Date.now() + 86400000 * 7)), // Next 7 days
+    priority: randomElement(["low", "medium", "high"]),
+    completed: Math.random() > 0.7 // 30% chance of being completed
+  };
+};
+
+// Main component
 const AgentsPage = () => {
-  const [agents, setAgents] = useState<Agent[]>(AGENTS);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [selectedAgent, setSelectedAgent] = useState<string>("");
-  const [selectedPriority, setSelectedPriority] = useState<"low" | "medium" | "high">("medium");
-  const [date, setDate] = useState<Date | undefined>(new Date());
   const [ticketStats, setTicketStats] = useState({
-    open: 0,
-    inProgress: 0,
-    resolved: 0
+    open: randomInt(10, 30),
+    inProgress: randomInt(15, 40),
+    pending: randomInt(5, 20),
+    resolved: randomInt(50, 150)
   });
-  const activityEndRef = useRef<HTMLDivElement>(null);
+  const [performanceTab, setPerformanceTab] = useState<"weekly" | "monthly" | "yearly">("weekly");
+  const [selectedChat, setSelectedChat] = useState<string>("T-1234");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Simulate changing agent online status and last active time
+  // Initialize with random data
   useEffect(() => {
-    const interval = setInterval(() => {
-      setAgents(prev => prev.map(agent => {
-        const isOnlineNow = Math.random() > 0.3;
-        return {
-          ...agent,
-          isOnline: isOnlineNow,
-          lastActive: isOnlineNow ? new Date() : agent.lastActive || new Date(Date.now() - Math.floor(Math.random() * 60 * 60 * 1000)),
-          availability: {
-            ...agent.availability,
-            status: isOnlineNow 
-              ? Math.random() > 0.7 
-                ? "Busy" 
-                : Math.random() > 0.8 
-                  ? "On Break" 
-                  : "Available"
-              : "Offline"
-          }
-        };
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
+    // Generate initial agents
+    const initialAgents = Array(15).fill(null).map(generateRandomAgent);
+    setAgents(initialAgents);
+    
+    // Generate initial tickets
+    const initialTickets = Array(20).fill(null).map(generateRandomTicket);
+    setTickets(initialTickets);
+    
+    // Generate initial activities
+    const initialActivities = Array(10).fill(null).map(() => generateRandomActivity(initialAgents));
+    setActivities(initialActivities);
+    
+    // Generate initial reminders
+    const initialReminders = Array(8).fill(null).map(generateRandomReminder);
+    setReminders(initialReminders);
+    
+    // Set up periodic updates for dynamic content
+    const ticketStatsInterval = setInterval(() => {
+      setTicketStats({
+        open: randomInt(10, 30),
+        inProgress: randomInt(15, 40),
+        pending: randomInt(5, 20),
+        resolved: randomInt(50, 150)
+      });
+    }, 10000); // Update every 10 seconds
+    
+    const newActivityInterval = setInterval(() => {
+      const newActivity = generateRandomActivity(agents);
+      setActivities(prev => [newActivity, ...prev.slice(0, 9)]); // Keep only 10 most recent
+    }, 15000); // New activity every 15 seconds
+    
+    const newTicketInterval = setInterval(() => {
+      if (Math.random() > 0.5) { // 50% chance of new ticket
+        const newTicket = generateRandomTicket();
+        setTickets(prev => [newTicket, ...prev.slice(0, 19)]); // Keep only 20 most recent
+      }
+    }, 30000); // Check for new ticket every 30 seconds
+    
+    return () => {
+      clearInterval(ticketStatsInterval);
+      clearInterval(newActivityInterval);
+      clearInterval(newTicketInterval);
+    };
   }, []);
 
-  // Simulate new tickets and auto-assignment
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (tickets.length < 20 && Math.random() > 0.7) {
-        const newTicket: Ticket = {
-          id: `T-${Date.now().toString().slice(-4)}`,
-          title: SAMPLE_TICKETS[Math.floor(Math.random() * SAMPLE_TICKETS.length)],
-          priority: ["low", "medium", "high"][Math.floor(Math.random() * 3)] as "low" | "medium" | "high",
-          status: "open",
-          assignedBy: "System Admin",
-          createdAt: new Date()
-        };
-        
-        // Auto-assign to a random online agent
-        const onlineAgents = agents.filter(a => a.isOnline);
-        if (onlineAgents.length > 0) {
-          const randomAgent = onlineAgents[Math.floor(Math.random() * onlineAgents.length)];
-          newTicket.assignedTo = randomAgent;
-          newTicket.status = "in-progress";
-          
-          toast(`Ticket #${newTicket.id} assigned to ${randomAgent.name}`, {
-            description: `Priority: ${newTicket.priority}`,
-            duration: 3000,
-          });
+  // Filter agents based on search term
+  const filteredAgents = agents.filter(agent => 
+    agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    agent.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-          // Add to activity log
-          const newActivity: ActivityLog = {
-            id: Date.now().toString(),
-            agentId: randomAgent.id,
-            action: "was assigned",
-            details: `Ticket #${newTicket.id}: ${newTicket.title}`,
-            timestamp: new Date()
-          };
-          
-          setActivityLogs(prev => [newActivity, ...prev.slice(0, 29)]);
-        }
-        
-        setTickets(prev => [...prev, newTicket]);
-        updateTicketStats([...tickets, newTicket]);
+  // Animation variants for elements
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1
       }
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, [agents, tickets]);
-
-  // Simulate team communication
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.6) {
-        const sender = agents[Math.floor(Math.random() * agents.length)];
-        let receiver;
-        do {
-          receiver = agents[Math.floor(Math.random() * agents.length)];
-        } while (receiver.id === sender.id);
-
-        const newMessage: Message = {
-          id: Date.now().toString(),
-          senderId: sender.id,
-          receiverId: receiver.id,
-          content: SAMPLE_MESSAGES[Math.floor(Math.random() * SAMPLE_MESSAGES.length)],
-          timestamp: new Date()
-        };
-        
-        setMessages(prev => [newMessage, ...prev.slice(0, 29)]);
-      }
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [agents]);
-
-  // Simulate ticket resolution and metrics update
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (tickets.length > 0 && Math.random() > 0.7) {
-        const ticketIndex = Math.floor(Math.random() * tickets.length);
-        const ticketToResolve = tickets[ticketIndex];
-        
-        if (ticketToResolve.status === "in-progress" && ticketToResolve.assignedTo) {
-          const updatedTickets = [...tickets];
-          updatedTickets[ticketIndex] = {
-            ...ticketToResolve,
-            status: "resolved"
-          };
-          
-          // Update agent metrics
-          const updatedAgents = agents.map(agent => {
-            if (agent.id === ticketToResolve.assignedTo?.id) {
-              const updatedMetrics = {
-                ticketsResolved: (agent.metrics?.ticketsResolved || 0) + 1,
-                responseTime: Math.max(2.8, ((agent.metrics?.responseTime || 5) * 10 - Math.random()) / 10),
-                satisfaction: Math.min(5, ((agent.metrics?.satisfaction || 4.5) * 10 + Math.random()) / 10)
-              };
-
-              const updatedRewards = {
-                points: (agent.rewards?.points || 0) + Math.floor(50 + Math.random() * 50),
-                badges: agent.rewards?.badges || []
-              };
-
-              // Randomly award a new badge if points threshold met and doesn't have too many badges
-              if (updatedRewards.points > 1000 && updatedRewards.badges.length < 5 && Math.random() > 0.8) {
-                // Find a badge they don't have yet
-                const availableBadges = BADGE_TYPES.filter(badge => 
-                  !updatedRewards.badges.includes(badge.name)
-                );
-                
-                if (availableBadges.length > 0) {
-                  const newBadge = availableBadges[Math.floor(Math.random() * availableBadges.length)];
-                  updatedRewards.badges = [...updatedRewards.badges, newBadge.name];
-                  
-                  // Show badge earned notification
-                  toast(`${agent.name} earned a new badge!`, {
-                    description: `${newBadge.icon} ${newBadge.name}`,
-                    duration: 4000,
-                  });
-                }
-              }
-
-              return {
-                ...agent,
-                metrics: updatedMetrics,
-                rewards: updatedRewards
-              };
-            }
-            return agent;
-          });
-
-          // Add to activity log
-          if (ticketToResolve.assignedTo) {
-            const newActivity: ActivityLog = {
-              id: Date.now().toString(),
-              agentId: ticketToResolve.assignedTo.id,
-              action: "resolved",
-              details: `Ticket #${ticketToResolve.id}: ${ticketToResolve.title}`,
-              timestamp: new Date()
-            };
-            
-            setActivityLogs(prev => [newActivity, ...prev.slice(0, 29)]);
-            
-            toast(`${ticketToResolve.assignedTo.name} resolved a ticket`, {
-              description: `Successfully closed #${ticketToResolve.id}`,
-              duration: 3000,
-            });
-          }
-          
-          setTickets(updatedTickets);
-          setAgents(updatedAgents);
-          updateTicketStats(updatedTickets);
-        }
-      }
-    }, 12000);
-
-    return () => clearInterval(interval);
-  }, [tickets, agents]);
-
-  // Simulate reminders
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        const randomAgent = agents[Math.floor(Math.random() * agents.length)];
-        const pendingCount = Math.floor(Math.random() * 5) + 1;
-        
-        const newReminder: Reminder = {
-          id: Date.now().toString(),
-          agentId: randomAgent.id,
-          message: `You have ${pendingCount} pending ticket${pendingCount > 1 ? 's' : ''} due today.`,
-          timestamp: new Date()
-        };
-        
-        setReminders(prev => [newReminder, ...prev.slice(0, 14)]);
-        
-        if (Math.random() > 0.7) {
-          toast(`Reminder for ${randomAgent.name}`, {
-            description: newReminder.message,
-            duration: 4000,
-          });
-        }
-      }
-    }, 15000);
-
-    return () => clearInterval(interval);
-  }, [agents]);
-
-  // Auto scroll to bottom of activity feed
-  useEffect(() => {
-    if (activityEndRef.current) {
-      activityEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [activityLogs]);
-
-  // Update ticket stats
-  const updateTicketStats = (currentTickets: Ticket[]) => {
-    setTicketStats({
-      open: currentTickets.filter(t => t.status === "open").length,
-      inProgress: currentTickets.filter(t => t.status === "in-progress").length,
-      resolved: currentTickets.filter(t => t.status === "resolved").length
-    });
   };
-
-  // Calculate timeAgo for lastActive
-  const timeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    
-    let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + " years ago";
-    
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + " months ago";
-    
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + " days ago";
-    
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + " hours ago";
-    
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + " minutes ago";
-    
-    return Math.floor(seconds) + " seconds ago";
-  };
-
-  // Handle manual ticket assignment
-  const handleAssignTicket = () => {
-    if (!selectedAgent || !selectedPriority) {
-      toast("Please select an agent and priority", {
-        description: "Both fields are required for assignment",
-        duration: 3000,
-      });
-      return;
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 }
     }
-
-    const agent = agents.find(a => a.id === selectedAgent);
-    if (!agent) return;
-
-    const newTicket: Ticket = {
-      id: `T-${Date.now().toString().slice(-4)}`,
-      title: SAMPLE_TICKETS[Math.floor(Math.random() * SAMPLE_TICKETS.length)],
-      priority: selectedPriority,
-      status: "in-progress",
-      assignedTo: agent,
-      assignedBy: "You",
-      createdAt: new Date()
-    };
-
-    // Add to activity log
-    const newActivity: ActivityLog = {
-      id: Date.now().toString(),
-      agentId: agent.id,
-      action: "was manually assigned",
-      details: `Ticket #${newTicket.id}: ${newTicket.title}`,
-      timestamp: new Date()
-    };
-    
-    setActivityLogs(prev => [newActivity, ...prev.slice(0, 29)]);
-    
-    toast(`Ticket #${newTicket.id} assigned to ${agent.name}`, {
-      description: `Priority: ${newTicket.priority}`,
-      duration: 3000,
-    });
-
-    setTickets(prev => [...prev, newTicket]);
-    updateTicketStats([...tickets, newTicket]);
-    setSelectedAgent("");
   };
 
   return (
@@ -639,493 +372,699 @@ const AgentsPage = () => {
       <Sidebar />
       
       <main className="pl-64 pt-16">
-        <div className="p-6 max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 bg-gradient-to-r from-indigo-500 to-purple-600 inline-block text-transparent bg-clip-text">Agent Management</h1>
+        <div className="p-6 max-w-[1600px] mx-auto">
+          <h1 className="text-3xl font-bold mb-2 text-foreground/90">Agent Management</h1>
+          <p className="text-muted-foreground mb-8">View and manage your customer support team performance</p>
           
-          {/* Top row metrics */}
-          <div className="bentoGrid mb-6">
-            <Card className="col-span-3 glass-card hover-scale depth-effect shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-center flex items-center justify-center gap-2">
-                  <TicketCheck className="h-5 w-5 text-primary" />
-                  <span>Ticket Stats</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{ticketStats.open}</div>
-                    <div className="text-sm text-muted-foreground">Open</div>
-                  </div>
-                  <Separator orientation="vertical" className="h-12" />
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{ticketStats.inProgress}</div>
-                    <div className="text-sm text-muted-foreground">In Progress</div>
-                  </div>
-                  <Separator orientation="vertical" className="h-12" />
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{ticketStats.resolved}</div>
-                    <div className="text-sm text-muted-foreground">Resolved</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-12 gap-6">
+            {/* Ticket Stats - Top Row */}
+            <div className="col-span-12 lg:col-span-3">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                className="h-full"
+              >
+                <Card className="bg-white/60 border-purple-100/40 h-full">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg font-medium">Open Tickets</CardTitle>
+                      <Ticket className="h-4 w-4 text-orange-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-orange-500">{ticketStats.open}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {randomInt(-10, 20)}% from last week
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
             
-            <Card className="col-span-5 glass-card hover-scale depth-effect shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-center flex items-center justify-center gap-2">
-                  <LineChart className="h-5 w-5 text-primary" />
-                  <span>Performance Overview</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[60px] w-full bg-accent/20 rounded-md relative overflow-hidden">
-                  {/* Simulated graph with animated bars */}
-                  <div className="absolute inset-0 flex items-end justify-around">
-                    {[...Array(14)].map((_, i) => (
-                      <div 
-                        key={i} 
-                        className="w-[5%] bg-gradient-to-t from-indigo-500 to-purple-600 rounded-t-sm shimmer-effect"
-                        style={{ 
-                          height: `${Math.max(15, Math.floor(Math.sin(i/2) * 30 + 50))}%`,
-                          animationDelay: `${i * 0.1}s`
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="col-span-4 glass-card hover-scale depth-effect shadow-md">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg text-center flex items-center justify-center gap-2">
-                  <Trophy className="h-5 w-5 text-primary" />
-                  <span>Top Performers</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  {agents
-                    .sort((a, b) => (b.metrics?.ticketsResolved || 0) - (a.metrics?.ticketsResolved || 0))
-                    .slice(0, 3)
-                    .map((agent, index) => (
-                      <div key={agent.id} className="text-center flex flex-col items-center">
-                        <div className="relative">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={agent.avatar} />
-                            <AvatarFallback className={index === 0 ? "bg-yellow-100 text-yellow-800" : index === 1 ? "bg-gray-100 text-gray-800" : "bg-amber-100 text-amber-800"}>
-                              {agent.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          </Avatar>
-                          {index === 0 && (
-                            <span className="absolute -top-1 -right-1 text-yellow-500">🏆</span>
-                          )}
-                        </div>
-                        <span className="text-xs font-medium mt-1">{agent.name.split(' ')[0]}</span>
-                        <span className="text-xs text-muted-foreground">{agent.metrics?.ticketsResolved || 0}</span>
+            <div className="col-span-12 lg:col-span-3">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.1 }}
+                className="h-full"
+              >
+                <Card className="bg-white/60 border-blue-100/40 h-full">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg font-medium">In Progress</CardTitle>
+                      <Clock className="h-4 w-4 text-blue-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-blue-500">{ticketStats.inProgress}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {randomInt(-5, 15)}% from last week
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            <div className="col-span-12 lg:col-span-3">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.2 }}
+                className="h-full"
+              >
+                <Card className="bg-white/60 border-amber-100/40 h-full">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg font-medium">Pending</CardTitle>
+                      <AlertCircle className="h-4 w-4 text-amber-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-amber-500">{ticketStats.pending}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {randomInt(-20, 5)}% from last week
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            <div className="col-span-12 lg:col-span-3">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.3 }}
+                className="h-full"
+              >
+                <Card className="bg-white/60 border-green-100/40 h-full">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg font-medium">Resolved</CardTitle>
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-500">{ticketStats.resolved}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {randomInt(5, 25)}% from last week
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            {/* Top Performers - Second Row */}
+            <div className="col-span-12 lg:col-span-8">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.4 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <UserCheck className="h-5 w-5 text-primary" />
+                        <span>Top Performers</span>
+                      </CardTitle>
+                      <Tabs value={performanceTab} onValueChange={(v) => setPerformanceTab(v as any)}>
+                        <TabsList className="bg-muted/50">
+                          <TabsTrigger value="weekly">Weekly</TabsTrigger>
+                          <TabsTrigger value="monthly">Monthly</TabsTrigger>
+                          <TabsTrigger value="yearly">Yearly</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <TabsContent value="weekly" className="mt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {agents.slice(0, 3).map((agent, index) => (
+                          <Card key={agent.id} className="border bg-card/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="relative">
+                                  <Avatar className="h-16 w-16 border-2 border-primary/20">
+                                    <AvatarImage src={agent.avatar} />
+                                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white text-lg">
+                                      {agent.name.split(" ").map(n => n[0]).join("")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 border">
+                                    <Badge className="h-5 w-5 p-1 flex items-center justify-center rounded-full font-bold">
+                                      {index + 1}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{agent.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{agent.role}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <TrendingUp className="h-3 w-3 text-green-500" />
+                                    <span className="text-xs text-green-600">
+                                      {randomInt(90, 99)}% satisfaction
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-4 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Tickets Resolved</span>
+                                  <span className="font-medium">{randomInt(20, 50)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Avg. Response Time</span>
+                                  <span className="font-medium">{randomInt(3, 15)} min</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
                       </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          {/* Main content */}
-          <div className="bentoGrid gap-6">
-            {/* Active Agents */}
-            <Card className="col-span-12 lg:col-span-4 glass-card premium-card hover-scale">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users2 className="h-5 w-5 text-primary" />
-                  <span>Active Agents</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px] pr-4">
-                  <div className="space-y-4">
-                    {agents.map(agent => (
-                      <div key={agent.id} className="flex flex-col p-3 rounded-lg hover:bg-accent/50 transition-colors premium-hover">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
+                    </TabsContent>
+                    
+                    <TabsContent value="monthly" className="mt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {agents.slice(3, 6).map((agent, index) => (
+                          <Card key={agent.id} className="border bg-card/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="relative">
+                                  <Avatar className="h-16 w-16 border-2 border-primary/20">
+                                    <AvatarImage src={agent.avatar} />
+                                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white text-lg">
+                                      {agent.name.split(" ").map(n => n[0]).join("")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 border">
+                                    <Badge className="h-5 w-5 p-1 flex items-center justify-center rounded-full font-bold">
+                                      {index + 1}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{agent.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{agent.role}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <TrendingUp className="h-3 w-3 text-green-500" />
+                                    <span className="text-xs text-green-600">
+                                      {randomInt(90, 99)}% satisfaction
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-4 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Tickets Resolved</span>
+                                  <span className="font-medium">{randomInt(80, 150)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Avg. Response Time</span>
+                                  <span className="font-medium">{randomInt(4, 10)} min</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="yearly" className="mt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {agents.slice(6, 9).map((agent, index) => (
+                          <Card key={agent.id} className="border bg-card/50">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="relative">
+                                  <Avatar className="h-16 w-16 border-2 border-primary/20">
+                                    <AvatarImage src={agent.avatar} />
+                                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/60 text-white text-lg">
+                                      {agent.name.split(" ").map(n => n[0]).join("")}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="absolute -bottom-1 -right-1 bg-card rounded-full p-0.5 border">
+                                    <Badge className="h-5 w-5 p-1 flex items-center justify-center rounded-full font-bold">
+                                      {index + 1}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{agent.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{agent.role}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <TrendingUp className="h-3 w-3 text-green-500" />
+                                    <span className="text-xs text-green-600">
+                                      {randomInt(92, 99)}% satisfaction
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mt-4 space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Tickets Resolved</span>
+                                  <span className="font-medium">{randomInt(500, 1200)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Avg. Response Time</span>
+                                  <span className="font-medium">{randomInt(4, 8)} min</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            {/* Active Agents - Right Side */}
+            <div className="col-span-12 lg:col-span-4">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.5 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <span>Active Agents</span>
+                      </CardTitle>
+                      <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                        {agents.filter(a => a.status === "online").length} Online
+                      </Badge>
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="search"
+                        placeholder="Search agents..."
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[320px] pr-4">
+                      <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="space-y-2"
+                      >
+                        {filteredAgents.map((agent) => (
+                          <motion.div 
+                            key={agent.id}
+                            variants={itemVariants}
+                            className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
+                          >
                             <div className="relative">
                               <Avatar>
                                 <AvatarImage src={agent.avatar} />
-                                <AvatarFallback>{agent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                                  {agent.name.split(" ").map(n => n[0]).join("")}
+                                </AvatarFallback>
                               </Avatar>
-                              <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${agent.isOnline ? 'bg-green-500 animate-pulse-slow' : 'bg-gray-300'}`} />
+                              <span className={`absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full ring-2 ring-white ${
+                                agent.status === "online" ? "bg-green-500" :
+                                agent.status === "busy" ? "bg-red-500" :
+                                agent.status === "away" ? "bg-amber-500" :
+                                "bg-gray-400"
+                              }`} />
                             </div>
-                            <div>
-                              <p className="font-medium">{agent.name}</p>
-                              <p className="text-sm text-muted-foreground">{agent.expertise}</p>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm">{agent.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{agent.role}</p>
                             </div>
-                          </div>
-                          <Badge variant={
-                            agent.availability?.status === "Available" ? "success" :
-                            agent.availability?.status === "Busy" ? "warning" :
-                            agent.availability?.status === "On Break" ? "default" :
-                            "secondary"
-                          }>
-                            {agent.availability?.status || (agent.isOnline ? "Online" : "Offline")}
-                          </Badge>
-                        </div>
-                        
-                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                          <div className="flex items-center space-x-1">
-                            <TicketCheck className="h-3 w-3 text-primary" />
-                            <span>{agent.metrics?.ticketsResolved || 0} tickets</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Timer className="h-3 w-3 text-primary" />
-                            <span>{agent.metrics?.responseTime || 0} min avg.</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-3 w-3 text-muted-foreground" />
-                            <span>{agent.isOnline ? "Active now" : `Last active: ${agent.lastActive ? timeAgo(agent.lastActive) : "Unknown"}`}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Star className="h-3 w-3 text-yellow-500" />
-                            <span>{agent.metrics?.satisfaction || 4.5}/5.0</span>
-                          </div>
-                        </div>
-
-                        {agent.rewards && agent.rewards.badges.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {agent.rewards.badges.slice(0, 3).map(badge => {
-                              const badgeData = BADGE_TYPES.find(b => b.name === badge);
-                              return (
-                                <Badge key={badge} variant="outline" className="text-[10px] h-5 bg-accent/30">
-                                  {badgeData?.icon} {badge}
-                                </Badge>
-                              );
-                            })}
-                            {agent.rewards.badges.length > 3 && (
-                              <Badge variant="outline" className="text-[10px] h-5 bg-accent/30">
-                                +{agent.rewards.badges.length - 3}
-                              </Badge>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="mt-3">
-                          <div className="flex justify-between items-center text-xs mb-1">
-                            <span className="text-muted-foreground">Today's Performance</span>
-                            <span className="font-medium">{agent.metrics ? Math.floor((agent.metrics.ticketsResolved / 20) * 100) : 0}%</span>
-                          </div>
-                          <Progress value={agent.metrics ? Math.floor((agent.metrics.ticketsResolved / 20) * 100) : 0} className="h-1 progress-gradient" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Leaderboard and Ticket Assignment */}
-            <div className="col-span-12 lg:col-span-4 space-y-6">
-              {/* Leaderboard */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Trophy className="h-5 w-5 text-primary" />
-                    <span>Agent Leaderboard</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[220px]">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[50px]">Rank</TableHead>
-                          <TableHead>Agent</TableHead>
-                          <TableHead className="text-right">Points</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {agents
-                          .sort((a, b) => (b.rewards?.points || 0) - (a.rewards?.points || 0))
-                          .map((agent, index) => (
-                            <TableRow key={agent.id}>
-                              <TableCell className="font-medium">
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center space-x-2">
-                                  <Avatar className="h-6 w-6">
-                                    <AvatarImage src={agent.avatar} />
-                                    <AvatarFallback className="text-xs">{agent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                  </Avatar>
-                                  <span>{agent.name}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <div className="flex items-center justify-end space-x-1">
-                                  <Zap className="h-3 w-3 text-yellow-500" />
-                                  <span>{agent.rewards?.points || 0}</span>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Manual Ticket Assignment */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <ClipboardCheck className="h-5 w-5 text-primary" />
-                    <span>Assign Ticket</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Select Agent</label>
-                      <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select an agent" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {agents.map(agent => (
-                            <SelectItem key={agent.id} value={agent.id}>
-                              {agent.name} ({agent.expertise})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Ticket Priority</label>
-                      <Select value={selectedPriority} onValueChange={(value: "low" | "medium" | "high") => setSelectedPriority(value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Low</SelectItem>
-                          <SelectItem value="medium">Medium</SelectItem>
-                          <SelectItem value="high">High</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <Button onClick={handleAssignTicket} className="w-full">
-                      Assign Ticket
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Agent Availability */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <CalendarIcon className="h-5 w-5 text-primary" />
-                    <span>Availability Calendar</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="mb-4">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      className="rounded-md border"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2 mt-4">
-                    <h4 className="text-sm font-medium">Today's Shifts</h4>
-                    {agents.slice(0, 3).map(agent => (
-                      <div key={agent.id} className="flex justify-between items-center text-sm p-2 rounded border bg-card/50">
-                        <div className="flex items-center space-x-2">
-                          <div className={`w-2 h-2 rounded-full ${agent.isOnline ? 'bg-green-500' : 'bg-gray-300'}`} />
-                          <span>{agent.name}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {agent.availability?.startTime} - {agent.availability?.endTime}
-                        </span>
-                      </div>
-                    ))}
-                    <Button variant="outline" size="sm" className="w-full mt-2">
-                      View All Schedules
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                            <div className="text-xs text-right">
+                              <p>{agent.ticketsResolved} tickets</p>
+                              <p className="text-muted-foreground mt-1">
+                                {agent.lastActive?.toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
-
-            {/* Active Tickets and Activity Feed */}
-            <div className="col-span-12 lg:col-span-4 space-y-6">
-              {/* Active Tickets */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TicketCheck className="h-5 w-5 text-primary" />
-                    <span>Active Tickets</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[220px] pr-4">
+            
+            {/* Agent Leaderboard */}
+            <div className="col-span-12 lg:col-span-4">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.6 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-primary" />
+                      <span>Agent Leaderboard</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
                     <div className="space-y-4">
-                      {tickets
-                        .filter(ticket => ticket.status !== "resolved")
-                        .slice(0, 5)
-                        .map(ticket => (
-                          <div key={ticket.id} className="p-4 rounded-lg border bg-card/50 hover:bg-card transition-colors premium-hover">
+                      {agents.slice(0, 5).map((agent, index) => (
+                        <div key={agent.id} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 text-sm font-medium text-muted-foreground">
+                                {index + 1}
+                              </div>
+                              <Avatar className="h-6 w-6">
+                                <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                                  {agent.name.split(" ").map(n => n[0]).join("")}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="text-sm font-medium">{agent.name}</div>
+                            </div>
+                            <div className="text-sm font-medium">{agent.performance}%</div>
+                          </div>
+                          <Progress value={agent.performance} className="h-1.5" />
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            {/* Active Tickets */}
+            <div className="col-span-12 lg:col-span-4">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.7 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Ticket className="h-5 w-5 text-primary" />
+                      <span>Active Tickets</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[250px] pr-4">
+                      <div className="space-y-4">
+                        {tickets.filter(t => t.status !== "resolved").slice(0, 6).map(ticket => (
+                          <div key={ticket.id} className="p-3 border rounded-md bg-card/50">
                             <div className="flex items-center justify-between mb-2">
-                              <h3 className="font-medium">{ticket.title}</h3>
-                              <Badge variant={
-                                ticket.priority === "high" ? "destructive" :
-                                ticket.priority === "medium" ? "default" :
-                                "secondary"
-                              }>
+                              <div className="font-medium">{ticket.title}</div>
+                              <Badge className={`
+                                ${
+                                  ticket.priority === "high" ? "bg-red-100 text-red-800 border-red-200" :
+                                  ticket.priority === "medium" ? "bg-amber-100 text-amber-800 border-amber-200" :
+                                  "bg-green-100 text-green-800 border-green-200"
+                                }
+                              `}>
                                 {ticket.priority}
                               </Badge>
                             </div>
-                            {ticket.assignedTo && (
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                                <ClipboardCheck className="h-4 w-4" />
-                                <span>Assigned to {ticket.assignedTo.name}</span>
-                              </div>
-                            )}
-                            <div className="flex items-center space-x-2 text-xs text-muted-foreground mt-2">
-                              <Clock className="h-3 w-3" />
-                              <span>Created {ticket.createdAt.toLocaleTimeString()}</span>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-muted-foreground">{ticket.customer}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {ticket.created.toLocaleDateString()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center mt-2">
+                              <Badge variant="outline" className={`
+                                ${
+                                  ticket.status === "open" ? "bg-blue-50 text-blue-700 border-blue-200" :
+                                  ticket.status === "in_progress" ? "bg-purple-50 text-purple-700 border-purple-200" :
+                                  "bg-amber-50 text-amber-700 border-amber-200"
+                                }
+                              `}>
+                                {ticket.status.replace("_", " ")}
+                              </Badge>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs">
+                                View <ChevronRight className="ml-1 h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
                         ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-              
-              {/* Activity Feed */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    <span>Activity Feed</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[220px] pr-4">
-                    <div className="space-y-4">
-                      {activityLogs.map(activity => {
-                        const agent = agents.find(a => a.id === activity.agentId);
-                        return (
-                          <div key={activity.id} className="flex flex-col space-y-2 notification-animate" style={{ animationDelay: '0.1s' }}>
-                            <div className="flex items-center space-x-2">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={agent?.avatar} />
-                                <AvatarFallback>{agent?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-sm">
-                                  <span className="font-medium">{agent?.name}</span>{' '}
-                                  <span className="text-muted-foreground">{activity.action}</span>
-                                </p>
-                                <p className="text-xs text-muted-foreground">{activity.details}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {activity.timestamp.toLocaleTimeString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div ref={activityEndRef} />
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-
-              {/* Reminders */}
-              <Card className="glass-card premium-card hover-scale">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    <span>Reminders</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[220px] pr-4">
-                    <div className="space-y-3">
-                      {reminders.slice(0, 5).map(reminder => {
-                        const agent = agents.find(a => a.id === reminder.agentId);
-                        return (
-                          <div key={reminder.id} className="p-3 rounded-lg border bg-card/50 hover:bg-card transition-colors">
-                            <div className="flex items-start space-x-2">
-                              <Bell className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="text-sm font-medium">{agent?.name}</p>
-                                <p className="text-xs">{reminder.message}</p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {reminder.timestamp.toLocaleTimeString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
-
+            
+            {/* Activity Feed */}
+            <div className="col-span-12 lg:col-span-4">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.8 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="h-5 w-5 text-primary" />
+                      <span>Activity Feed</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[250px] pr-4">
+                      <ol className="relative border-l border-muted space-y-4 ml-3">
+                        {activities.map(activity => (
+                          <li key={activity.id} className="ml-6">
+                            <span className="absolute flex items-center justify-center w-6 h-6 bg-primary/10 rounded-full -left-3 ring-4 ring-white">
+                              <User className="w-3 h-3 text-primary" />
+                            </span>
+                            <div className="p-3 bg-card/50 border rounded-md">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-medium">{activity.agent}</h3>
+                                <span className="text-xs text-muted-foreground">
+                                  {activity.timestamp.toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </span>
+                              </div>
+                              <p className="text-sm">
+                                {activity.action}
+                                {activity.ticketId && (
+                                  <span className="ml-1 text-primary font-medium">
+                                    {activity.ticketId}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
             {/* Team Communication */}
-            <Card className="col-span-12 glass-card premium-card hover-scale">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <MessageSquare className="h-5 w-5 text-primary" />
-                  <span>Team Communication</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px] pr-4">
-                  <div className="space-y-4">
-                    {messages.map(message => {
-                      const sender = agents.find(a => a.id === message.senderId);
-                      const receiver = agents.find(a => a.id === message.receiverId);
-                      return (
-                        <div key={message.id} className="flex flex-col space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Avatar className="h-6 w-6">
-                              <AvatarImage src={sender?.avatar} />
-                              <AvatarFallback>{sender?.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                            </Avatar>
-                            <p className="text-sm font-medium">{sender?.name}</p>
-                            <span className="text-xs text-muted-foreground">→</span>
-                            <p className="text-sm font-medium">{receiver?.name}</p>
-                            <span className="text-xs text-muted-foreground ml-auto">{message.timestamp.toLocaleTimeString()}</span>
-                          </div>
-                          <div className="pl-8">
-                            <p className="text-sm bg-accent/50 p-2 rounded-lg">{message.content}</p>
-                          </div>
-                          <Separator className="my-2" />
+            <div className="col-span-12 lg:col-span-8">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 1 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      <span>Team Communication</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex h-[400px] border rounded-md overflow-hidden">
+                      {/* Chat sidebar */}
+                      <div className="w-64 border-r bg-muted/30">
+                        <div className="p-3 border-b">
+                          <h3 className="font-medium">Active Tickets</h3>
                         </div>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-                
-                <div className="mt-4 flex items-center space-x-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>You</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 relative">
-                    <Input placeholder="Type your message..." className="pr-10" />
-                    <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7">
-                      <Send className="h-4 w-4" />
+                        <ScrollArea className="h-[350px]">
+                          {CHAT_MESSAGES.map(chat => (
+                            <div 
+                              key={chat.ticketId}
+                              className={`p-3 cursor-pointer hover:bg-muted/50 transition-colors ${
+                                selectedChat === chat.ticketId ? "bg-muted/80" : ""
+                              }`}
+                              onClick={() => setSelectedChat(chat.ticketId)}
+                            >
+                              <div className="font-medium text-sm">{chat.ticketId}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {chat.title}
+                              </div>
+                              <div className="flex items-center gap-1 mt-1 text-xs">
+                                <div className="flex -space-x-2">
+                                  {chat.messages.slice(0, 2).map((msg, idx) => (
+                                    <Avatar key={idx} className="h-5 w-5 border border-background">
+                                      <AvatarFallback className="text-[8px]">
+                                        {msg.sender.split(" ").map(n => n[0]).join("")}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  ))}
+                                </div>
+                                <span className="text-muted-foreground">
+                                  {chat.messages.length} messages
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </ScrollArea>
+                      </div>
+                      
+                      {/* Chat messages */}
+                      <div className="flex-1 flex flex-col">
+                        <div className="p-3 border-b flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium">
+                              {CHAT_MESSAGES.find(c => c.ticketId === selectedChat)?.ticketId}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {CHAT_MESSAGES.find(c => c.ticketId === selectedChat)?.title}
+                            </p>
+                          </div>
+                          <Button size="sm" variant="ghost">
+                            View Ticket
+                          </Button>
+                        </div>
+                        
+                        <ScrollArea className="flex-1 p-4">
+                          <div className="space-y-4">
+                            {CHAT_MESSAGES.find(c => c.ticketId === selectedChat)?.messages.map((message, idx) => (
+                              <div key={idx} className="flex gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="text-xs bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                                    {message.sender.split(" ").map(n => n[0]).join("")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-sm">{message.sender}</span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {new Date().toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })}
+                                    </span>
+                                  </div>
+                                  <p className="text-sm mt-1">{message.content}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                        
+                        <div className="p-3 border-t">
+                          <div className="flex gap-2">
+                            <Input placeholder="Type your message..." className="flex-1" />
+                            <Button>Send</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+            
+            {/* Reminders */}
+            <div className="col-span-12 lg:col-span-4">
+              <motion.div 
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 1.1 }}
+              >
+                <Card className="bg-white/60 border-purple-100/40">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="h-5 w-5 text-primary" />
+                      <span>Reminders</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-3">
+                        {reminders.map(reminder => (
+                          <motion.div 
+                            key={reminder.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-3 border rounded-md ${
+                              reminder.completed ? "bg-muted/30" : "bg-card/50"
+                            }`}
+                          >
+                            <div className="flex items-start">
+                              <div className="mr-2 pt-0.5">
+                                <Checkbox 
+                                  checked={reminder.completed}
+                                  className={`${
+                                    reminder.priority === "high" ? "text-red-600 data-[state=checked]:bg-red-600" : 
+                                    reminder.priority === "medium" ? "text-amber-600 data-[state=checked]:bg-amber-600" : 
+                                    "text-green-600 data-[state=checked]:bg-green-600"
+                                  }`}
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className={`text-sm font-medium ${
+                                  reminder.completed ? "line-through text-muted-foreground" : ""
+                                }`}>
+                                  {reminder.title}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className={`
+                                    ${
+                                      reminder.priority === "high" ? "bg-red-50 text-red-700 border-red-200" :
+                                      reminder.priority === "medium" ? "bg-amber-50 text-amber-700 border-amber-200" :
+                                      "bg-green-50 text-green-700 border-green-200"
+                                    }
+                                  `}>
+                                    {reminder.priority}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {reminder.dueDate.toLocaleDateString()} 
+                                    {" • "}
+                                    {reminder.dueDate.toLocaleTimeString([], {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                  <CardFooter className="border-t pt-4">
+                    <Button className="w-full">
+                      <Plus className="h-4 w-4 mr-2" /> Add Reminder
                     </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CardFooter>
+                </Card>
+              </motion.div>
+            </div>
           </div>
         </div>
       </main>
