@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -14,12 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
 import {
   Users,
   User,
@@ -38,10 +31,8 @@ import {
   Calendar,
   Search,
   Plus,
-  Activity as ActivityIcon,
-  Send
+  Activity as ActivityIcon
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 // Types
 interface Agent {
@@ -92,18 +83,9 @@ interface Message {
 }
 
 // Helper constants
-const FIRST_NAMES = [
-  "Arjun", "Aditya", "Rahul", "Vikram", "Raj", "Amit", "Sanjay", "Vivek", "Suresh", "Mahesh", 
-  "Neha", "Priya", "Meera", "Anjali", "Divya", "Pooja", "Isha", "Ananya", "Kavita", "Deepa"
-];
-
-const LAST_NAMES = [
-  "Sharma", "Patel", "Singh", "Gupta", "Verma", "Joshi", "Agarwal", "Mehta", "Desai", "Iyer", 
-  "Reddy", "Malhotra", "Kapoor", "Nair", "Pillai", "Saxena", "Trivedi", "Choudhury", "Bhat", "Rao"
-];
-
-const CUSTOMER_NAMES = ["Tata Consultancy", "Reliance Industries", "Infosys Technologies", "Bharti Airtel", "Mahindra Group", "Wipro Limited", "HCL Technologies", "Tech Mahindra", "Aditya Birla Group", "Larsen & Toubro", "Godrej Industries", "Bajaj Auto", "Adani Enterprises", "TVS Motors", "Sun Pharma"];
-
+const FIRST_NAMES = ["James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "Rahul", "Priya", "Anita", "Vikram", "Suresh"];
+const LAST_NAMES = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Sharma", "Patel", "Desai", "Gupta", "Kumar"];
+const CUSTOMER_NAMES = ["Apple Inc.", "Google LLC", "Microsoft Corp", "Amazon", "Tesla Motors", "Samsung", "Meta Platforms", "Netflix", "Salesforce", "Uber", "Airbnb", "Spotify", "Walmart", "Target", "Starbucks"];
 const TICKET_SUBJECTS = [
   "Account login issues",
   "Payment processing failed",
@@ -149,23 +131,23 @@ const CHAT_MESSAGES = [
     title: "Payment processing failed for premium customer",
     messages: [
       { 
-        sender: "Vikram Sharma", 
-        content: "Hey team, I'm looking at ticket T-1234 about a payment processing failure. The customer is pretty upset. @Anjali Desai can you take a look at the payment logs?" 
+        sender: "John Smith", 
+        content: "Hey team, I'm looking at ticket T-1234 about a payment processing failure. The customer is pretty upset. @Sarah Johnson can you take a look at the payment logs?" 
       },
       { 
-        sender: "Anjali Desai", 
-        content: "I'll check the logs right away. From what I can see initially, it looks like their card was declined by the payment gateway. @Rahul Verma, have you seen this error code before?" 
+        sender: "Sarah Johnson", 
+        content: "I'll check the logs right away. From what I can see initially, it looks like their card was declined by the payment gateway. @Michael Chen, have you seen this error code before?" 
       },
       { 
-        sender: "Rahul Verma", 
+        sender: "Michael Chen", 
         content: "Yes, that error usually means the card issuer blocked the transaction. I suggest we: 1) Verify customer details, 2) Ask them to contact their bank, 3) Offer alternative payment methods." 
       },
       { 
-        sender: "Vikram Sharma", 
-        content: "Great suggestions, Rahul. I'll contact the customer with these options. Anjali, can you prepare a detailed report of the transaction attempts for reference?" 
+        sender: "John Smith", 
+        content: "Great suggestions, Michael. I'll contact the customer with these options. Sarah, can you prepare a detailed report of the transaction attempts for reference?" 
       },
       { 
-        sender: "Anjali Desai", 
+        sender: "Sarah Johnson", 
         content: "Already on it. I'll have the report ready in 15 minutes and share it with you both." 
       }
     ]
@@ -175,27 +157,27 @@ const CHAT_MESSAGES = [
     title: "Data sync not working after recent update",
     messages: [
       { 
-        sender: "Rahul Verma", 
+        sender: "Michael Chen", 
         content: "Has anyone looked at ticket T-2345 about data sync issues? We've received multiple reports since the latest update." 
       },
       { 
-        sender: "Anjali Desai", 
-        content: "I'm checking it now. Looks like there might be an issue with the new API endpoints. @Vikram Sharma, didn't you work on the sync mechanism recently?" 
+        sender: "Sarah Johnson", 
+        content: "I'm checking it now. Looks like there might be an issue with the new API endpoints. @John Smith, didn't you work on the sync mechanism recently?" 
       },
       { 
-        sender: "Vikram Sharma", 
+        sender: "John Smith", 
         content: "Yes, I did. Let me review the logs. There might be a compatibility issue with older client versions. I'll push a hotfix to address this within the next hour." 
       },
       { 
-        sender: "Rahul Verma", 
+        sender: "Michael Chen", 
         content: "Should we notify all affected customers about the expected fix?" 
       },
       { 
-        sender: "Vikram Sharma", 
-        content: "Good idea. I'll draft a notification once I've confirmed the exact issue. Anjali, could you identify all impacted accounts so we can target the communication?" 
+        sender: "John Smith", 
+        content: "Good idea. I'll draft a notification once I've confirmed the exact issue. Sarah, could you identify all impacted accounts so we can target the communication?" 
       },
       { 
-        sender: "Anjali Desai", 
+        sender: "Sarah Johnson", 
         content: "Will do. I'll prepare a list of affected accounts categorized by priority level." 
       }
     ]
@@ -205,39 +187,32 @@ const CHAT_MESSAGES = [
     title: "Feature request implementation timeline",
     messages: [
       { 
-        sender: "Anjali Desai", 
-        content: "We have a priority feature request from Enterprise customer Tata Consultancy. They're asking about dark mode implementation timeline. Thoughts on when we can deliver this?" 
+        sender: "Sarah Johnson", 
+        content: "We have a priority feature request from Enterprise customer Acme Corp. They're asking about dark mode implementation timeline. Thoughts on when we can deliver this?" 
       },
       { 
-        sender: "Vikram Sharma", 
-        content: "I've reviewed the request. It's on our roadmap for next quarter, but given their status, we might want to expedite. @Rahul Verma, how busy is the front-end team right now?" 
+        sender: "John Smith", 
+        content: "I've reviewed the request. It's on our roadmap for next quarter, but given their status, we might want to expedite. @Michael Chen, how busy is the front-end team right now?" 
       },
       { 
-        sender: "Rahul Verma", 
+        sender: "Michael Chen", 
         content: "We're focused on the accessibility improvements this sprint, but I could allocate resources for this starting next week. It should take about 2-3 weeks to implement properly." 
       },
       { 
-        sender: "Anjali Desai", 
+        sender: "Sarah Johnson", 
         content: "That's great news! I'll let them know we can start work on it next week with an expected delivery in 3 weeks. Would be nice to under-promise and over-deliver." 
       },
       { 
-        sender: "Vikram Sharma", 
-        content: "Agreed. Rahul, can you prepare a brief implementation plan that I can share with the account manager? Just the high-level milestones and testing approach." 
+        sender: "John Smith", 
+        content: "Agreed. Michael, can you prepare a brief implementation plan that I can share with the account manager? Just the high-level milestones and testing approach." 
       },
       { 
-        sender: "Rahul Verma", 
+        sender: "Michael Chen", 
         content: "Sure thing. I'll have that ready by tomorrow morning. I'll also include some mockups so they can see what we're planning." 
       }
     ]
   }
 ];
-
-// Define form schemas
-const AddReminderSchema = z.object({
-  title: z.string().min(2, { message: "Title must be at least 2 characters" }),
-  dueDate: z.date(),
-  priority: z.enum(["low", "medium", "high"]),
-});
 
 // Helper functions
 const randomDate = (start: Date, end: Date) => {
@@ -319,73 +294,6 @@ const AgentsPage = () => {
   const [performanceTab, setPerformanceTab] = useState<"weekly" | "monthly" | "yearly">("weekly");
   const [selectedChat, setSelectedChat] = useState<string>("T-1234");
   const [searchTerm, setSearchTerm] = useState("");
-  const [isReminderDialogOpen, setIsReminderDialogOpen] = useState(false);
-  const [newMessage, setNewMessage] = useState("");
-
-  // Initialize forms
-  const reminderForm = useForm<z.infer<typeof AddReminderSchema>>({
-    resolver: zodResolver(AddReminderSchema),
-    defaultValues: {
-      title: "",
-      dueDate: new Date(),
-      priority: "medium",
-    },
-  });
-
-  // Add reminder handler
-  const onAddReminder = (values: z.infer<typeof AddReminderSchema>) => {
-    const newReminder: Reminder = {
-      id: `reminder-${Math.random().toString(36).substring(2, 10)}`,
-      title: values.title,
-      dueDate: values.dueDate,
-      priority: values.priority,
-      completed: false,
-    };
-    
-    setReminders(prev => [newReminder, ...prev]);
-    setIsReminderDialogOpen(false);
-    reminderForm.reset();
-    toast("New reminder added successfully");
-  };
-
-  // Send message handler
-  const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
-    
-    const selectedChatData = CHAT_MESSAGES.find(c => c.ticketId === selectedChat);
-    if (!selectedChatData) return;
-    
-    // Add new message to the chat
-    const updatedMessages = [...selectedChatData.messages, {
-      sender: "Vikram Sharma", // Using a fixed sender for the current user
-      content: newMessage,
-      timestamp: new Date(),
-    }];
-    
-    // Update the chat messages
-    const updatedChatMessages = CHAT_MESSAGES.map(chat => 
-      chat.ticketId === selectedChat 
-        ? { ...chat, messages: updatedMessages } 
-        : chat
-    );
-    
-    // Update state
-    setNewMessage("");
-    
-    // Show success message
-    toast("Message sent successfully");
-  };
-
-  // Handle reminder completion toggle
-  const toggleReminderCompletion = (id: string) => {
-    setReminders(prev => 
-      prev.map(reminder => 
-        reminder.id === id 
-          ? { ...reminder, completed: !reminder.completed } 
-          : reminder
-      )
-    );
-  };
 
   // Initialize with random data
   useEffect(() => {
@@ -1070,20 +978,8 @@ const AgentsPage = () => {
                         
                         <div className="p-3 border-t">
                           <div className="flex gap-2">
-                            <Input 
-                              placeholder="Type your message..." 
-                              className="flex-1" 
-                              value={newMessage}
-                              onChange={(e) => setNewMessage(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  handleSendMessage();
-                                }
-                              }}
-                            />
-                            <Button onClick={handleSendMessage}>
-                              <Send className="h-4 w-4 mr-2" /> Send
-                            </Button>
+                            <Input placeholder="Type your message..." className="flex-1" />
+                            <Button>Send</Button>
                           </div>
                         </div>
                       </div>
@@ -1124,7 +1020,6 @@ const AgentsPage = () => {
                               <div className="mr-2 pt-0.5">
                                 <Checkbox 
                                   checked={reminder.completed}
-                                  onCheckedChange={() => toggleReminderCompletion(reminder.id)}
                                   className={`${
                                     reminder.priority === "high" ? "text-red-600 data-[state=checked]:bg-red-600" : 
                                     reminder.priority === "medium" ? "text-amber-600 data-[state=checked]:bg-amber-600" : 
@@ -1165,83 +1060,9 @@ const AgentsPage = () => {
                     </ScrollArea>
                   </CardContent>
                   <CardFooter className="border-t pt-4">
-                    <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="w-full">
-                          <Plus className="h-4 w-4 mr-2" /> Add Reminder
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Add New Reminder</DialogTitle>
-                          <DialogDescription>
-                            Create a new reminder for tasks and follow-ups
-                          </DialogDescription>
-                        </DialogHeader>
-                        <Form {...reminderForm}>
-                          <form onSubmit={reminderForm.handleSubmit(onAddReminder)} className="space-y-4">
-                            <FormField
-                              control={reminderForm.control}
-                              name="title"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Title</FormLabel>
-                                  <FormControl>
-                                    <Input placeholder="Reminder title" {...field} />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={reminderForm.control}
-                              name="dueDate"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Due Date</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="datetime-local" 
-                                      {...field} 
-                                      value={field.value instanceof Date ? field.value.toISOString().slice(0, 16) : ''}
-                                      onChange={(e) => {
-                                        field.onChange(new Date(e.target.value));
-                                      }}
-                                    />
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <FormField
-                              control={reminderForm.control}
-                              name="priority"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Priority</FormLabel>
-                                  <FormControl>
-                                    <Select 
-                                      onValueChange={field.onChange} 
-                                      defaultValue={field.value}
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select priority" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="low">Low</SelectItem>
-                                        <SelectItem value="medium">Medium</SelectItem>
-                                        <SelectItem value="high">High</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </FormControl>
-                                </FormItem>
-                              )}
-                            />
-                            <DialogFooter>
-                              <Button type="submit">Add Reminder</Button>
-                            </DialogFooter>
-                          </form>
-                        </Form>
-                      </DialogContent>
-                    </Dialog>
+                    <Button className="w-full">
+                      <Plus className="h-4 w-4 mr-2" /> Add Reminder
+                    </Button>
                   </CardFooter>
                 </Card>
               </motion.div>
