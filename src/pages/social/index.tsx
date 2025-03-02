@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -782,10 +781,10 @@ const SocialPage = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Post Scheduler Modal */}
+          {/* Post Scheduler Modal - Updated to plain white background */}
           {showScheduler && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-              <Card className="w-full max-w-md mx-auto glass-card">
+              <Card className="w-full max-w-md mx-auto bg-white shadow-lg">
                 <CardHeader>
                   <CardTitle>Schedule Social Media Post</CardTitle>
                   <CardDescription>
