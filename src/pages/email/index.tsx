@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -869,5 +870,65 @@ const EmailPage = () => {
                         
                         <div className="p-4 border-t">
                           <div className="flex items-center gap-2">
-                            <Button
-                              className
+                            <Button 
+                              className="bg-gradient-to-r from-purple-600 to-indigo-600"
+                              onClick={() => setIsReplyOpen(true)}
+                            >
+                              <Reply className="mr-2 h-4 w-4" />
+                              Reply
+                            </Button>
+                            <Button variant="outline">
+                              <Forward className="mr-2 h-4 w-4" />
+                              Forward
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              className="ml-auto"
+                              onClick={() => handleEmailAction("mark_resolved", selectedEmail)}
+                            >
+                              <CheckCircle2 className="mr-2 h-4 w-4 text-green-600" />
+                              Mark as Resolved
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-6">
+                        <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center mb-4">
+                          <Mail className="h-8 w-8 text-purple-600" />
+                        </div>
+                        <h3 className="text-lg font-medium">Select an email to view</h3>
+                        <p className="text-gray-500 mt-1 max-w-sm">
+                          Choose an email from the list to view its contents
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+        </div>
+      </main>
+      
+      {isComposeOpen && (
+        <ComposeEmail 
+          isOpen={isComposeOpen} 
+          onClose={() => setIsComposeOpen(false)} 
+          onSend={handleComposeEmail}
+        />
+      )}
+      
+      {isReplyOpen && selectedEmail && (
+        <ReplyEmail 
+          isOpen={isReplyOpen} 
+          onClose={() => setIsReplyOpen(false)} 
+          email={selectedEmail}
+          onSend={handleReplyEmail}
+        />
+      )}
+    </div>
+  );
+};
+
+export default EmailPage;
