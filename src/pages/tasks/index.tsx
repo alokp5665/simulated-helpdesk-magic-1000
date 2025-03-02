@@ -9,6 +9,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { BarChart3, Users, CheckCircle2, Clock } from "lucide-react";
 
+// Add TypeScript declaration for the window property
+declare global {
+  interface Window {
+    KanbanSimulationTimeout: number;
+  }
+}
+
 const TasksPage = () => {
   const [stats, setStats] = useState({
     totalTasks: 24,
