@@ -50,7 +50,6 @@ interface EngagementGoal {
   current: number;
 }
 
-// Indian Hindu names for simulation
 const indianNames = [
   "Aarav Sharma", "Aditi Patel", "Arjun Mehta", "Ananya Singh", "Aryan Gupta",
   "Diya Verma", "Ishaan Malhotra", "Kavya Agarwal", "Neha Kapoor", "Rahul Joshi",
@@ -111,13 +110,11 @@ const SocialPage = () => {
     }, 3000);
   };
 
-  // Update wave graphs
   useEffect(() => {
     const interval = setInterval(() => {
       setWaveData1(prevData => [...prevData.slice(1), { value: Math.random() * 100 }]);
       setWaveData2(prevData => [...prevData.slice(1), { value: Math.random() * 100 }]);
       
-      // Update interaction rates
       setInteractionRates(prevRates => {
         const newRates = [...prevRates];
         const lastValue = newRates[newRates.length - 1].rate;
@@ -138,7 +135,6 @@ const SocialPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Update pie charts
   useEffect(() => {
     const interval = setInterval(() => {
       setPieData1(prevData => {
@@ -172,7 +168,6 @@ const SocialPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate social media posts
   useEffect(() => {
     const generatePost = (): SocialPost => {
       const platforms = ["twitter", "facebook", "instagram"] as const;
@@ -232,7 +227,6 @@ const SocialPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate campaigns
   useEffect(() => {
     const generateCampaign = (): Campaign => {
       const platforms = ["twitter", "facebook", "instagram", "all"] as const;
@@ -291,7 +285,6 @@ const SocialPage = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate updates to engagement goals
   useEffect(() => {
     const interval = setInterval(() => {
       setGoals(prevGoals => {
@@ -343,7 +336,6 @@ const SocialPage = () => {
       
       <main className="pl-64 pt-16">
         <div className="p-6 max-w-7xl mx-auto">
-          {/* Premium Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
               Social Media Analytics
@@ -351,7 +343,6 @@ const SocialPage = () => {
             <p className="text-muted-foreground mt-2">Real-time insights and engagement metrics</p>
           </div>
 
-          {/* Notification Popup */}
           {showNotification && (
             <div className="fixed top-20 right-6 z-50 notification-animate">
               <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
@@ -361,7 +352,6 @@ const SocialPage = () => {
             </div>
           )}
 
-          {/* Tabs Navigation */}
           <Tabs defaultValue="overview" className="mb-6" onValueChange={setActiveTab}>
             <TabsList className="grid w-full max-w-md grid-cols-3">
               <TabsTrigger value="overview" className="text-sm">Overview</TabsTrigger>
@@ -371,7 +361,6 @@ const SocialPage = () => {
 
             <TabsContent value="overview" className="space-y-6">
               <div className="grid grid-cols-12 gap-6 bentoGrid">
-                {/* Engagement Trends */}
                 <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center space-x-2">
@@ -410,7 +399,6 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Engagement Goals */}
                 <Card className="col-span-12 md:col-span-4 glass-card hover-scale">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -440,14 +428,13 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Sentiment Analysis */}
                 <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <PieChart className="h-5 w-5 text-primary" />
+                    <CardTitle className="flex items-center space-x-2 text-white">
+                      <PieChart className="h-5 w-5 text-white" />
                       <span>Sentiment Analysis</span>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-white">
                       Distribution of feedback sentiment across platforms
                     </CardDescription>
                   </CardHeader>
@@ -479,21 +466,26 @@ const SocialPage = () => {
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             color: 'white' 
                           }}
+                          labelStyle={{
+                            color: 'white'
+                          }}
+                          itemStyle={{
+                            color: 'white'
+                          }}
                         />
-                        <Legend />
+                        <Legend formatter={(value) => <span style={{ color: 'white' }}>{value}</span>} />
                       </RePieChart>
                     </ResponsiveContainer>
                   </CardContent>
                 </Card>
 
-                {/* Platform Distribution */}
                 <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
                   <CardHeader>
-                    <CardTitle className="flex items-center space-x-2">
-                      <BarChart className="h-5 w-5 text-primary" />
+                    <CardTitle className="flex items-center space-x-2 text-white">
+                      <BarChart className="h-5 w-5 text-white" />
                       <span>Platform Distribution</span>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-white">
                       Engagement breakdown by social media platform
                     </CardDescription>
                   </CardHeader>
@@ -501,8 +493,8 @@ const SocialPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <ReBarChart data={pieData2}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
+                        <XAxis dataKey="name" tick={{ fill: 'white' }} />
+                        <YAxis tick={{ fill: 'white' }} />
                         <RechartsTooltip 
                           formatter={(value: number) => [`${value.toFixed(1)}%`, 'Engagement']}
                           contentStyle={{ 
@@ -510,6 +502,12 @@ const SocialPage = () => {
                             borderRadius: '8px',
                             border: '1px solid rgba(255, 255, 255, 0.1)',
                             color: 'white' 
+                          }}
+                          labelStyle={{
+                            color: 'white'
+                          }}
+                          itemStyle={{
+                            color: 'white'
                           }}
                         />
                         <Bar dataKey="value">
@@ -526,7 +524,6 @@ const SocialPage = () => {
 
             <TabsContent value="feed" className="space-y-6">
               <div className="grid grid-cols-12 gap-6 bentoGrid">
-                {/* Filters and Actions */}
                 <Card className="col-span-12 glass-card">
                   <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row justify-between gap-4">
@@ -570,7 +567,6 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Social Feed */}
                 <Card className="col-span-12 md:col-span-8 glass-card hover-scale">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -646,9 +642,7 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Right Sidebar with Templates and Quick Stats */}
                 <div className="col-span-12 md:col-span-4 space-y-6">
-                  {/* Quick Stats */}
                   <Card className="glass-card hover-scale">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
@@ -700,7 +694,6 @@ const SocialPage = () => {
                     </CardContent>
                   </Card>
 
-                  {/* Response Templates */}
                   <Card className="glass-card hover-scale">
                     <CardHeader>
                       <CardTitle className="flex items-center space-x-2">
@@ -729,7 +722,6 @@ const SocialPage = () => {
 
             <TabsContent value="campaigns" className="space-y-6">
               <div className="grid grid-cols-12 gap-6 bentoGrid">
-                {/* Campaigns Overview */}
                 <Card className="col-span-12 glass-card hover-scale">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
@@ -781,7 +773,6 @@ const SocialPage = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Post Scheduler Modal - Updated to plain white background */}
           {showScheduler && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
               <Card className="w-full max-w-md mx-auto bg-white shadow-lg">

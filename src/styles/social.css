@@ -122,6 +122,17 @@
   backdrop-filter: blur(10px);
 }
 
+/* Glass card text color override for better visibility */
+.glass-card .recharts-tooltip-item-name,
+.glass-card .recharts-tooltip-item-value,
+.glass-card .recharts-legend-item-text,
+.glass-card text,
+.glass-card .recharts-cartesian-axis-tick-value,
+.glass-card .recharts-text {
+  fill: white !important;
+  color: white !important;
+}
+
 /* Premium button styling */
 .premium-button {
   background: linear-gradient(90deg, #4f46e5, #8b5cf6);
