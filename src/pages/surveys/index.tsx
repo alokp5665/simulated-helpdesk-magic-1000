@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -27,6 +28,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { Skeleton } from "@/components/ui/skeleton";
 import { AnalyticsCard } from "@/components/dashboard/AnalyticsCard";
 
+// Indian Hindu Names
 const FIRST_NAMES = [
   "Aarav", "Arjun", "Vivaan", "Dhruv", "Vihaan", 
   "Advik", "Aditya", "Rohan", "Vikram", "Aryan",
@@ -94,12 +96,14 @@ interface AgentPerformance {
   responsesCount: number;
 }
 
+// Helper function to determine sentiment based on rating
 const getSentiment = (rating: number): "positive" | "neutral" | "negative" => {
   if (rating >= 4) return "positive";
   if (rating >= 3) return "neutral";
   return "negative";
 };
 
+// Helper function to generate a random Indian name
 const getRandomIndianName = () => {
   return `${FIRST_NAMES[Math.floor(Math.random() * FIRST_NAMES.length)]} ${
     LAST_NAMES[Math.floor(Math.random() * LAST_NAMES.length)]
@@ -119,6 +123,7 @@ const SurveysPage = () => {
   const [targetResponseRate, setTargetResponseRate] = useState(80);
   const [responseFilter, setResponseFilter] = useState("all");
 
+  // Generate initial surveys
   useEffect(() => {
     setIsLoading(true);
     
@@ -129,9 +134,9 @@ const SurveysPage = () => {
         respondent: getRandomIndianName(),
         rating: rating,
         comment: COMMENTS[Math.floor(Math.random() * COMMENTS.length)],
-        timestamp: new Date(Date.now() - Math.random() * 48 * 60 * 60 * 1000),
+        timestamp: new Date(Date.now() - Math.random() * 48 * 60 * 60 * 1000), // Random time in the last 48 hours
         sentiment: getSentiment(rating),
-        resolved: Math.random() > 0.7
+        resolved: Math.random() > 0.7 // 30% chance of being resolved
       };
     };
 
@@ -149,7 +154,7 @@ const SurveysPage = () => {
         responses,
         responseRate: 60 + Math.random() * 30,
         averageRating: responses.reduce((acc, r) => acc + r.rating, 0) / responses.length,
-        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000), // Random date in the last month
         completionRate: 50 + Math.random() * 40,
         targetRate: 75 + Math.random() * 15,
         department: departments[Math.floor(Math.random() * departments.length)]
@@ -159,12 +164,14 @@ const SurveysPage = () => {
     const initialSurveys = Array(5).fill(null).map(generateSurvey);
     setSurveys(initialSurveys);
 
+    // Generate initial response rates
     const initialRates = Array(10).fill(0).map((_, i) => ({
       timestamp: Date.now() - (9 - i) * 3000,
       rate: 75 + Math.random() * 15
     }));
     setResponseRates(initialRates);
 
+    // Generate agent performance data
     const generateAgentPerformance = (): AgentPerformance[] => {
       return Array(8).fill(null).map(() => ({
         name: getRandomIndianName(),
@@ -175,6 +182,7 @@ const SurveysPage = () => {
     };
     setAgentPerformance(generateAgentPerformance());
 
+    // Generate feedback trends
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
     const trends = months.map(month => ({
       month,
@@ -184,11 +192,13 @@ const SurveysPage = () => {
     }));
     setFeedbackTrend(trends);
 
+    // Simulate loading
     setTimeout(() => {
       setIsLoading(false);
     }, 1500);
   }, []);
 
+  // Update response rates
   useEffect(() => {
     const interval = setInterval(() => {
       const newRate = 75 + Math.random() * 15;
@@ -197,6 +207,7 @@ const SurveysPage = () => {
         { timestamp: Date.now(), rate: newRate }
       ]);
       
+      // Occasionally show rate change notification
       if (Math.random() > 0.7) {
         const message = `Response Rate ${newRate > responseRates[responseRates.length-1]?.rate ? 'increased' : 'decreased'} to ${newRate.toFixed(1)}%`;
         setLatestNotification(message);
@@ -208,6 +219,7 @@ const SurveysPage = () => {
     return () => clearInterval(interval);
   }, [responseRates]);
 
+  // Add new responses randomly
   useEffect(() => {
     const interval = setInterval(() => {
       if (Math.random() > 0.6) {
@@ -237,6 +249,7 @@ const SurveysPage = () => {
           
           updatedSurveys[randomSurveyIndex] = updatedSurvey;
           
+          // Show notification for negative feedback
           if (rating <= 2) {
             const alertMessage = `Alert: Negative feedback from ${respondent}`;
             toast({
@@ -246,6 +259,7 @@ const SurveysPage = () => {
             });
           }
           
+          // Show notification for new feedback
           if (Math.random() > 0.5) {
             const newFeedbackMsg = `New feedback from ${respondent}`;
             setLatestNotification(newFeedbackMsg);
@@ -261,6 +275,7 @@ const SurveysPage = () => {
     return () => clearInterval(interval);
   }, [toast]);
 
+  // Update agent performance randomly
   useEffect(() => {
     const interval = setInterval(() => {
       if (Math.random() > 0.7) {
@@ -280,6 +295,7 @@ const SurveysPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Handle response to feedback
   const handleRespondToFeedback = useCallback((surveyId: string, responseId: string) => {
     setSurveys(prev => 
       prev.map(survey => {
@@ -307,18 +323,22 @@ const SurveysPage = () => {
     });
   }, [toast]);
 
+  // Filter surveys based on search term
   const filteredSurveys = surveys.filter(survey => 
     survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     survey.department.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Filter responses based on sentiment
   const getFilteredResponses = useCallback(() => {
     let allResponses = surveys.flatMap(survey => 
       survey.responses.map(response => ({...response, surveyId: survey.id, surveyTitle: survey.title}))
     );
     
+    // Sort by timestamp (newest first)
     allResponses.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     
+    // Apply filter
     if (responseFilter !== "all") {
       allResponses = allResponses.filter(response => response.sentiment === responseFilter);
     }
@@ -326,6 +346,7 @@ const SurveysPage = () => {
     return allResponses.slice(0, 12);
   }, [surveys, responseFilter]);
 
+  // Get sentiment class for color coding
   const getSentimentClass = (sentiment: string) => {
     switch(sentiment) {
       case 'positive': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
@@ -335,6 +356,7 @@ const SurveysPage = () => {
     }
   };
 
+  // Get sentiment icon
   const getSentimentIcon = (sentiment: string) => {
     switch(sentiment) {
       case 'positive': return <Smile className="h-4 w-4 text-green-500" />;
@@ -344,6 +366,7 @@ const SurveysPage = () => {
     }
   };
 
+  // Handle creating a new survey
   const handleCreateSurvey = () => {
     toast({
       title: "New Survey Created",
@@ -351,6 +374,7 @@ const SurveysPage = () => {
     });
   };
   
+  // Handle downloading report
   const handleDownloadReport = () => {
     toast({
       title: "Report Download Successful",
@@ -358,6 +382,7 @@ const SurveysPage = () => {
     });
   };
 
+  // Calculate overall statistics
   const totalResponses = surveys.reduce((total, survey) => total + survey.responses.length, 0);
   const averageSatisfaction = surveys.reduce((total, survey) => total + survey.averageRating, 0) / surveys.length;
   const positiveFeedbackPercentage = surveys.reduce((total, survey) => {
@@ -365,6 +390,7 @@ const SurveysPage = () => {
     return total + (positiveCount / survey.responses.length) * 100;
   }, 0) / surveys.length;
 
+  // Data for sentiment distribution pie chart
   const sentimentData = [
     { name: 'Positive', value: Math.round(positiveFeedbackPercentage), fill: '#22c55e' },
     { name: 'Neutral', value: Math.round((100 - positiveFeedbackPercentage) * 0.6), fill: '#eab308' },
@@ -372,7 +398,7 @@ const SurveysPage = () => {
   ];
   
   const responseBreakdownData = [
-    { name: 'Sales', responses: 86, fill: '#3070f4' },
+    { name: 'Sales', responses: 86, fill: '#8884d8' },
     { name: 'Support', responses: 114, fill: '#82ca9d' },
     { name: 'Marketing', responses: 73, fill: '#ffc658' },
     { name: 'Development', responses: 91, fill: '#ff8042' },
@@ -384,8 +410,10 @@ const SurveysPage = () => {
       <TopBar />
       <Sidebar />
       
+      {/* Main content */}
       <main className="pl-64 pt-16">
         <div className="p-6 max-w-[1600px] mx-auto">
+          {/* Top notification */}
           {showNotification && (
             <div className="fixed top-20 right-6 z-50 animate-fade-in">
               <div className="bg-primary text-white p-3 rounded-lg shadow-lg flex items-center space-x-2">
@@ -395,6 +423,7 @@ const SurveysPage = () => {
             </div>
           )}
           
+          {/* Page header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Survey Dashboard</h1>
@@ -420,6 +449,7 @@ const SurveysPage = () => {
             </div>
           </div>
           
+          {/* Stats cards row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <AnalyticsCard
               title="Total Responses"
@@ -451,7 +481,9 @@ const SurveysPage = () => {
             />
           </div>
           
+          {/* Bento grid layout for main content */}
           <div className="grid grid-cols-12 gap-6">
+            {/* Response Rate Chart */}
             <Card className="col-span-12 lg:col-span-8 glass-card hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center space-x-2">
@@ -544,6 +576,7 @@ const SurveysPage = () => {
               </CardContent>
             </Card>
 
+            {/* Sentiment Analysis */}
             <Card className="col-span-12 lg:col-span-4 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -599,6 +632,7 @@ const SurveysPage = () => {
               </CardContent>
             </Card>
 
+            {/* Feedback Trends */}
             <Card className="col-span-12 md:col-span-6 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -618,11 +652,7 @@ const SurveysPage = () => {
                         <XAxis dataKey="month" />
                         <RechartsTooltip 
                           formatter={(value, name) => {
-                            // Fix the type issue by properly checking if name is a string
-                            const formattedName = typeof name === 'string' 
-                              ? name.charAt(0).toUpperCase() + name.slice(1) 
-                              : name;
-                            return [`${value}%`, formattedName];
+                            return [`${value}%`, typeof name === 'string' ? name.charAt(0).toUpperCase() + name.slice(1) : name];
                           }}
                         />
                         <Bar dataKey="positive" name="Positive" fill="#22c55e" />
@@ -639,6 +669,7 @@ const SurveysPage = () => {
               </CardContent>
             </Card>
 
+            {/* Response Breakdown */}
             <Card className="col-span-12 md:col-span-6 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -679,6 +710,7 @@ const SurveysPage = () => {
               </CardContent>
             </Card>
 
+            {/* Agent Performance */}
             <Card className="col-span-12 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -693,8 +725,8 @@ const SurveysPage = () => {
                       <div key={i} className="flex items-center space-x-4">
                         <Skeleton className="h-10 w-10 rounded-full" />
                         <div className="space-y-2">
-                          <Skeleton className="h-4 w-24" />
-                          <Skeleton className="h-3 w-16 mt-1" />
+                          <Skeleton className="h-4 w-[250px]" />
+                          <Skeleton className="h-4 w-[200px]" />
                         </div>
                       </div>
                     ))}
@@ -767,6 +799,7 @@ const SurveysPage = () => {
               </CardFooter>
             </Card>
 
+            {/* Survey Stats */}
             <Card className="col-span-12 lg:col-span-4 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -876,6 +909,7 @@ const SurveysPage = () => {
               </CardFooter>
             </Card>
 
+            {/* Latest Responses */}
             <Card className="col-span-12 lg:col-span-8 hover:shadow-xl transition-all duration-300 hover:translate-y-[-5px]">
               <CardHeader>
                 <div className="flex items-center justify-between">
