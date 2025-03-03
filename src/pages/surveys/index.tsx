@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -397,12 +396,13 @@ const SurveysPage = () => {
     { name: 'Negative', value: Math.round((100 - positiveFeedbackPercentage) * 0.4), fill: '#ef4444' }
   ];
   
+  // Updated responseBreakdownData with consistent color scheme
   const responseBreakdownData = [
-    { name: 'Sales', responses: 86, fill: '#8884d8' },
-    { name: 'Support', responses: 114, fill: '#82ca9d' },
-    { name: 'Marketing', responses: 73, fill: '#ffc658' },
-    { name: 'Development', responses: 91, fill: '#ff8042' },
-    { name: 'HR', responses: 57, fill: '#8dd1e1' }
+    { name: 'Sales', responses: 86, fill: '#3070f4' },
+    { name: 'Support', responses: 114, fill: '#3070f4' },
+    { name: 'Marketing', responses: 73, fill: '#3070f4' },
+    { name: 'Development', responses: 91, fill: '#3070f4' },
+    { name: 'HR', responses: 57, fill: '#3070f4' }
   ];
 
   return (
@@ -685,16 +685,12 @@ const SurveysPage = () => {
                 ) : (
                   <div className="h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={responseBreakdownData} layout="vertical">
-                        <XAxis type="number" />
+                      <BarChart data={responseBreakdownData}>
+                        <XAxis dataKey="name" />
                         <RechartsTooltip 
                           formatter={(value) => [`${value} responses`, 'Total']}
                         />
-                        <Bar dataKey="responses">
-                          {responseBreakdownData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Bar>
+                        <Bar dataKey="responses" fill="#3070f4" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
