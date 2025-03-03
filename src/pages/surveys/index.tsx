@@ -617,7 +617,13 @@ const SurveysPage = () => {
                       <BarChart data={feedbackTrend}>
                         <XAxis dataKey="month" />
                         <RechartsTooltip 
-                          formatter={(value) => [`${value}%`, typeof name === 'string' ? name.charAt(0).toUpperCase() + name.slice(1) : name]}
+                          formatter={(value, name) => {
+                            // Fix the type issue by properly checking if name is a string
+                            const formattedName = typeof name === 'string' 
+                              ? name.charAt(0).toUpperCase() + name.slice(1) 
+                              : name;
+                            return [`${value}%`, formattedName];
+                          }}
                         />
                         <Bar dataKey="positive" name="Positive" fill="#22c55e" />
                         <Bar dataKey="neutral" name="Neutral" fill="#eab308" />
