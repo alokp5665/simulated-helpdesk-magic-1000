@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -440,8 +441,8 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Sentiment Analysis */}
-                <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
+                {/* Sentiment Analysis - Changed to plain white background */}
+                <Card className="col-span-12 md:col-span-6 hover-scale bg-white">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <PieChart className="h-5 w-5 text-primary" />
@@ -486,8 +487,8 @@ const SocialPage = () => {
                   </CardContent>
                 </Card>
 
-                {/* Platform Distribution */}
-                <Card className="col-span-12 md:col-span-6 glass-card hover-scale">
+                {/* Platform Distribution - Changed to plain white background */}
+                <Card className="col-span-12 md:col-span-6 hover-scale bg-white">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <BarChart className="h-5 w-5 text-primary" />
@@ -781,7 +782,7 @@ const SocialPage = () => {
             </TabsContent>
           </Tabs>
 
-          {/* Post Scheduler Modal - Updated to plain white background */}
+          {/* Post Scheduler Modal */}
           {showScheduler && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
               <Card className="w-full max-w-md mx-auto bg-white shadow-lg">
