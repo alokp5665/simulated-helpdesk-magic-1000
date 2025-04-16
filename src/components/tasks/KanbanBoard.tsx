@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -175,7 +175,11 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
   return Math.round((completed / subtasks.length) * 100);
 };
 
-export const KanbanBoard = forwardRef((props, ref) => {
+interface KanbanBoardProps {
+  onAddTaskFunctionReady?: (addTaskFn: (status: "todo" | "inProgress" | "done", taskData: any) => void) => void;
+}
+
+export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
   const [columns, setColumns] = useState<KanbanColumns>(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
   const [newTaskContent, setNewTaskContent] = useState("");
@@ -183,30 +187,34 @@ export const KanbanBoard = forwardRef((props, ref) => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
 
-  useImperativeHandle(ref, () => ({
-    addNewTask: (status: "todo" | "inProgress" | "done", taskData: any) => {
-      const newTask: KanbanTask = {
-        id: taskData.id || `task-${Date.now()}`,
-        content: taskData.title || taskData.content,
-        status,
-        priority: taskData.priority || "medium",
-        progress: status === "done" ? 100 : 0,
-        deadline: taskData.deadline,
-        assignee: taskData.assignee || TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)],
-        subtasks: taskData.subtasks || [
-          { id: `st-${Date.now()}-1`, title: "First step", completed: false },
-          { id: `st-${Date.now()}-2`, title: "Review", completed: false }
-        ]
-      };
-      
-      setColumns(prev => ({
-        ...prev,
-        [status]: [...prev[status], newTask]
-      }));
-      
-      return newTask;
+  const addNewTask = useCallback((status: "todo" | "inProgress" | "done", taskData: any) => {
+    const newTask: KanbanTask = {
+      id: taskData.id || `task-${Date.now()}`,
+      content: taskData.title || taskData.content,
+      status,
+      priority: taskData.priority || "medium",
+      progress: status === "done" ? 100 : 0,
+      deadline: taskData.deadline,
+      assignee: taskData.assignee || TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)],
+      subtasks: taskData.subtasks || [
+        { id: `st-${Date.now()}-1`, title: "First step", completed: false },
+        { id: `st-${Date.now()}-2`, title: "Review", completed: false }
+      ]
+    };
+    
+    setColumns(prev => ({
+      ...prev,
+      [status]: [...prev[status], newTask]
+    }));
+    
+    return newTask;
+  }, []);
+
+  useEffect(() => {
+    if (onAddTaskFunctionReady) {
+      onAddTaskFunctionReady(addNewTask);
     }
-  }));
+  }, [addNewTask, onAddTaskFunctionReady]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -283,7 +291,7 @@ export const KanbanBoard = forwardRef((props, ref) => {
     };
   }, [columns]);
 
-  const addNewTask = (status: "todo" | "inProgress" | "done") => {
+  const handleAddNewTask = (status: "todo" | "inProgress" | "done") => {
     if (!newTaskContent.trim()) {
       toast.error("Task name cannot be empty");
       return;
@@ -462,7 +470,7 @@ export const KanbanBoard = forwardRef((props, ref) => {
               <Button variant="outline" size="sm" onClick={() => setNewTaskContent("")}>
                 <X className="h-4 w-4 mr-1" /> Cancel
               </Button>
-              <Button size="sm" onClick={() => addNewTask(columnId)}>
+              <Button size="sm" onClick={() => handleAddNewTask(columnId)}>
                 <Plus className="h-4 w-4 mr-1" /> Add Task
               </Button>
             </div>
@@ -836,6 +844,6 @@ export const KanbanBoard = forwardRef((props, ref) => {
       </CardContent>
     </Card>
   );
-});
+};
 
 KanbanBoard.displayName = "KanbanBoard";

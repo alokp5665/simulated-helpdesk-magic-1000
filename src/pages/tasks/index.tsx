@@ -42,8 +42,8 @@ const TasksPage = () => {
     status: "todo",
   });
   
-  // Reference to the KanbanBoard component for adding tasks
-  const [kanbanRef, setKanbanRef] = useState<any>(null);
+  // Use state to store the addNewTask function instead of a direct ref
+  const [addNewTaskFn, setAddNewTaskFn] = useState<any>(null);
 
   const handleCreateTask = () => {
     if (!newTask.title.trim()) {
@@ -51,9 +51,9 @@ const TasksPage = () => {
       return;
     }
 
-    // If KanbanBoard reference exists, call its addNewTask method
-    if (kanbanRef && kanbanRef.addNewTask) {
-      kanbanRef.addNewTask(newTask.status, {
+    // If the addNewTask function exists, call it
+    if (addNewTaskFn) {
+      addNewTaskFn(newTask.status, {
         ...newTask,
         id: `task-${Date.now()}`,
       });
@@ -175,13 +175,15 @@ const TasksPage = () => {
           
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-12 lg:col-span-8">
-              <KanbanBoard ref={(ref) => setKanbanRef(ref)} />
+              <KanbanBoard 
+                onAddTaskFunctionReady={(addTaskFn) => setAddNewTaskFn(addTaskFn)} 
+              />
             </div>
             
             <div className="col-span-12 lg:col-span-4 space-y-6">
               <ClockCalendar onTaskScheduled={(task) => {
-                if (kanbanRef && kanbanRef.addNewTask) {
-                  kanbanRef.addNewTask("todo", {
+                if (addNewTaskFn) {
+                  addNewTaskFn("todo", {
                     ...task,
                     id: `task-${Date.now()}`,
                     status: "todo"
