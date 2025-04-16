@@ -1,24 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
 import { 
   Clock, 
@@ -30,10 +13,7 @@ import {
   Snowflake,
   Sun,
   Music,
-  Flame,
-  PlusCircle,
-  Clock3,
-  AlertTriangle
+  Flame
 } from "lucide-react";
 
 const REMINDERS = [
@@ -73,56 +53,11 @@ const HOLIDAYS = [
   { date: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 8), name: "Staff Appreciation Day", icon: <Gift className="h-4 w-4 text-purple-400" /> },
 ];
 
-// Missed deadlines data
-const MISSED_DEADLINES = [
-  {
-    task: "Update customer feedback database",
-    dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 4),
-    assignee: "Alex Chen",
-    priority: "medium"
-  },
-  {
-    task: "Send marketing campaign report",
-    dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 2),
-    assignee: "Sarah Johnson",
-    priority: "high"
-  },
-  {
-    task: "Client presentation preparation",
-    dueDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 1),
-    assignee: "Miguel Rodriguez",
-    priority: "high"
-  }
-];
-
-// Rescheduled tasks data
-const RESCHEDULED_TASKS = [
-  {
-    task: "Team training session",
-    originalDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7),
-    newDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 3),
-    rescheduledBy: "Priya Patel"
-  },
-  {
-    task: "Product review meeting",
-    originalDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 3),
-    newDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 5),
-    rescheduledBy: "Jordan Taylor"
-  }
-];
-
 export const ClockCalendar = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState<string>("");
   const [activeHoliday, setActiveHoliday] = useState<{name: string, icon: JSX.Element} | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
-  const [newTask, setNewTask] = useState({
-    title: "",
-    priority: "medium",
-    assignee: "Unassigned"
-  });
-  const [showDeadlinesOverview, setShowDeadlinesOverview] = useState(true);
 
   useEffect(() => {
     // No loading delay
@@ -186,39 +121,6 @@ export const ClockCalendar = () => {
     );
   };
 
-  const handleDateSelect = (newDate: Date | undefined) => {
-    if (newDate) {
-      setDate(newDate);
-      setTaskDialogOpen(true);
-    }
-  };
-
-  const handleAddTask = () => {
-    if (!newTask.title.trim()) {
-      toast.error("Task title cannot be empty");
-      return;
-    }
-    
-    toast.success("Task scheduled successfully", {
-      description: `"${newTask.title}" scheduled for ${date.toLocaleDateString()}`,
-      icon: <CalendarIcon className="h-4 w-4" />,
-    });
-    
-    setTaskDialogOpen(false);
-    setNewTask({
-      title: "",
-      priority: "medium",
-      assignee: "Unassigned"
-    });
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric"
-    });
-  };
-
   return (
     <Card className={`glass-card hover-scale ${activeHoliday ? 'bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border-purple-200/50' : ''}`}>
       <CardHeader className={activeHoliday ? 'border-b border-purple-200/50' : ''}>
@@ -244,31 +146,18 @@ export const ClockCalendar = () => {
             <p className="text-muted-foreground text-sm">Loading calendar...</p>
           </div>
         ) : (
-          <>
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="text-sm font-medium">Select a date to schedule a task</h4>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs flex items-center p-1 h-auto"
-                onClick={() => setShowDeadlinesOverview(!showDeadlinesOverview)}
-              >
-                {showDeadlinesOverview ? "Hide" : "Show"} Deadlines Overview
-              </Button>
-            </div>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={handleDateSelect}
-              className="rounded-md border pointer-events-auto"
-              modifiers={{
-                holiday: (date) => isHoliday(date)
-              }}
-              modifiersClassNames={{
-                holiday: "holiday-date bg-red-100 text-red-600 font-semibold"
-              }}
-            />
-          </>
+          <Calendar
+            mode="single"
+            selected={date}
+            onSelect={(newDate) => setDate(newDate || new Date())}
+            className="rounded-md border"
+            modifiers={{
+              holiday: (date) => isHoliday(date)
+            }}
+            modifiersClassNames={{
+              holiday: "holiday-date bg-red-100 text-red-600 font-semibold"
+            }}
+          />
         )}
         
         {/* Display upcoming events for the next 7 days */}
@@ -294,139 +183,7 @@ export const ClockCalendar = () => {
               ))}
           </div>
         </div>
-        
-        {/* Missed Deadlines & Reschedules Overview */}
-        {showDeadlinesOverview && (
-          <div className="mt-4 border-t pt-4 border-gray-100">
-            <h4 className="font-medium flex items-center text-amber-600 mb-2">
-              <AlertTriangle className="h-4 w-4 mr-1" />
-              Missed Deadlines & Reschedules
-            </h4>
-            
-            <div className="space-y-3">
-              <div>
-                <h5 className="text-xs text-red-500 font-medium mb-1">Missed Deadlines</h5>
-                {MISSED_DEADLINES.map((item, idx) => (
-                  <div key={`missed-${idx}`} className="flex items-center justify-between text-xs mb-1 pb-1 border-b border-gray-50 last:border-0">
-                    <div className="flex items-center">
-                      <Clock3 className="h-3 w-3 text-red-400 mr-1" />
-                      <span className="flex-1 truncate max-w-[140px]">{item.task}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-red-500 font-medium">{formatDate(item.dueDate)}</span>
-                      <div className="ml-1 h-4 w-4 rounded-full bg-purple-100 flex items-center justify-center text-[10px] text-purple-700">
-                        {item.assignee.charAt(0)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div>
-                <h5 className="text-xs text-amber-500 font-medium mb-1">Rescheduled Tasks</h5>
-                {RESCHEDULED_TASKS.map((item, idx) => (
-                  <div key={`reschedule-${idx}`} className="flex items-start justify-between text-xs mb-1 pb-1 border-b border-gray-50 last:border-0">
-                    <div className="flex items-center">
-                      <Clock className="h-3 w-3 text-amber-400 mr-1 mt-[2px]" />
-                      <span className="flex-1 truncate max-w-[140px]">{item.task}</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center justify-end mb-1">
-                        <span className="text-red-400 line-through">{formatDate(item.originalDate)}</span>
-                        <span className="mx-1">→</span>
-                        <span className="text-green-500">{formatDate(item.newDate)}</span>
-                      </div>
-                      <div className="text-[10px] text-slate-400">
-                        by {item.rescheduledBy}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="text-xs text-slate-500 mt-1">
-                <span className="flex items-center">
-                  <AlertTriangle className="h-3 w-3 text-amber-400 mr-1" />
-                  Most common bottleneck days: Monday, Friday
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </CardContent>
-      
-      <Dialog open={taskDialogOpen} onOpenChange={setTaskDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Schedule New Task</DialogTitle>
-            <DialogDescription>
-              Create a task for {date.toLocaleDateString()}. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="task-title" className="text-right text-sm">
-                Title
-              </label>
-              <Input
-                id="task-title"
-                placeholder="Enter task title"
-                className="col-span-3"
-                value={newTask.title}
-                onChange={(e) => setNewTask({...newTask, title: e.target.value})}
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="priority" className="text-right text-sm">
-                Priority
-              </label>
-              <Select 
-                value={newTask.priority} 
-                onValueChange={(val) => setNewTask({...newTask, priority: val})}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="assignee" className="text-right text-sm">
-                Assignee
-              </label>
-              <Select 
-                value={newTask.assignee} 
-                onValueChange={(val) => setNewTask({...newTask, assignee: val})}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Sarah Johnson">Sarah Johnson</SelectItem>
-                  <SelectItem value="Miguel Rodriguez">Miguel Rodriguez</SelectItem>
-                  <SelectItem value="Alex Chen">Alex Chen</SelectItem>
-                  <SelectItem value="Priya Patel">Priya Patel</SelectItem>
-                  <SelectItem value="Jordan Taylor">Jordan Taylor</SelectItem>
-                  <SelectItem value="Unassigned">Unassigned</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setTaskDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="button" onClick={handleAddTask}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Schedule Task
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

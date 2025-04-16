@@ -7,7 +7,7 @@ import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ClockCalendar } from "@/components/tasks/ClockCalendar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { BarChart3, Users, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { BarChart3, Users, CheckCircle2, Clock } from "lucide-react";
 
 // Add TypeScript declaration for the window property
 declare global {
@@ -21,8 +21,7 @@ const TasksPage = () => {
     totalTasks: 24,
     completedTasks: 12,
     inProgressTasks: 8,
-    upcomingDeadlines: 5,
-    missedDeadlines: 3
+    upcomingDeadlines: 5
   });
 
   // Add a custom styling for scrollbars
@@ -86,8 +85,8 @@ const TasksPage = () => {
           <p className="text-muted-foreground mb-8">Organize, track, and manage your tasks efficiently</p>
           
           <div className="grid grid-cols-12 gap-6">
-            {/* Quick Stats - Top Row, now 5 cards with missed deadlines */}
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
+            {/* Quick Stats - Top Row, 4 cards */}
+            <div className="col-span-12 lg:col-span-3 space-y-0">
               <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-purple-200/40 bg-white/60`}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
@@ -103,7 +102,7 @@ const TasksPage = () => {
               </Card>
             </div>
             
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
+            <div className="col-span-12 lg:col-span-3 space-y-0">
               <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-green-200/40 bg-white/60`}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
@@ -119,7 +118,7 @@ const TasksPage = () => {
               </Card>
             </div>
             
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
+            <div className="col-span-12 lg:col-span-3 space-y-0">
               <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-blue-200/40 bg-white/60`}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
@@ -135,7 +134,7 @@ const TasksPage = () => {
               </Card>
             </div>
             
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
+            <div className="col-span-12 lg:col-span-3 space-y-0">
               <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-amber-200/40 bg-white/60`}>
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center">
@@ -145,23 +144,6 @@ const TasksPage = () => {
                     </div>
                     <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
                       <Clock className="h-6 w-6 text-amber-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* New Missed Deadlines card */}
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-red-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Missed Deadlines</p>
-                      <p className="text-3xl font-bold text-red-500">{stats.missedDeadlines}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                      <AlertTriangle className="h-6 w-6 text-red-500" />
                     </div>
                   </div>
                 </CardContent>
