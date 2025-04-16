@@ -20,12 +20,6 @@ import {
   BarChart,
   LineChart,
   Activity,
-  Calendar,
-  FileText,
-  ClipboardCheck,
-  GitPullRequestDraft,
-  GitMerge,
-  Milestone
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -53,8 +47,8 @@ const generateRandomData = (points: number, min = 0, max = 100) => {
   }));
 };
 
-// Professional names for simulation
-const professionalNames = [
+// Indian Hindu Names for simulation
+const indianNames = [
   "Aarav Sharma",
   "Priya Patel",
   "Arjun Singh",
@@ -72,9 +66,9 @@ const professionalNames = [
   "Anil Agarwal",
 ];
 
-// Generate random professional name
+// Generate random Indian name
 const getRandomName = () => {
-  return professionalNames[Math.floor(Math.random() * professionalNames.length)];
+  return indianNames[Math.floor(Math.random() * indianNames.length)];
 };
 
 // This generates a smooth wave-like data for the charts 
@@ -85,17 +79,17 @@ const generateSmoothData = (points: number, amplitude = 30, offset = 50) => {
   }));
 };
 
-// Project types for simulation
-const projectTypes = ["Feature Development", "Bug Fix", "UI Update", "Infrastructure", "Product Launch"];
+// Ticket types for simulation
+const ticketTypes = ["Technical Issue", "Billing Question", "Feature Request", "Account Access", "General Inquiry"];
 
-// Generate random project
-const generateRandomProject = () => {
+// Generate random ticket
+const generateRandomTicket = () => {
   const id = Math.floor(10000 + Math.random() * 90000);
   return {
-    id: `PR-${id}`,
-    manager: getRandomName(),
-    type: projectTypes[Math.floor(Math.random() * projectTypes.length)],
-    status: ["Planning", "In Progress", "Review", "Completed"][Math.floor(Math.random() * 4)],
+    id: `TK-${id}`,
+    customer: getRandomName(),
+    type: ticketTypes[Math.floor(Math.random() * ticketTypes.length)],
+    status: ["Open", "In Progress", "Resolved"][Math.floor(Math.random() * 3)],
     priority: ["Low", "Medium", "High"][Math.floor(Math.random() * 3)],
     timeAgo: `${Math.floor(Math.random() * 60)} min ago`,
   };
@@ -133,15 +127,15 @@ const FeedItem = ({ icon, title, message, time, colorClass }: FeedItemProps) => 
 const Index = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const [projectData, setProjectData] = useState({
-    completed: 0,
+  const [ticketData, setTicketData] = useState({
+    resolved: 0,
     inProgress: 0,
-    upcoming: 0,
+    due: 0,
     new: 0,
   });
 
   const [chartData, setChartData] = useState(generateSmoothData(24));
-  const [deliveryTimeData, setDeliveryTimeData] = useState(generateSmoothData(24, 25, 20));
+  const [responseTimeData, setResponseTimeData] = useState(generateSmoothData(24, 25, 20));
   const [salesData, setSalesData] = useState({
     daily: generateSmoothData(24, 40, 60),
     weekly: generateSmoothData(7, 50, 70),
@@ -149,14 +143,14 @@ const Index = () => {
     yearly: generateSmoothData(12, 70, 90),
   });
   
-  const [taskFeed, setTaskFeed] = useState<any[]>([]);
-  const [updateFeed, setUpdateFeed] = useState<any[]>([]);
-  const [teamFeed, setTeamFeed] = useState<any[]>([]);
-  const [milestoneFeed, setMilestoneFeed] = useState<any[]>([]);
+  const [emailFeed, setEmailFeed] = useState<any[]>([]);
+  const [socialFeed, setSocialFeed] = useState<any[]>([]);
+  const [agentFeed, setAgentFeed] = useState<any[]>([]);
+  const [customerFeed, setCustomerFeed] = useState<any[]>([]);
   const [activityFeed, setActivityFeed] = useState<any[]>([]);
   const [selectedSalesView, setSelectedSalesView] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
   
-  const [recentProjects, setRecentProjects] = useState<any[]>([]);
+  const [recentTickets, setRecentTickets] = useState<any[]>([]);
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
 
   // Simulate data loading
@@ -165,25 +159,25 @@ const Index = () => {
       setIsLoading(false);
       
       // Initial data
-      setProjectData({
-        completed: Math.floor(Math.random() * 100),
+      setTicketData({
+        resolved: Math.floor(Math.random() * 100),
         inProgress: Math.floor(Math.random() * 50),
-        upcoming: Math.floor(Math.random() * 30),
+        due: Math.floor(Math.random() * 30),
         new: Math.floor(Math.random() * 20),
       });
       
       // Generate initial feeds
       updateAllFeeds();
       
-      // Generate initial projects
-      const initialProjects = Array(5).fill(null).map(() => generateRandomProject());
-      setRecentProjects(initialProjects);
+      // Generate initial tickets
+      const initialTickets = Array(5).fill(null).map(() => generateRandomTicket());
+      setRecentTickets(initialTickets);
       
       // Generate top performers
       const initialPerformers = [
-        { name: "Priya Sharma", projects: 15, ontime: 98 },
-        { name: "Amit Patel", projects: 12, ontime: 96 },
-        { name: "Neha Gupta", projects: 10, ontime: 99 },
+        { name: "Priya Sharma", tickets: 15, satisfaction: 98 },
+        { name: "Amit Patel", tickets: 12, satisfaction: 96 },
+        { name: "Neha Gupta", tickets: 10, satisfaction: 99 },
       ];
       setTopPerformers(initialPerformers);
       
@@ -194,53 +188,53 @@ const Index = () => {
 
   // Function to update all feeds
   const updateAllFeeds = () => {
-    // Task feed
-    const newTask = {
-      assignee: getRandomName(),
-      title: ["Update project dashboard", "Create new milestone", "Fix critical bug", "Update documentation"][Math.floor(Math.random() * 4)],
+    // Email feed
+    const newEmail = {
+      sender: getRandomName(),
+      subject: ["Question about my order", "Support needed", "Thank you for help", "Product inquiry"][Math.floor(Math.random() * 4)],
       time: `${Math.floor(Math.random() * 60)} min ago`
     };
-    setTaskFeed(prev => [newTask, ...prev].slice(0, 5));
+    setEmailFeed(prev => [newEmail, ...prev].slice(0, 5));
     
-    // Update feed
-    const projects = ["Website Redesign", "Mobile App", "CRM Integration", "Cloud Migration"];
-    const project = projects[Math.floor(Math.random() * projects.length)];
-    const newUpdate = {
+    // Social feed
+    const platforms = ["Twitter", "Facebook", "Instagram", "LinkedIn"];
+    const platform = platforms[Math.floor(Math.random() * platforms.length)];
+    const newSocial = {
       user: getRandomName(),
-      project,
+      platform,
       message: [
-        "added a new comment",
-        "updated the timeline",
-        "created a milestone",
-        "shared project assets",
+        "Need assistance with the product",
+        "Loving the new features!",
+        "Having trouble logging in",
+        "Can someone help me with setup?",
       ][Math.floor(Math.random() * 4)],
       time: `${Math.floor(Math.random() * 60)} min ago`
     };
-    setUpdateFeed(prev => [newUpdate, ...prev].slice(0, 5));
+    setSocialFeed(prev => [newSocial, ...prev].slice(0, 5));
     
-    // Team feed
-    const newTeam = {
+    // Agent feed
+    const newAgent = {
       name: getRandomName(),
-      action: ["completed task", "started shift", "assigned to project", "completed training"][Math.floor(Math.random() * 4)],
+      action: ["resolved ticket", "started shift", "assigned to case", "completed training"][Math.floor(Math.random() * 4)],
       detail: `#${Math.floor(1000 + Math.random() * 9000)}`,
       time: `${Math.floor(Math.random() * 60)} min ago`
     };
-    setTeamFeed(prev => [newTeam, ...prev].slice(0, 5));
+    setAgentFeed(prev => [newAgent, ...prev].slice(0, 5));
     
-    // Milestone feed
-    const newMilestone = {
-      name: ["Phase 1 Complete", "Beta Launch", "Design Approval", "User Testing"][Math.floor(Math.random() * 4)],
-      project: projects[Math.floor(Math.random() * projects.length)],
-      completionPercent: Math.floor(Math.random() * 100),
+    // Customer feed
+    const newCustomer = {
+      name: getRandomName(),
+      action: ["updated profile", "placed order", "submitted feedback", "registered account"][Math.floor(Math.random() * 4)],
+      detail: `#${Math.floor(10000 + Math.random() * 90000)}`,
       time: `${Math.floor(Math.random() * 60)} min ago`
     };
-    setMilestoneFeed(prev => [newMilestone, ...prev].slice(0, 5));
+    setCustomerFeed(prev => [newCustomer, ...prev].slice(0, 5));
     
     // Activity feed
     const newActivity = {
-      type: ["Project", "Task", "Review", "Meeting"][Math.floor(Math.random() * 4)],
+      type: ["Ticket", "Order", "Review", "Inquiry"][Math.floor(Math.random() * 4)],
       id: `#${Math.floor(10000 + Math.random() * 90000)}`,
-      action: ["created", "updated", "completed", "assigned"][Math.floor(Math.random() * 4)],
+      action: ["created", "updated", "resolved", "assigned"][Math.floor(Math.random() * 4)],
       by: getRandomName(),
       time: `${Math.floor(Math.random() * 60)} min ago`
     };
@@ -251,12 +245,12 @@ const Index = () => {
   useEffect(() => {
     if (isLoading) return;
     
-    // Simulate real-time project updates
-    const projectInterval = setInterval(() => {
-      setProjectData({
-        completed: Math.floor(Math.random() * 100),
+    // Simulate real-time ticket updates
+    const ticketInterval = setInterval(() => {
+      setTicketData({
+        resolved: Math.floor(Math.random() * 100),
         inProgress: Math.floor(Math.random() * 50),
-        upcoming: Math.floor(Math.random() * 30),
+        due: Math.floor(Math.random() * 30),
         new: Math.floor(Math.random() * 20),
       });
     }, 4000);
@@ -264,7 +258,7 @@ const Index = () => {
     // Simulate real-time chart data updates
     const chartInterval = setInterval(() => {
       setChartData(generateSmoothData(24));
-      setDeliveryTimeData(generateSmoothData(24, 25, 20));
+      setResponseTimeData(generateSmoothData(24, 25, 20));
       
       // Update sales data
       setSalesData({
@@ -279,14 +273,14 @@ const Index = () => {
     const feedInterval = setInterval(() => {
       updateAllFeeds();
       
-      // Update recent projects
-      const newProject = generateRandomProject();
-      setRecentProjects(prev => [newProject, ...prev].slice(0, 5));
+      // Update recent tickets
+      const newTicket = generateRandomTicket();
+      setRecentTickets(prev => [newTicket, ...prev].slice(0, 5));
       
     }, 8000);
     
     return () => {
-      clearInterval(projectInterval);
+      clearInterval(ticketInterval);
       clearInterval(chartInterval);
       clearInterval(feedInterval);
     };
@@ -358,8 +352,8 @@ const Index = () => {
             transition={{ duration: 0.5 }}
             className="mb-8"
           >
-            <h1 className="text-3xl font-bold text-foreground/90">Project Dashboard</h1>
-            <p className="text-muted-foreground">Real-time metrics and project analytics</p>
+            <h1 className="text-3xl font-bold text-foreground/90">Dashboard Overview</h1>
+            <p className="text-muted-foreground">Real-time metrics and analytics</p>
           </motion.div>
           
           {/* Bento Grid Layout */}
@@ -373,19 +367,19 @@ const Index = () => {
               transition={{ delay: 0.1 }}
             >
               <AnalyticsCard
-                title="Completed Projects"
-                value={isLoading ? "..." : projectData.completed}
+                title="Resolved Tickets"
+                value={isLoading ? "..." : ticketData.resolved}
                 icon={<CheckCircle className="h-5 w-5 text-green-500" />}
-                description="Last 30 days"
+                description="Last 24 hours"
                 className="relative overflow-hidden border-green-100/50 bg-gradient-to-br from-white to-green-50/60"
               >
                 {!isLoading && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
                       <span>Progress</span>
-                      <span className="font-medium">{Math.min(100, Math.round(projectData.completed))}%</span>
+                      <span className="font-medium">{Math.min(100, Math.round(ticketData.resolved))}%</span>
                     </div>
-                    <Progress value={Math.min(100, projectData.completed)} className="h-1.5 bg-green-100" />
+                    <Progress value={Math.min(100, ticketData.resolved)} className="h-1.5 bg-green-100" />
                   </div>
                 )}
               </AnalyticsCard>
@@ -399,19 +393,19 @@ const Index = () => {
               transition={{ delay: 0.2 }}
             >
               <AnalyticsCard
-                title="Active Projects"
-                value={isLoading ? "..." : projectData.inProgress}
+                title="In Progress"
+                value={isLoading ? "..." : ticketData.inProgress}
                 icon={<Clock className="h-5 w-5 text-blue-500" />}
-                description="Currently being managed"
+                description="Currently being handled"
                 className="relative overflow-hidden border-blue-100/50 bg-gradient-to-br from-white to-blue-50/60"
               >
                 {!isLoading && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
                       <span>Assigned</span>
-                      <span className="font-medium">{Math.min(100, Math.round(projectData.inProgress * 2))}%</span>
+                      <span className="font-medium">{Math.min(100, Math.round(ticketData.inProgress * 2))}%</span>
                     </div>
-                    <Progress value={Math.min(100, projectData.inProgress * 2)} className="h-1.5 bg-blue-100" />
+                    <Progress value={Math.min(100, ticketData.inProgress * 2)} className="h-1.5 bg-blue-100" />
                   </div>
                 )}
               </AnalyticsCard>
@@ -425,19 +419,19 @@ const Index = () => {
               transition={{ delay: 0.3 }}
             >
               <AnalyticsCard
-                title="Upcoming Deadlines"
-                value={isLoading ? "..." : projectData.upcoming}
+                title="Due Today"
+                value={isLoading ? "..." : ticketData.due}
                 icon={<AlertCircle className="h-5 w-5 text-amber-500" />}
-                description="Next 7 days"
+                description="Requires attention"
                 className="relative overflow-hidden border-amber-100/50 bg-gradient-to-br from-white to-amber-50/60"
               >
                 {!isLoading && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
                       <span>Critical</span>
-                      <span className="font-medium">{Math.round(projectData.upcoming / 3)}%</span>
+                      <span className="font-medium">{Math.round(ticketData.due / 3)}%</span>
                     </div>
-                    <Progress value={Math.round(projectData.upcoming / 3)} className="h-1.5 bg-amber-100" />
+                    <Progress value={Math.round(ticketData.due / 3)} className="h-1.5 bg-amber-100" />
                   </div>
                 )}
               </AnalyticsCard>
@@ -451,19 +445,19 @@ const Index = () => {
               transition={{ delay: 0.4 }}
             >
               <AnalyticsCard
-                title="New Projects"
-                value={isLoading ? "..." : projectData.new}
-                icon={<FileText className="h-5 w-5 text-purple-500" />}
-                description="Awaiting kickoff"
+                title="New Tickets"
+                value={isLoading ? "..." : ticketData.new}
+                icon={<Ticket className="h-5 w-5 text-purple-500" />}
+                description="Awaiting assignment"
                 className="relative overflow-hidden border-purple-100/50 bg-gradient-to-br from-white to-purple-50/60"
               >
                 {!isLoading && (
                   <div className="mt-3">
                     <div className="flex justify-between text-xs mb-1">
                       <span>Unassigned</span>
-                      <span className="font-medium">{Math.round(100 - (projectData.new * 2))}%</span>
+                      <span className="font-medium">{Math.round(100 - (ticketData.new * 2))}%</span>
                     </div>
-                    <Progress value={Math.round(100 - (projectData.new * 2))} className="h-1.5 bg-purple-100" />
+                    <Progress value={Math.round(100 - (ticketData.new * 2))} className="h-1.5 bg-purple-100" />
                   </div>
                 )}
               </AnalyticsCard>
@@ -481,7 +475,7 @@ const Index = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-semibold text-foreground/90 flex items-center gap-2">
                     <BarChart3 className="h-5 w-5 text-indigo-500" />
-                    <span>Project Budget Utilization</span>
+                    <span>Total Sales</span>
                   </CardTitle>
                   <div className="flex gap-2">
                     {(['daily', 'weekly', 'monthly', 'yearly'] as const).map((view) => (
@@ -507,7 +501,7 @@ const Index = () => {
                       </div>
                     ) : (
                       <ChartContainer config={{
-                        budget: { label: "Budget", theme: { light: "#8875FF", dark: "#8875FF" } },
+                        sales: { label: "Sales", theme: { light: "#8875FF", dark: "#8875FF" } },
                       }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={salesData[selectedSalesView]}>
@@ -534,7 +528,7 @@ const Index = () => {
                             <Area
                               type="monotone"
                               dataKey="value"
-                              name="budget"
+                              name="sales"
                               stroke="#8875FF"
                               strokeWidth={2}
                               fill="url(#colorSales)"
@@ -551,7 +545,7 @@ const Index = () => {
               </Card>
             </motion.div>
             
-            {/* Recent Projects */}
+            {/* Recent Tickets */}
             <motion.div 
               className="col-span-12 lg:col-span-4"
               variants={itemVariants}
@@ -562,8 +556,8 @@ const Index = () => {
               <Card className="glass-card hover-scale overflow-hidden border border-violet-200/20 bg-white/90 h-[350px]">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-lg font-semibold text-foreground/90 flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-violet-500" />
-                    <span>Recent Projects</span>
+                    <Ticket className="h-5 w-5 text-violet-500" />
+                    <span>Recent Tickets</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="overflow-auto max-h-[270px] custom-scrollbar">
@@ -575,9 +569,9 @@ const Index = () => {
                       </div>
                     ))
                   ) : (
-                    recentProjects.map((project, i) => (
+                    recentTickets.map((ticket, i) => (
                       <motion.div 
-                        key={project.id}
+                        key={ticket.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
@@ -585,20 +579,19 @@ const Index = () => {
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-medium text-sm text-foreground/90">{project.id}</p>
-                            <p className="text-xs text-muted-foreground">{project.manager}</p>
+                            <p className="font-medium text-sm text-foreground/90">{ticket.id}</p>
+                            <p className="text-xs text-muted-foreground">{ticket.customer}</p>
                           </div>
                           <div className={`text-xs px-2 py-0.5 rounded-full font-medium 
-                            ${project.status === 'Completed' ? 'bg-green-100 text-green-700' : 
-                              project.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 
-                              project.status === 'Review' ? 'bg-amber-100 text-amber-700' : 
-                              'bg-purple-100 text-purple-700'}`}>
-                            {project.status}
+                            ${ticket.status === 'Resolved' ? 'bg-green-100 text-green-700' : 
+                              ticket.status === 'In Progress' ? 'bg-blue-100 text-blue-700' : 
+                              'bg-amber-100 text-amber-700'}`}>
+                            {ticket.status}
                           </div>
                         </div>
                         <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                          <span>{project.type}</span>
-                          <span>{project.timeAgo}</span>
+                          <span>{ticket.type}</span>
+                          <span>{ticket.timeAgo}</span>
                         </div>
                       </motion.div>
                     ))
@@ -623,7 +616,7 @@ const Index = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                     <BarChart className="h-4 w-4 text-blue-500" />
-                    <span>Project Completion Rate</span>
+                    <span>Customer Satisfaction</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -634,7 +627,7 @@ const Index = () => {
                       </div>
                     ) : (
                       <ChartContainer config={{
-                        completion: { label: "Completion Rate", theme: { light: "#3b82f6", dark: "#3b82f6" } },
+                        satisfaction: { label: "Satisfaction Rate", theme: { light: "#3b82f6", dark: "#3b82f6" } },
                       }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={oceanWaveData1}>
@@ -661,7 +654,7 @@ const Index = () => {
                             <Area
                               type="monotone"
                               dataKey="value"
-                              name="completion"
+                              name="satisfaction"
                               stroke="#3b82f6"
                               strokeWidth={2}
                               fill="url(#colorWave1)"
@@ -693,7 +686,7 @@ const Index = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-emerald-500" />
-                    <span>Team Velocity</span>
+                    <span>Resolution Rate</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -704,7 +697,7 @@ const Index = () => {
                       </div>
                     ) : (
                       <ChartContainer config={{
-                        velocity: { label: "Points/Sprint", theme: { light: "#10b981", dark: "#10b981" } },
+                        resolution: { label: "Resolution Rate", theme: { light: "#10b981", dark: "#10b981" } },
                       }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={oceanWaveData2}>
@@ -731,7 +724,7 @@ const Index = () => {
                             <Area
                               type="monotone"
                               dataKey="value"
-                              name="velocity"
+                              name="resolution"
                               stroke="#10b981"
                               strokeWidth={2}
                               fill="url(#colorWave2)"
@@ -763,7 +756,7 @@ const Index = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                     <Activity className="h-4 w-4 text-purple-500" />
-                    <span>Resource Utilization</span>
+                    <span>Agent Performance</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -774,7 +767,7 @@ const Index = () => {
                       </div>
                     ) : (
                       <ChartContainer config={{
-                        utilization: { label: "Utilization %", theme: { light: "#8b5cf6", dark: "#8b5cf6" } },
+                        performance: { label: "Performance Score", theme: { light: "#8b5cf6", dark: "#8b5cf6" } },
                       }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart data={oceanWaveData3}>
@@ -801,7 +794,7 @@ const Index = () => {
                             <Area
                               type="monotone"
                               dataKey="value"
-                              name="utilization"
+                              name="performance"
                               stroke="#8b5cf6"
                               strokeWidth={2}
                               fill="url(#colorWave3)"
@@ -827,12 +820,12 @@ const Index = () => {
               transition={{ delay: 1.0 }}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Task Feed */}
+                {/* Email Feed */}
                 <Card className="glass-card hover-scale overflow-hidden border border-blue-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <ClipboardCheck className="h-4 w-4 text-blue-500" />
-                      <span>Recent Tasks</span>
+                      <Mail className="h-4 w-4 text-blue-500" />
+                      <span>Email Notifications</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="overflow-auto max-h-[220px] custom-scrollbar">
@@ -844,13 +837,13 @@ const Index = () => {
                         </div>
                       ))
                     ) : (
-                      taskFeed.map((task, i) => (
+                      emailFeed.map((email, i) => (
                         <FeedItem 
                           key={i}
-                          icon={<ClipboardCheck className="h-4 w-4" />}
-                          title={task.assignee}
-                          message={task.title}
-                          time={task.time}
+                          icon={<Mail className="h-4 w-4" />}
+                          title={email.sender}
+                          message={email.subject}
+                          time={email.time}
                           colorClass="blue"
                         />
                       ))
@@ -858,12 +851,12 @@ const Index = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Update Feed */}
+                {/* Social Feed */}
                 <Card className="glass-card hover-scale overflow-hidden border border-rose-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                       <MessageSquare className="h-4 w-4 text-rose-500" />
-                      <span>Project Updates</span>
+                      <span>Social Media Activity</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="overflow-auto max-h-[220px] custom-scrollbar">
@@ -875,13 +868,13 @@ const Index = () => {
                         </div>
                       ))
                     ) : (
-                      updateFeed.map((update, i) => (
+                      socialFeed.map((social, i) => (
                         <FeedItem 
                           key={i}
                           icon={<MessageSquare className="h-4 w-4" />}
-                          title={`${update.user} on ${update.project}`}
-                          message={update.message}
-                          time={update.time}
+                          title={`${social.user} on ${social.platform}`}
+                          message={social.message}
+                          time={social.time}
                           colorClass="rose"
                         />
                       ))
@@ -891,12 +884,12 @@ const Index = () => {
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                {/* Team Feed */}
+                {/* Agent Feed */}
                 <Card className="glass-card hover-scale overflow-hidden border border-amber-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                       <Users className="h-4 w-4 text-amber-500" />
-                      <span>Team Activities</span>
+                      <span>Agent Activities</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="overflow-auto max-h-[220px] custom-scrollbar">
@@ -908,13 +901,13 @@ const Index = () => {
                         </div>
                       ))
                     ) : (
-                      teamFeed.map((team, i) => (
+                      agentFeed.map((agent, i) => (
                         <FeedItem 
                           key={i}
                           icon={<Users className="h-4 w-4" />}
-                          title={team.name}
-                          message={`${team.action} ${team.detail}`}
-                          time={team.time}
+                          title={agent.name}
+                          message={`${agent.action} ${agent.detail}`}
+                          time={agent.time}
                           colorClass="amber"
                         />
                       ))
@@ -922,12 +915,12 @@ const Index = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Milestone Feed */}
+                {/* Customer Feed */}
                 <Card className="glass-card hover-scale overflow-hidden border border-green-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                      <Milestone className="h-4 w-4 text-green-500" />
-                      <span>Milestone Updates</span>
+                      <User className="h-4 w-4 text-green-500" />
+                      <span>Customer Updates</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="overflow-auto max-h-[220px] custom-scrollbar">
@@ -939,13 +932,13 @@ const Index = () => {
                         </div>
                       ))
                     ) : (
-                      milestoneFeed.map((milestone, i) => (
+                      customerFeed.map((customer, i) => (
                         <FeedItem 
                           key={i}
-                          icon={<Milestone className="h-4 w-4" />}
-                          title={milestone.name}
-                          message={`${milestone.project}: ${milestone.completionPercent}% complete`}
-                          time={milestone.time}
+                          icon={<User className="h-4 w-4" />}
+                          title={customer.name}
+                          message={`${customer.action} ${customer.detail}`}
+                          time={customer.time}
                           colorClass="green"
                         />
                       ))
@@ -955,7 +948,7 @@ const Index = () => {
               </div>
             </motion.div>
             
-            {/* Delivery Time + Top Performers */}
+            {/* Response Time + Top Performers */}
             <motion.div 
               className="col-span-12 lg:col-span-4"
               variants={itemVariants}
@@ -964,12 +957,12 @@ const Index = () => {
               transition={{ delay: 1.1 }}
             >
               <div className="space-y-6">
-                {/* Delivery Time Chart */}
+                {/* Response Time Chart */}
                 <Card className="glass-card hover-scale overflow-hidden border border-teal-200/20 bg-white/90">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-teal-500" />
-                      <span>Project Delivery Time</span>
+                      <span>Response Time</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -980,10 +973,10 @@ const Index = () => {
                         </div>
                       ) : (
                         <ChartContainer config={{
-                          delivery: { label: "Days", theme: { light: "#14b8a6", dark: "#14b8a6" } },
+                          response: { label: "Minutes", theme: { light: "#14b8a6", dark: "#14b8a6" } },
                         }}>
                           <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={deliveryTimeData}>
+                            <AreaChart data={responseTimeData}>
                               <defs>
                                 <linearGradient id="colorResponse" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.5}/>
@@ -1007,7 +1000,7 @@ const Index = () => {
                               <Area
                                 type="monotone"
                                 dataKey="value"
-                                name="delivery"
+                                name="response"
                                 stroke="#14b8a6"
                                 strokeWidth={2}
                                 fill="url(#colorResponse)"
@@ -1028,7 +1021,7 @@ const Index = () => {
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                       <Award className="h-4 w-4 text-amber-500" />
-                      <span>Top Project Managers</span>
+                      <span>Top Performers</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1054,11 +1047,11 @@ const Index = () => {
                             </div>
                             <div>
                               <p className="font-medium text-sm">{performer.name}</p>
-                              <p className="text-xs text-muted-foreground">{performer.projects} projects</p>
+                              <p className="text-xs text-muted-foreground">{performer.tickets} tickets</p>
                             </div>
                           </div>
                           <div className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
-                            {performer.ontime}% On-time
+                            {performer.satisfaction}% Satisfaction
                           </div>
                         </motion.div>
                       ))
