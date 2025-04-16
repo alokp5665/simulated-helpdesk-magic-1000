@@ -1,11 +1,29 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { ListTodo, Timer, CheckCircle2, AlertTriangle, BarChart, Clock, Layers } from "lucide-react";
+import { 
+  ListTodo, 
+  Timer, 
+  CheckCircle2, 
+  AlertTriangle, 
+  BarChart, 
+  Clock, 
+  Layers, 
+  Plus,
+  X,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  Users,
+  Clock3
+} from "lucide-react";
 
 interface KanbanTask {
   id: string;
@@ -14,6 +32,7 @@ interface KanbanTask {
   priority: "low" | "medium" | "high";
   progress: number;
   deadline?: string;
+  assignee?: string;
   subtasks?: { id: string; title: string; completed: boolean }[];
 }
 
@@ -40,6 +59,15 @@ const SAMPLE_TASKS = [
     priority: "high" as const,
     subtasks: ["Review current modules", "Add new procedures", "Create assessment questions"]
   }
+];
+
+// Team members for assignees
+const TEAM_MEMBERS = [
+  "Sarah Johnson",
+  "Miguel Rodriguez",
+  "Alex Chen",
+  "Priya Patel",
+  "Jordan Taylor"
 ];
 
 // Pre-filled tasks
@@ -151,6 +179,10 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
 export const KanbanBoard = () => {
   const [columns, setColumns] = useState<KanbanColumns>(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
+  const [newTaskContent, setNewTaskContent] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const newTaskInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -226,6 +258,40 @@ export const KanbanBoard = () => {
       clearTimeout(timer);
     };
   }, [columns]);
+
+  const addNewTask = (status: "todo" | "inProgress" | "done") => {
+    if (!newTaskContent.trim()) {
+      toast.error("Task name cannot be empty");
+      return;
+    }
+
+    const randomAssignee = TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)];
+    
+    const newTask: KanbanTask = {
+      id: `task-${Date.now()}`,
+      content: newTaskContent,
+      status,
+      priority: newTaskPriority,
+      progress: status === "done" ? 100 : 0,
+      deadline: new Date(Date.now() + 1000 * 60 * 60 * 24 * Math.floor(Math.random() * 14) + 1).toLocaleDateString(),
+      assignee: randomAssignee,
+      subtasks: [
+        { id: `st-${Date.now()}-1`, title: "First step", completed: false },
+        { id: `st-${Date.now()}-2`, title: "Review", completed: false }
+      ]
+    };
+    
+    setColumns(prev => ({
+      ...prev,
+      [status]: [...prev[status], newTask]
+    }));
+    
+    setNewTaskContent("");
+    toast.success("New task added", {
+      description: newTask.content,
+      icon: <ListTodo className="h-4 w-4" />
+    });
+  };
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
@@ -308,21 +374,102 @@ export const KanbanBoard = () => {
     icon: Icon, 
     title, 
     color, 
-    count 
+    count,
+    columnId
   }: { 
     icon: any; 
     title: string; 
     color: string; 
-    count: number 
+    count: number;
+    columnId: "todo" | "inProgress" | "done";
   }) => (
-    <div className="flex items-center space-x-2 mb-4">
-      <Icon className={color} />
-      <h3 className="font-semibold">{title}</h3>
-      <span className={`${color.replace('text-', 'bg-')}/10 ${color} px-2 py-1 rounded-full text-sm`}>
-        {count}
-      </span>
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center space-x-2">
+        <Icon className={color} />
+        <h3 className="font-semibold">{title}</h3>
+        <span className={`${color.replace('text-', 'bg-')}/10 ${color} px-2 py-1 rounded-full text-sm`}>
+          {count}
+        </span>
+      </div>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button size="icon" variant="ghost" className={`h-8 w-8 rounded-full ${color.replace('text-', 'hover:bg-')}/10`}>
+            <Plus className={`h-4 w-4 ${color}`} />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-72">
+          <div className="grid gap-2">
+            <h4 className="font-medium">Add New Task</h4>
+            <Input 
+              placeholder="Task name" 
+              value={newTaskContent}
+              onChange={(e) => setNewTaskContent(e.target.value)}
+              className="col-span-2"
+              ref={newTaskInputRef}
+            />
+            <div className="flex gap-2 items-center">
+              <div className="flex-1">Priority:</div>
+              <Button
+                size="sm"
+                variant={newTaskPriority === "low" ? "default" : "outline"} 
+                onClick={() => setNewTaskPriority("low")}
+                className={newTaskPriority === "low" ? "bg-green-500 hover:bg-green-600" : ""}
+              >
+                Low
+              </Button>
+              <Button 
+                size="sm"
+                variant={newTaskPriority === "medium" ? "default" : "outline"} 
+                onClick={() => setNewTaskPriority("medium")}
+                className={newTaskPriority === "medium" ? "bg-amber-500 hover:bg-amber-600" : ""}
+              >
+                Med
+              </Button>
+              <Button 
+                size="sm"
+                variant={newTaskPriority === "high" ? "default" : "outline"} 
+                onClick={() => setNewTaskPriority("high")}
+                className={newTaskPriority === "high" ? "bg-red-500 hover:bg-red-600" : ""}
+              >
+                High
+              </Button>
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button variant="outline" size="sm" onClick={() => setNewTaskContent("")}>
+                <X className="h-4 w-4 mr-1" /> Cancel
+              </Button>
+              <Button size="sm" onClick={() => addNewTask(columnId)}>
+                <Plus className="h-4 w-4 mr-1" /> Add Task
+              </Button>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
+
+  // Calculate team analytics data
+  const teamAnalytics = {
+    taskOwnership: [
+      { name: 'Sarah Johnson', count: 4, color: '#4338ca' },
+      { name: 'Miguel Rodriguez', count: 3, color: '#6366f1' },
+      { name: 'Alex Chen', count: 5, color: '#818cf8' },
+      { name: 'Priya Patel', count: 2, color: '#a5b4fc' },
+      { name: 'Jordan Taylor', count: 2, color: '#c7d2fe' }
+    ],
+    completionTrends: [
+      { name: 'Mon', value: 3 },
+      { name: 'Tue', value: 2 },
+      { name: 'Wed', value: 5 },
+      { name: 'Thu', value: 1 },
+      { name: 'Fri', value: 4 }
+    ],
+    averageCompletionDays: 3.2,
+    taskDistribution: {
+      overloaded: ["Alex Chen", "Sarah Johnson"],
+      underTasked: ["Priya Patel", "Jordan Taylor"]
+    }
+  };
 
   if (isLoading) {
     return (
@@ -351,13 +498,113 @@ export const KanbanBoard = () => {
             <Layers className="h-5 w-5 text-purple-500" />
             Kanban Board
           </span>
-          <Button variant="outline" size="sm" className="group">
-            <BarChart className="h-4 w-4 mr-2 group-hover:text-primary" />
-            View Stats
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="group"
+              onClick={() => setShowAnalytics(!showAnalytics)}
+            >
+              <Users className="h-4 w-4 mr-2 group-hover:text-primary" />
+              {showAnalytics ? "Hide" : "Show"} Team Analytics
+              {showAnalytics ? (
+                <ChevronUp className="h-4 w-4 ml-1" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-1" />
+              )}
+            </Button>
+            <Button variant="outline" size="sm" className="group">
+              <BarChart className="h-4 w-4 mr-2 group-hover:text-primary" />
+              View Stats
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {showAnalytics && (
+          <div className="mb-6 p-4 bg-muted/40 rounded-lg">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-purple-500" />
+              Team Collaboration Analytics
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <h4 className="text-sm font-medium mb-2">Task Ownership</h4>
+                <div className="space-y-2">
+                  {teamAnalytics.taskOwnership.map((member) => (
+                    <div key={member.name} className="flex items-center justify-between">
+                      <span className="text-sm">{member.name}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="bg-slate-200 w-24 h-2 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full" 
+                            style={{ 
+                              width: `${(member.count / Math.max(...teamAnalytics.taskOwnership.map(m => m.count))) * 100}%`,
+                              backgroundColor: member.color
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-xs">{member.count}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-2">Completion Trends (This Week)</h4>
+                <div className="h-24 flex items-end justify-between gap-1">
+                  {teamAnalytics.completionTrends.map((day) => (
+                    <div key={day.name} className="flex flex-col items-center gap-1">
+                      <div 
+                        className="bg-purple-500/60 w-6 rounded-t-sm" 
+                        style={{ height: `${(day.value / Math.max(...teamAnalytics.completionTrends.map(d => d.value))) * 80}px` }}
+                      ></div>
+                      <span className="text-xs">{day.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium mb-2">Team Workload</h4>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span>Average completion time:</span>
+                      <span className="font-medium">{teamAnalytics.averageCompletionDays} days</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-xs text-red-500 flex items-center gap-1 mb-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      Overloaded team members:
+                    </h5>
+                    <div className="flex gap-1 flex-wrap">
+                      {teamAnalytics.taskDistribution.overloaded.map(member => (
+                        <span key={member} className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
+                          {member}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h5 className="text-xs text-green-500 flex items-center gap-1 mb-1">
+                      <Users className="h-3 w-3" />
+                      Available capacity:
+                    </h5>
+                    <div className="flex gap-1 flex-wrap">
+                      {teamAnalytics.taskDistribution.underTasked.map(member => (
+                        <span key={member} className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                          {member}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-yellow-500/5 rounded-lg p-4 transition-all">
@@ -365,7 +612,8 @@ export const KanbanBoard = () => {
                 icon={ListTodo} 
                 title="To Do" 
                 color="text-yellow-500" 
-                count={columns.todo.length} 
+                count={columns.todo.length}
+                columnId="todo"
               />
               <Droppable droppableId="todo">
                 {(provided, snapshot) => (
@@ -390,6 +638,15 @@ export const KanbanBoard = () => {
                                   {task.priority}
                                 </span>
                               </div>
+                              
+                              {task.assignee && (
+                                <div className="flex items-center mt-2 mb-2">
+                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
+                                    {task.assignee.charAt(0)}
+                                  </div>
+                                  <span className="text-xs text-slate-600">{task.assignee}</span>
+                                </div>
+                              )}
                               
                               {task.subtasks && task.subtasks.length > 0 && (
                                 <div className="mt-2">
@@ -423,7 +680,8 @@ export const KanbanBoard = () => {
                 icon={Timer} 
                 title="In Progress" 
                 color="text-blue-500" 
-                count={columns.inProgress.length} 
+                count={columns.inProgress.length}
+                columnId="inProgress"
               />
               <Droppable droppableId="inProgress">
                 {(provided, snapshot) => (
@@ -448,6 +706,15 @@ export const KanbanBoard = () => {
                                   {task.priority}
                                 </span>
                               </div>
+                              
+                              {task.assignee && (
+                                <div className="flex items-center mt-2 mb-2">
+                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
+                                    {task.assignee.charAt(0)}
+                                  </div>
+                                  <span className="text-xs text-slate-600">{task.assignee}</span>
+                                </div>
+                              )}
                               
                               {task.subtasks && task.subtasks.length > 0 && (
                                 <div className="mt-2">
@@ -481,7 +748,8 @@ export const KanbanBoard = () => {
                 icon={CheckCircle2} 
                 title="Done" 
                 color="text-green-500" 
-                count={columns.done.length} 
+                count={columns.done.length}
+                columnId="done"
               />
               <Droppable droppableId="done">
                 {(provided, snapshot) => (
@@ -506,6 +774,15 @@ export const KanbanBoard = () => {
                                   {task.priority}
                                 </span>
                               </div>
+                              
+                              {task.assignee && (
+                                <div className="flex items-center mt-2 mb-2">
+                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
+                                    {task.assignee.charAt(0)}
+                                  </div>
+                                  <span className="text-xs text-slate-600">{task.assignee}</span>
+                                </div>
+                              )}
                               
                               {task.subtasks && task.subtasks.length > 0 && (
                                 <div className="mt-2">
