@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Bell, User, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -60,7 +59,7 @@ export const TopBar = () => {
   return (
     <div className="fixed top-0 right-0 left-0 h-16 bg-white/50 backdrop-blur-lg border-b border-border z-50 px-4">
       <div className="h-full max-w-screen-2xl mx-auto flex items-center justify-between">
-        <div className="text-xl font-semibold">EduCare Dashboard</div>
+        <div className="text-xl font-semibold">PrimeCare Dashboard</div>
         
         <div className="flex items-center space-x-4">
           <DropdownMenu>
