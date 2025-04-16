@@ -174,9 +174,10 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
 
 interface KanbanBoardProps {
   onAddTaskFunctionReady?: (addTaskFn: (status: "todo" | "inProgress" | "done", taskData: any) => void) => void;
+  onColumnsChange?: (columns: KanbanColumns) => void;
 }
 
-export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
+export const KanbanBoard = ({ onAddTaskFunctionReady, onColumnsChange }: KanbanBoardProps) => {
   const [columns, setColumns] = useState<KanbanColumns>(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
   const [newTaskContent, setNewTaskContent] = useState("");
@@ -212,6 +213,12 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
       onAddTaskFunctionReady(addNewTask);
     }
   }, [addNewTask, onAddTaskFunctionReady]);
+
+  useEffect(() => {
+    if (onColumnsChange && columns) {
+      onColumnsChange(columns);
+    }
+  }, [columns, onColumnsChange]);
 
   useEffect(() => {
     setIsLoading(true);

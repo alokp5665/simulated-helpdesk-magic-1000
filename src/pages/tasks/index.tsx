@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
+import { TaskAnalytics } from "@/components/tasks/TaskAnalytics";
 import { ClockCalendar } from "@/components/tasks/ClockCalendar";
 import { ToDoList } from "@/components/tasks/ToDoList";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,13 @@ const TasksPage = () => {
   
   // Initialize addNewTaskFn as null instead of using a state setter function
   const [addNewTaskFn, setAddNewTaskFn] = useState<((status: "todo" | "inProgress" | "done", taskData: any) => void) | null>(null);
+  
+  // State to track task columns data for analytics
+  const [taskColumns, setTaskColumns] = useState<{
+    todo: any[];
+    inProgress: any[];
+    done: any[];
+  } | null>(null);
 
   const handleCreateTask = () => {
     if (!newTask.title.trim()) {
@@ -185,8 +193,16 @@ const TasksPage = () => {
                   if (typeof addTaskFn === 'function') {
                     setAddNewTaskFn(() => addTaskFn);
                   }
-                }} 
+                }}
+                onColumnsChange={(columns) => {
+                  if (columns) {
+                    setTaskColumns(columns);
+                  }
+                }}
               />
+              
+              {/* Task Analytics Panel */}
+              <TaskAnalytics taskData={taskColumns} />
             </div>
             
             <div className="col-span-12 lg:col-span-4 space-y-6">
