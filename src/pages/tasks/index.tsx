@@ -42,8 +42,8 @@ const TasksPage = () => {
     status: "todo",
   });
   
-  // Use state to store the addNewTask function instead of a direct ref
-  const [addNewTaskFn, setAddNewTaskFn] = useState<any>(null);
+  // Initialize addNewTaskFn as null instead of using a state setter function
+  const [addNewTaskFn, setAddNewTaskFn] = useState<((status: "todo" | "inProgress" | "done", taskData: any) => void) | null>(null);
 
   const handleCreateTask = () => {
     if (!newTask.title.trim()) {
@@ -51,24 +51,29 @@ const TasksPage = () => {
       return;
     }
 
-    // If the addNewTask function exists, call it
-    if (addNewTaskFn) {
-      addNewTaskFn(newTask.status, {
-        ...newTask,
-        id: `task-${Date.now()}`,
-      });
-      
-      toast.success("New task created", {
-        description: `"${newTask.title}" added to ${newTask.status === "todo" ? "To Do" : newTask.status === "inProgress" ? "In Progress" : "Done"}`
-      });
-      
-      // Reset form and close dialog
-      setNewTask({
-        title: "",
-        priority: "medium",
-        status: "todo",
-      });
-      setIsAddTaskOpen(false);
+    // Check if addNewTaskFn exists and is a function before calling it
+    if (addNewTaskFn && typeof addNewTaskFn === 'function') {
+      try {
+        addNewTaskFn(newTask.status, {
+          ...newTask,
+          id: `task-${Date.now()}`,
+        });
+        
+        toast.success("New task created", {
+          description: `"${newTask.title}" added to ${newTask.status === "todo" ? "To Do" : newTask.status === "inProgress" ? "In Progress" : "Done"}`
+        });
+        
+        // Reset form and close dialog
+        setNewTask({
+          title: "",
+          priority: "medium",
+          status: "todo",
+        });
+        setIsAddTaskOpen(false);
+      } catch (error) {
+        console.error("Error creating task:", error);
+        toast.error("Could not add task. An error occurred.");
+      }
     } else {
       toast.error("Could not add task. Please try again.");
     }
@@ -176,13 +181,17 @@ const TasksPage = () => {
           <div className="grid grid-cols-12 gap-6">
             <div className="col-span-12 lg:col-span-8">
               <KanbanBoard 
-                onAddTaskFunctionReady={(addTaskFn) => setAddNewTaskFn(addTaskFn)} 
+                onAddTaskFunctionReady={(addTaskFn) => {
+                  if (typeof addTaskFn === 'function') {
+                    setAddNewTaskFn(() => addTaskFn);
+                  }
+                }} 
               />
             </div>
             
             <div className="col-span-12 lg:col-span-4 space-y-6">
               <ClockCalendar onTaskScheduled={(task) => {
-                if (addNewTaskFn) {
+                if (addNewTaskFn && typeof addNewTaskFn === 'function') {
                   addNewTaskFn("todo", {
                     ...task,
                     id: `task-${Date.now()}`,

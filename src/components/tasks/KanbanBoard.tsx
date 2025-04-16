@@ -41,7 +41,6 @@ interface KanbanColumns {
   done: KanbanTask[];
 }
 
-// Pre-defined tasks for simulation
 const SAMPLE_TASKS = [
   {
     content: "Review Customer Survey Results",
@@ -60,7 +59,6 @@ const SAMPLE_TASKS = [
   }
 ];
 
-// Team members for assignees
 const TEAM_MEMBERS = [
   "Sarah Johnson",
   "Miguel Rodriguez",
@@ -69,7 +67,6 @@ const TEAM_MEMBERS = [
   "Jordan Taylor"
 ];
 
-// Pre-filled tasks
 const INITIAL_TASKS: KanbanColumns = {
   todo: [
     {
@@ -189,14 +186,14 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
 
   const addNewTask = useCallback((status: "todo" | "inProgress" | "done", taskData: any) => {
     const newTask: KanbanTask = {
-      id: taskData.id || `task-${Date.now()}`,
-      content: taskData.title || taskData.content,
+      id: taskData?.id || `task-${Date.now()}`,
+      content: taskData?.title || taskData?.content || "New Task",
       status,
-      priority: taskData.priority || "medium",
+      priority: taskData?.priority || "medium",
       progress: status === "done" ? 100 : 0,
-      deadline: taskData.deadline,
-      assignee: taskData.assignee || TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)],
-      subtasks: taskData.subtasks || [
+      deadline: taskData?.deadline,
+      assignee: taskData?.assignee || TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)],
+      subtasks: taskData?.subtasks || [
         { id: `st-${Date.now()}-1`, title: "First step", completed: false },
         { id: `st-${Date.now()}-2`, title: "Review", completed: false }
       ]
@@ -326,7 +323,7 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
   };
 
   const onDragEnd = (result: any) => {
-    if (!result.destination) return;
+    if (!result?.destination) return;
 
     const { source, destination } = result;
     
@@ -366,7 +363,18 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
       
       const sourceColumn = [...columns[sourceKey]];
       const destColumn = [...columns[destKey]];
+      
+      if (sourceColumn.length <= source.index) {
+        console.error("Invalid source index for drag operation");
+        return;
+      }
+      
       const [removed] = sourceColumn.splice(source.index, 1);
+      
+      if (!removed) {
+        console.error("Failed to remove task from source column");
+        return;
+      }
       
       const updatedTask = {
         ...removed,
@@ -500,6 +508,59 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
       overloaded: ["Alex Chen", "Sarah Johnson"],
       underTasked: ["Priya Patel", "Jordan Taylor"]
     }
+  };
+
+  const renderKanbanCard = (task: KanbanTask, index: number) => {
+    if (!task || typeof task !== 'object') {
+      console.error("Invalid task object:", task);
+      return null;
+    }
+    
+    return (
+      <Draggable key={task.id} draggableId={task.id} index={index}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            className={`bg-white/80 backdrop-blur-md rounded-lg p-4 mb-3 shadow-sm transition-all duration-300 ${snapshot.isDragging ? 'shadow-lg ring-2 ring-yellow-300/50 rotate-1' : 'hover:shadow-md'}`}
+          >
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="font-medium">{task.content}</h4>
+              <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
+                {task.priority}
+              </span>
+            </div>
+            
+            {task.assignee && (
+              <div className="flex items-center mt-2 mb-2">
+                <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
+                  {task.assignee.charAt(0)}
+                </div>
+                <span className="text-xs text-slate-600">{task.assignee}</span>
+              </div>
+            )}
+            
+            {task.subtasks && task.subtasks.length > 0 && (
+              <div className="mt-2">
+                <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
+                  <span>Progress: {task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}</span>
+                  <span>{task.progress}%</span>
+                </div>
+                <Progress value={task.progress} className="h-1.5 bg-yellow-100" />
+              </div>
+            )}
+            
+            {task.deadline && (
+              <div className="flex items-center mt-3 text-xs text-muted-foreground">
+                <Clock className="h-3 w-3 mr-1" />
+                <span>Due: {task.deadline}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </Draggable>
+    );
   };
 
   if (isLoading) {
@@ -654,51 +715,9 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
                       ref={provided.innerRef}
                       className="min-h-[400px] pr-4"
                     >
-                      {columns.todo.map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`bg-white/80 backdrop-blur-md rounded-lg p-4 mb-3 shadow-sm transition-all duration-300 ${snapshot.isDragging ? 'shadow-lg ring-2 ring-yellow-300/50 rotate-1' : 'hover:shadow-md'}`}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <h4 className="font-medium">{task.content}</h4>
-                                <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
-                                  {task.priority}
-                                </span>
-                              </div>
-                              
-                              {task.assignee && (
-                                <div className="flex items-center mt-2 mb-2">
-                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
-                                    {task.assignee.charAt(0)}
-                                  </div>
-                                  <span className="text-xs text-slate-600">{task.assignee}</span>
-                                </div>
-                              )}
-                              
-                              {task.subtasks && task.subtasks.length > 0 && (
-                                <div className="mt-2">
-                                  <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
-                                    <span>Progress: {task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}</span>
-                                    <span>{task.progress}%</span>
-                                  </div>
-                                  <Progress value={task.progress} className="h-1.5 bg-yellow-100" />
-                                </div>
-                              )}
-                              
-                              {task.deadline && (
-                                <div className="flex items-center mt-3 text-xs text-muted-foreground">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  <span>Due: {task.deadline}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                      {columns.todo.map((task, index) => 
+                        task ? renderKanbanCard(task, index) : null
+                      )}
                       {provided.placeholder}
                     </div>
                   </ScrollArea>
@@ -722,51 +741,9 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
                       ref={provided.innerRef}
                       className="min-h-[400px] pr-4"
                     >
-                      {columns.inProgress.map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`bg-white/80 backdrop-blur-md rounded-lg p-4 mb-3 shadow-sm transition-all duration-300 ${snapshot.isDragging ? 'shadow-lg ring-2 ring-blue-300/50 rotate-1' : 'hover:shadow-md'}`}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <h4 className="font-medium">{task.content}</h4>
-                                <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
-                                  {task.priority}
-                                </span>
-                              </div>
-                              
-                              {task.assignee && (
-                                <div className="flex items-center mt-2 mb-2">
-                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
-                                    {task.assignee.charAt(0)}
-                                  </div>
-                                  <span className="text-xs text-slate-600">{task.assignee}</span>
-                                </div>
-                              )}
-                              
-                              {task.subtasks && task.subtasks.length > 0 && (
-                                <div className="mt-2">
-                                  <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
-                                    <span>Progress: {task.subtasks.filter(st => st.completed).length}/{task.subtasks.length}</span>
-                                    <span>{task.progress}%</span>
-                                  </div>
-                                  <Progress value={task.progress} className="h-1.5 bg-blue-100" />
-                                </div>
-                              )}
-                              
-                              {task.deadline && (
-                                <div className="flex items-center mt-3 text-xs text-muted-foreground">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  <span>Due: {task.deadline}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                      {columns.inProgress.map((task, index) => 
+                        task ? renderKanbanCard(task, index) : null
+                      )}
                       {provided.placeholder}
                     </div>
                   </ScrollArea>
@@ -790,49 +767,9 @@ export const KanbanBoard = ({ onAddTaskFunctionReady }: KanbanBoardProps) => {
                       ref={provided.innerRef}
                       className="min-h-[400px] pr-4"
                     >
-                      {columns.done.map((task, index) => (
-                        <Draggable key={task.id} draggableId={task.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`bg-white/80 backdrop-blur-md rounded-lg p-4 mb-3 shadow-sm transition-all duration-300 ${snapshot.isDragging ? 'shadow-lg ring-2 ring-green-300/50 rotate-1' : 'hover:shadow-md'}`}
-                            >
-                              <div className="flex justify-between items-start mb-2">
-                                <h4 className="font-medium">{task.content}</h4>
-                                <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
-                                  {task.priority}
-                                </span>
-                              </div>
-                              
-                              {task.assignee && (
-                                <div className="flex items-center mt-2 mb-2">
-                                  <div className="h-5 w-5 rounded-full bg-purple-200 flex items-center justify-center text-xs text-purple-700 mr-1">
-                                    {task.assignee.charAt(0)}
-                                  </div>
-                                  <span className="text-xs text-slate-600">{task.assignee}</span>
-                                </div>
-                              )}
-                              
-                              {task.subtasks && task.subtasks.length > 0 && (
-                                <div className="mt-2">
-                                  <div className="flex justify-between items-center text-xs text-muted-foreground mb-1">
-                                    <span>Complete</span>
-                                    <span>100%</span>
-                                  </div>
-                                  <Progress value={100} className="h-1.5 bg-green-100" />
-                                </div>
-                              )}
-                              
-                              <div className="flex items-center mt-3 text-xs text-green-500">
-                                <CheckCircle2 className="h-3 w-3 mr-1" />
-                                <span>Completed</span>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                      {columns.done.map((task, index) => 
+                        task ? renderKanbanCard(task, index) : null
+                      )}
                       {provided.placeholder}
                     </div>
                   </ScrollArea>
