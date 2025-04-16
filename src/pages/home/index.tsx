@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { 
@@ -64,13 +63,13 @@ const HomePage = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div>
                   <h1 className="text-4xl font-bold mb-4 text-foreground flex items-center">
-                    Welcome to EduCare
+                    Welcome to EduCare Hub
                     <span className="ml-3 text-xs font-normal bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                       Enterprise Edition
                     </span>
                   </h1>
                   <p className="text-xl text-muted-foreground mb-6">
-                    The complete customer support solution for growing teams
+                    The complete project management solution for growing teams
                   </p>
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
