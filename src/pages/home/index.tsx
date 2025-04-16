@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
@@ -6,7 +7,9 @@ import {
   CheckCircle2, AlertCircle, BarChart3, 
   Users, Zap, Shield, Award, ArrowUpRight,
   RefreshCcw, Clock, BookOpen, ChevronRight, 
-  PanelRight, Star, Mail, MessageSquare
+  PanelRight, Star, Mail, MessageSquare,
+  Calendar, GanttChart, ClipboardCheck, Timer,
+  Milestone, GitPullRequestDraft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,21 +19,21 @@ import { useNavigate } from "react-router-dom";
 
 // Knowledge tips for the "Did you know?" feature
 const knowledgeTips = [
-  "You can create automation rules to automatically assign tickets based on keywords in the subject line.",
-  "Keyboard shortcuts can significantly speed up your ticket processing. Press 'K' to view all available shortcuts.",
-  "You can merge duplicate tickets to keep your helpdesk organized and provide a unified response to customers.",
-  "Setting up canned responses for common questions can save your agents hours of repetitive typing each week.",
-  "The 'Snooze' feature lets you temporarily hide tickets until they need attention again.",
-  "PrimeCare Helpdesk can automatically suggest relevant knowledge base articles when agents are responding to tickets.",
+  "You can create automation workflows to trigger actions when project milestones are reached.",
+  "Keyboard shortcuts can significantly speed up your project management. Press 'K' to view all available shortcuts.",
+  "You can link related tasks together to track dependencies and ensure proper sequencing of work.",
+  "Setting up templates for common project types can save your team hours of setup time each week.",
+  "The 'Snooze' feature lets you temporarily hide tasks until they need attention again.",
+  "PrimeCare Project Management can automatically suggest resource allocation based on team workload.",
   "You can schedule reports to be automatically emailed to stakeholders on a regular basis.",
-  "Internal notes allow agents to collaborate on tickets without the customer seeing these comments.",
-  "Tags can be used to categorize tickets and create powerful reports on specific types of issues.",
-  "The collision detection feature alerts agents when multiple people are viewing or replying to the same ticket.",
-  "Use SLA policies to ensure your team meets response time commitments to customers.",
-  "The 'Customer Satisfaction Score' feature automatically surveys customers after their tickets are resolved.",
-  "You can create custom ticket fields to collect specific information needed for your support process.",
-  "Time tracking features allow you to measure how much time is spent on different types of support issues.",
-  "The knowledge base analytics show which articles are most viewed, helping you improve your self-service content.",
+  "Internal notes allow team members to collaborate on tasks without the client seeing these comments.",
+  "Tags can be used to categorize projects and create powerful reports on specific types of work.",
+  "The collision detection feature alerts team members when multiple people are working on the same task.",
+  "Use SLA policies to ensure your team meets project delivery commitments to clients.",
+  "The 'Client Satisfaction Score' feature automatically surveys clients after project completion.",
+  "You can create custom project fields to collect specific information needed for your workflow process.",
+  "Time tracking features allow you to measure how much time is spent on different types of project tasks.",
+  "The knowledge base analytics show which guides are most viewed, helping you improve your team resources.",
 ];
 
 const HomePage = () => {
@@ -74,11 +77,11 @@ const HomePage = () => {
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="text-green-500 h-5 w-5" />
-                      <span>Streamline customer conversations across all channels</span>
+                      <span>Track projects and tasks across all departments</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="text-green-500 h-5 w-5" />
-                      <span>Automate routine tasks with intelligent workflows</span>
+                      <span>Automate routine workflows with intelligent triggers</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="text-green-500 h-5 w-5" />
@@ -100,7 +103,7 @@ const HomePage = () => {
                     {/* Placeholder for hero image or animation */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="p-4 bg-white/80 backdrop-blur-sm rounded-lg text-center">
-                        <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
+                        <GanttChart className="h-8 w-8 text-primary mx-auto mb-2" />
                         <p className="font-medium">Interactive Dashboard Demo</p>
                         <Button variant="link" size="sm" className="mt-1">
                           Play Demo
@@ -120,16 +123,16 @@ const HomePage = () => {
               <Card className="glass-card hover-scale">
                 <CardHeader>
                   <div className="p-2 w-fit rounded-full bg-blue-100">
-                    <MessageSquare className="h-5 w-5 text-blue-600" />
+                    <ClipboardCheck className="h-5 w-5 text-blue-600" />
                   </div>
-                  <CardTitle className="mt-4">Omnichannel Support</CardTitle>
+                  <CardTitle className="mt-4">Task Management</CardTitle>
                   <CardDescription>
-                    Manage customer conversations across email, chat, phone, and social media
+                    Create, assign, and track tasks across your entire organization
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Provide seamless support across all communication channels from a single unified inbox.
+                    Manage tasks with customizable workflows, priorities, and dependencies to keep projects moving forward.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -144,14 +147,14 @@ const HomePage = () => {
                   <div className="p-2 w-fit rounded-full bg-amber-100">
                     <Zap className="h-5 w-5 text-amber-600" />
                   </div>
-                  <CardTitle className="mt-4">Smart Automation</CardTitle>
+                  <CardTitle className="mt-4">Workflow Automation</CardTitle>
                   <CardDescription>
                     Create intelligent workflows to handle routine tasks automatically
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Build custom rules to route, prioritize, and assign tickets based on your business logic.
+                    Build custom rules to route, prioritize, and assign tasks based on your business processes.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -166,14 +169,14 @@ const HomePage = () => {
                   <div className="p-2 w-fit rounded-full bg-green-100">
                     <BarChart3 className="h-5 w-5 text-green-600" />
                   </div>
-                  <CardTitle className="mt-4">Advanced Analytics</CardTitle>
+                  <CardTitle className="mt-4">Project Analytics</CardTitle>
                   <CardDescription>
                     Comprehensive reporting to track performance and identify trends
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Gain actionable insights into team performance, customer satisfaction, and support trends.
+                    Gain actionable insights into team performance, project health, and resource allocation.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -186,16 +189,16 @@ const HomePage = () => {
               <Card className="glass-card hover-scale">
                 <CardHeader>
                   <div className="p-2 w-fit rounded-full bg-purple-100">
-                    <BookOpen className="h-5 w-5 text-purple-600" />
+                    <GanttChart className="h-5 w-5 text-purple-600" />
                   </div>
-                  <CardTitle className="mt-4">Knowledge Base</CardTitle>
+                  <CardTitle className="mt-4">Gantt Charts</CardTitle>
                   <CardDescription>
-                    Create a self-service support center with searchable articles
+                    Visualize project timelines with interactive Gantt charts
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Empower customers to find answers on their own and reduce repetitive support queries.
+                    Plan and manage project schedules with powerful visualization tools that make timelines clear.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -212,12 +215,12 @@ const HomePage = () => {
                   </div>
                   <CardTitle className="mt-4">Team Collaboration</CardTitle>
                   <CardDescription>
-                    Tools to help your support team work together efficiently
+                    Tools to help your project team work together efficiently
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Collaborate on tickets with internal notes, @mentions, and shared ticket views.
+                    Collaborate on tasks with comments, @mentions, file sharing, and real-time updates.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -230,16 +233,16 @@ const HomePage = () => {
               <Card className="glass-card hover-scale">
                 <CardHeader>
                   <div className="p-2 w-fit rounded-full bg-pink-100">
-                    <Shield className="h-5 w-5 text-pink-600" />
+                    <Timer className="h-5 w-5 text-pink-600" />
                   </div>
-                  <CardTitle className="mt-4">SLA Management</CardTitle>
+                  <CardTitle className="mt-4">Time Tracking</CardTitle>
                   <CardDescription>
-                    Define and track service level agreements for customer support
+                    Monitor time spent on tasks and projects for accurate billing
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Set response and resolution time targets with automatic escalations and tracking.
+                    Track hours, set estimates, and measure actual time spent for better resource planning.
                   </p>
                 </CardContent>
                 <CardFooter>
@@ -255,7 +258,7 @@ const HomePage = () => {
           <div className="mb-12 fade-in">
             <Card className="glass-card">
               <CardContent className="p-8">
-                <h2 className="text-2xl font-bold mb-8 text-center">Trusted by Support Teams Worldwide</h2>
+                <h2 className="text-2xl font-bold mb-8 text-center">Trusted by Project Teams Worldwide</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                   <div className="text-center">
                     <div className="text-3xl font-bold text-primary mb-2">5,000+</div>
@@ -263,15 +266,15 @@ const HomePage = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-primary mb-2">25M+</div>
-                    <p className="text-sm text-muted-foreground">Tickets Resolved</p>
+                    <p className="text-sm text-muted-foreground">Projects Completed</p>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-primary mb-2">98%</div>
-                    <p className="text-sm text-muted-foreground">Customer Satisfaction</p>
+                    <p className="text-sm text-muted-foreground">On-Time Delivery</p>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-primary mb-2">30min</div>
-                    <p className="text-sm text-muted-foreground">Avg. Response Time</p>
+                    <div className="text-3xl font-bold text-primary mb-2">30%</div>
+                    <p className="text-sm text-muted-foreground">Productivity Increase</p>
                   </div>
                 </div>
               </CardContent>
@@ -281,39 +284,39 @@ const HomePage = () => {
           {/* Solutions Tabs */}
           <div className="mb-12 fade-in">
             <h2 className="text-2xl font-bold mb-6">Solutions For Every Team</h2>
-            <Tabs defaultValue="support" className="w-full">
+            <Tabs defaultValue="product" className="w-full">
               <TabsList className="grid grid-cols-4 mb-6">
-                <TabsTrigger value="support">Customer Support</TabsTrigger>
-                <TabsTrigger value="it">IT Help Desk</TabsTrigger>
-                <TabsTrigger value="hr">HR Services</TabsTrigger>
-                <TabsTrigger value="field">Field Service</TabsTrigger>
+                <TabsTrigger value="product">Product Teams</TabsTrigger>
+                <TabsTrigger value="marketing">Marketing</TabsTrigger>
+                <TabsTrigger value="engineering">Engineering</TabsTrigger>
+                <TabsTrigger value="client">Client Services</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="support" className="animate-in fade-in">
+              <TabsContent value="product" className="animate-in fade-in">
                 <Card>
                   <div className="grid md:grid-cols-2 gap-6">
                     <CardContent className="p-6">
                       <div className="h-full flex flex-col justify-center">
-                        <h3 className="text-xl font-bold mb-4">Customer Support Solutions</h3>
+                        <h3 className="text-xl font-bold mb-4">Product Management Solutions</h3>
                         <p className="text-muted-foreground mb-4">
-                          Deliver exceptional customer support across all channels, reduce response times, and increase satisfaction scores.
+                          Plan your product roadmap, track feature development, and ensure timely delivery with our comprehensive project tools.
                         </p>
                         <ul className="space-y-2">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Unified customer communication hub</span>
+                            <span>Product roadmap planning</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Automated ticket routing and prioritization</span>
+                            <span>Feature prioritization boards</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Customer satisfaction tracking</span>
+                            <span>Sprint planning tools</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Self-service knowledge base</span>
+                            <span>User feedback integration</span>
                           </li>
                         </ul>
                         <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
@@ -322,11 +325,11 @@ const HomePage = () => {
                     <div className="bg-primary/10 h-[300px] md:h-auto flex items-center justify-center p-6">
                       <div className="p-6 glass-card text-center max-w-xs rounded-lg">
                         <div className="p-3 bg-white rounded-full w-fit mx-auto mb-4">
-                          <MessageSquare className="h-6 w-6 text-primary" />
+                          <GitPullRequestDraft className="h-6 w-6 text-primary" />
                         </div>
-                        <h4 className="text-lg font-bold mb-2">Customer-Centric Support</h4>
+                        <h4 className="text-lg font-bold mb-2">Product-Led Growth</h4>
                         <p className="text-sm text-muted-foreground mb-4">
-                          "PrimeCare transformed our support operations, reducing our average response time by 65% and increasing CSAT scores by 28%."
+                          "PrimeCare transformed our product development process, reducing our time-to-market by 40% and improving our feature adoption rates by 28%."
                         </p>
                         <div className="flex items-center justify-center gap-1 text-amber-500">
                           <Star className="fill-amber-500 h-4 w-4" />
@@ -335,38 +338,38 @@ const HomePage = () => {
                           <Star className="fill-amber-500 h-4 w-4" />
                           <Star className="fill-amber-500 h-4 w-4" />
                         </div>
-                        <p className="text-xs mt-2 font-medium">Sarah Johnson, CX Director at TechGlobal</p>
+                        <p className="text-xs mt-2 font-medium">Sarah Johnson, CPO at Vertex Corp</p>
                       </div>
                     </div>
                   </div>
                 </Card>
               </TabsContent>
               
-              <TabsContent value="it" className="animate-in fade-in">
+              <TabsContent value="marketing" className="animate-in fade-in">
                 <Card>
                   <div className="grid md:grid-cols-2 gap-6">
                     <CardContent className="p-6">
                       <div className="h-full flex flex-col justify-center">
-                        <h3 className="text-xl font-bold mb-4">IT Help Desk Solutions</h3>
+                        <h3 className="text-xl font-bold mb-4">Marketing Campaign Management</h3>
                         <p className="text-muted-foreground mb-4">
-                          Streamline internal IT support, resolve issues faster, and maintain detailed asset management.
+                          Plan, execute, and measure marketing campaigns across all channels with integrated project tracking.
                         </p>
                         <ul className="space-y-2">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Incident and problem management</span>
+                            <span>Campaign planning tools</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>IT asset tracking and management</span>
+                            <span>Content calendar integrations</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Change request workflows</span>
+                            <span>Asset management workflows</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Service catalog for common requests</span>
+                            <span>Marketing analytics dashboards</span>
                           </li>
                         </ul>
                         <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
@@ -377,9 +380,9 @@ const HomePage = () => {
                         <div className="p-3 bg-white rounded-full w-fit mx-auto mb-4">
                           <PanelRight className="h-6 w-6 text-primary" />
                         </div>
-                        <h4 className="text-lg font-bold mb-2">IT Support Excellence</h4>
+                        <h4 className="text-lg font-bold mb-2">Marketing Excellence</h4>
                         <p className="text-sm text-muted-foreground mb-4">
-                          "Our IT team now resolves tickets 40% faster, and our asset management is completely streamlined thanks to PrimeCare's IT solutions."
+                          "Our marketing team now launches campaigns 35% faster, and our project tracking is completely streamlined thanks to PrimeCare's solutions."
                         </p>
                         <div className="flex items-center justify-center gap-1 text-amber-500">
                           <Star className="fill-amber-500 h-4 w-4" />
@@ -388,38 +391,38 @@ const HomePage = () => {
                           <Star className="fill-amber-500 h-4 w-4" />
                           <Star className="fill-amber-500 h-4 w-4" />
                         </div>
-                        <p className="text-xs mt-2 font-medium">Michael Chen, IT Director at Finova</p>
+                        <p className="text-xs mt-2 font-medium">Michael Chen, CMO at Synapse Systems</p>
                       </div>
                     </div>
                   </div>
                 </Card>
               </TabsContent>
               
-              <TabsContent value="hr" className="animate-in fade-in">
+              <TabsContent value="engineering" className="animate-in fade-in">
                 <Card>
                   <div className="grid md:grid-cols-2 gap-6">
                     <CardContent className="p-6">
                       <div className="h-full flex flex-col justify-center">
-                        <h3 className="text-xl font-bold mb-4">HR Service Desk Solutions</h3>
+                        <h3 className="text-xl font-bold mb-4">Engineering Project Management</h3>
                         <p className="text-muted-foreground mb-4">
-                          Simplify employee requests, automate onboarding and offboarding, and maintain detailed HR documentation.
+                          Plan development cycles, track bugs, and manage technical debt with specialized engineering tools.
                         </p>
                         <ul className="space-y-2">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Employee self-service portal</span>
+                            <span>Sprint management tools</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Onboarding & offboarding workflows</span>
+                            <span>GitHub & GitLab integration</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Benefits and policy management</span>
+                            <span>CI/CD pipeline visibility</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Secure document handling</span>
+                            <span>Technical documentation hub</span>
                           </li>
                         </ul>
                         <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
@@ -430,9 +433,9 @@ const HomePage = () => {
                         <div className="p-3 bg-white rounded-full w-fit mx-auto mb-4">
                           <Users className="h-6 w-6 text-primary" />
                         </div>
-                        <h4 className="text-lg font-bold mb-2">HR Process Transformation</h4>
+                        <h4 className="text-lg font-bold mb-2">Engineering Transformation</h4>
                         <p className="text-sm text-muted-foreground mb-4">
-                          "Our HR team saved over 20 hours per week by automating routine processes with PrimeCare. Employee satisfaction with HR services increased by a remarkable 42%."
+                          "Our engineering team saved over 15 hours per sprint by automating routine processes with PrimeCare. Deployment frequency increased by 45%."
                         </p>
                         <div className="flex items-center justify-center gap-1 text-amber-500">
                           <Star className="fill-amber-500 h-4 w-4" />
@@ -441,38 +444,38 @@ const HomePage = () => {
                           <Star className="fill-amber-500 h-4 w-4" />
                           <Star className="fill-amber-500 h-4 w-4" />
                         </div>
-                        <p className="text-xs mt-2 font-medium">Elena Rodriguez, HR Manager at NexGen</p>
+                        <p className="text-xs mt-2 font-medium">Elena Rodriguez, CTO at Quantum Innovations</p>
                       </div>
                     </div>
                   </div>
                 </Card>
               </TabsContent>
               
-              <TabsContent value="field" className="animate-in fade-in">
+              <TabsContent value="client" className="animate-in fade-in">
                 <Card>
                   <div className="grid md:grid-cols-2 gap-6">
                     <CardContent className="p-6">
                       <div className="h-full flex flex-col justify-center">
-                        <h3 className="text-xl font-bold mb-4">Field Service Solutions</h3>
+                        <h3 className="text-xl font-bold mb-4">Client Services Solutions</h3>
                         <p className="text-muted-foreground mb-4">
-                          Optimize field service operations, dispatch technicians efficiently, and track service performance.
+                          Manage client projects, track deliverables, and ensure client satisfaction with specialized tools.
                         </p>
                         <ul className="space-y-2">
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Technician scheduling and dispatch</span>
+                            <span>Client portal access</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Mobile service management</span>
+                            <span>SOW and deliverable tracking</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Parts inventory tracking</span>
+                            <span>Automated client reporting</span>
                           </li>
                           <li className="flex items-center gap-2">
                             <CheckCircle2 className="text-green-500 h-4 w-4" />
-                            <span>Service history and reporting</span>
+                            <span>Time and budget monitoring</span>
                           </li>
                         </ul>
                         <Button className="mt-6 w-fit" onClick={goToContact}>Learn More</Button>
@@ -483,9 +486,9 @@ const HomePage = () => {
                         <div className="p-3 bg-white rounded-full w-fit mx-auto mb-4">
                           <RefreshCcw className="h-6 w-6 text-primary" />
                         </div>
-                        <h4 className="text-lg font-bold mb-2">Field Operations Optimization</h4>
+                        <h4 className="text-lg font-bold mb-2">Client Project Excellence</h4>
                         <p className="text-sm text-muted-foreground mb-4">
-                          "PrimeCare's field service solution improved our first-time fix rate by 35% and reduced travel time between service calls by nearly 28%."
+                          "PrimeCare's client services solution improved our on-time delivery rate by 35% and increased our client satisfaction scores by nearly 28%."
                         </p>
                         <div className="flex items-center justify-center gap-1 text-amber-500">
                           <Star className="fill-amber-500 h-4 w-4" />
@@ -494,7 +497,7 @@ const HomePage = () => {
                           <Star className="fill-amber-500 h-4 w-4" />
                           <Star className="fill-amber-500 h-4 w-4" />
                         </div>
-                        <p className="text-xs mt-2 font-medium">Robert Patel, Operations Manager at ServicePro</p>
+                        <p className="text-xs mt-2 font-medium">Robert Patel, VP Client Services at Nimbus Solutions</p>
                       </div>
                     </div>
                   </div>
@@ -511,13 +514,13 @@ const HomePage = () => {
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full -mb-16 -ml-16 blur-xl"></div>
                 <CardContent className="p-8 text-center relative z-10">
                   <div className="max-w-xl mx-auto">
-                    <h2 className="text-3xl font-bold mb-4">Ready to transform your support operations?</h2>
+                    <h2 className="text-3xl font-bold mb-4">Ready to transform your project management?</h2>
                     <p className="text-muted-foreground mb-6">
-                      Join thousands of companies that are delivering exceptional support experiences with PrimeCare Helpdesk.
+                      Join thousands of companies that are delivering exceptional results with PrimeCare Project Management.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                       <Button size="lg" className="gap-2" onClick={goToContact}>
-                        Buy Now <ArrowRight className="h-4 w-4" />
+                        Start Now <ArrowRight className="h-4 w-4" />
                       </Button>
                       <Button size="lg" variant="outline" className="gap-2" onClick={goToContact}>
                         Upgrade <Sparkles className="h-4 w-4" />
