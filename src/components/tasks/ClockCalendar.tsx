@@ -10,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -35,6 +34,18 @@ import {
   Clock3,
   AlertTriangle
 } from "lucide-react";
+
+interface ScheduledTask {
+  id: string;
+  title: string;
+  priority: "low" | "medium" | "high";
+  date: Date;
+  assignee?: string;
+}
+
+interface ClockCalendarProps {
+  onTaskScheduled?: (task: any) => void;
+}
 
 const REMINDERS = [
   "Team meeting at 2 PM",
@@ -111,7 +122,7 @@ const RESCHEDULED_TASKS = [
   }
 ];
 
-export const ClockCalendar = () => {
+export const ClockCalendar = ({ onTaskScheduled }: ClockCalendarProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [time, setTime] = useState<string>("");
   const [activeHoliday, setActiveHoliday] = useState<{name: string, icon: JSX.Element} | null>(null);
@@ -123,6 +134,7 @@ export const ClockCalendar = () => {
     assignee: "Unassigned"
   });
   const [showDeadlinesOverview, setShowDeadlinesOverview] = useState(true);
+  const [scheduledTasks, setScheduledTasks] = useState<ScheduledTask[]>([]);
 
   useEffect(() => {
     // No loading delay
@@ -178,6 +190,15 @@ export const ClockCalendar = () => {
     };
   }, [date]);
 
+  // Function to check if a date has scheduled tasks
+  const hasScheduledTasks = (day: Date) => {
+    return scheduledTasks.some(task => 
+      task.date.getDate() === day.getDate() && 
+      task.date.getMonth() === day.getMonth() &&
+      task.date.getFullYear() === day.getFullYear()
+    );
+  };
+
   // Function to add a holiday class to the selected date
   const isHoliday = (day: Date) => {
     return HOLIDAYS.some(h => 
@@ -197,6 +218,26 @@ export const ClockCalendar = () => {
     if (!newTask.title.trim()) {
       toast.error("Task title cannot be empty");
       return;
+    }
+    
+    const scheduledTask: ScheduledTask = {
+      id: Date.now().toString(),
+      title: newTask.title,
+      priority: newTask.priority as "low" | "medium" | "high",
+      date: new Date(date),
+      assignee: newTask.assignee !== "Unassigned" ? newTask.assignee : undefined
+    };
+    
+    setScheduledTasks(prev => [...prev, scheduledTask]);
+    
+    // Notify parent component about the scheduled task
+    if (onTaskScheduled) {
+      onTaskScheduled({
+        title: newTask.title,
+        priority: newTask.priority,
+        deadline: date.toLocaleDateString(),
+        assignee: newTask.assignee !== "Unassigned" ? newTask.assignee : undefined
+      });
     }
     
     toast.success("Task scheduled successfully", {
@@ -262,13 +303,42 @@ export const ClockCalendar = () => {
               onSelect={handleDateSelect}
               className="rounded-md border pointer-events-auto"
               modifiers={{
-                holiday: (date) => isHoliday(date)
+                holiday: (date) => isHoliday(date),
+                scheduled: (date) => hasScheduledTasks(date)
               }}
               modifiersClassNames={{
-                holiday: "holiday-date bg-red-100 text-red-600 font-semibold"
+                holiday: "holiday-date bg-red-100 text-red-600 font-semibold",
+                scheduled: "scheduled-date bg-red-50 text-red-500 font-semibold border-2 border-red-300"
               }}
             />
           </>
+        )}
+        
+        {/* Display scheduled tasks for the selected date */}
+        {scheduledTasks.length > 0 && (
+          <div className="mt-4 text-sm">
+            <h4 className="font-medium mb-2 flex items-center gap-1">
+              <PlusCircle className="h-4 w-4 text-purple-500" />
+              Your Scheduled Tasks
+            </h4>
+            <div className="space-y-2 max-h-[120px] overflow-y-auto custom-scrollbar pr-1">
+              {scheduledTasks
+                .sort((a, b) => a.date.getTime() - b.date.getTime())
+                .map((task, idx) => (
+                  <div key={idx} className="flex items-center space-x-2 pb-1 border-b border-gray-100 last:border-0">
+                    <div className={`h-2 w-2 rounded-full ${
+                      task.priority === "high" ? "bg-red-500" : 
+                      task.priority === "medium" ? "bg-amber-500" : 
+                      "bg-green-500"
+                    }`} />
+                    <span className="flex-1">{task.title}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(task.date)}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
         )}
         
         {/* Display upcoming events for the next 7 days */}

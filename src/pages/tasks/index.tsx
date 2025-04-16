@@ -1,191 +1,194 @@
 
-import { useState, useEffect } from "react";
-import { TopBar } from "@/components/layout/TopBar";
+import { useState } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { ToDoList } from "@/components/tasks/ToDoList";
+import { TopBar } from "@/components/layout/TopBar";
 import { KanbanBoard } from "@/components/tasks/KanbanBoard";
 import { ClockCalendar } from "@/components/tasks/ClockCalendar";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { BarChart3, Users, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { ToDoList } from "@/components/tasks/ToDoList";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
-// Add TypeScript declaration for the window property
-declare global {
-  interface Window {
-    KanbanSimulationTimeout: number;
-  }
+interface NewTaskFormData {
+  title: string;
+  priority: "low" | "medium" | "high";
+  status: "todo" | "inProgress" | "done";
+  deadline?: string;
 }
 
 const TasksPage = () => {
-  const [stats, setStats] = useState({
-    totalTasks: 24,
-    completedTasks: 12,
-    inProgressTasks: 8,
-    upcomingDeadlines: 5,
-    missedDeadlines: 3
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [newTask, setNewTask] = useState<NewTaskFormData>({
+    title: "",
+    priority: "medium",
+    status: "todo",
   });
+  
+  // Reference to the KanbanBoard component for adding tasks
+  const [kanbanRef, setKanbanRef] = useState<any>(null);
 
-  // Add a custom styling for scrollbars
-  useEffect(() => {
-    // Add CSS for custom scrollbars
-    const style = document.createElement('style');
-    style.textContent = `
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: rgba(241, 242, 243, 0.5);
-        border-radius: 10px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(156, 163, 175, 0.5);
-        border-radius: 10px;
-      }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background-color: rgba(107, 114, 128, 0.7);
-      }
+  const handleCreateTask = () => {
+    if (!newTask.title.trim()) {
+      toast.error("Task title cannot be empty");
+      return;
+    }
+
+    // If KanbanBoard reference exists, call its addNewTask method
+    if (kanbanRef && kanbanRef.addNewTask) {
+      kanbanRef.addNewTask(newTask.status, {
+        ...newTask,
+        id: `task-${Date.now()}`,
+      });
       
-      /* Make a special style for the holiday dates */
-      .holiday-date {
-        position: relative;
-      }
-      .holiday-date::after {
-        content: '';
-        position: absolute;
-        width: 5px;
-        height: 5px;
-        background-color: #e11d48;
-        border-radius: 50%;
-        bottom: 2px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Set a timeout for the KanbanBoard simulation - now 8 seconds
-    window.KanbanSimulationTimeout = 8000; // 8 seconds for Kanban simulation
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-
-  // Animation classes for Bento grid items
-  const bentoItemClasses = "animate-fade-in transition-all duration-500 hover:shadow-lg hover:translate-y-[-2px]";
+      toast.success("New task created", {
+        description: `"${newTask.title}" added to ${newTask.status === "todo" ? "To Do" : newTask.status === "inProgress" ? "In Progress" : "Done"}`
+      });
+      
+      // Reset form and close dialog
+      setNewTask({
+        title: "",
+        priority: "medium",
+        status: "todo",
+      });
+      setIsAddTaskOpen(false);
+    } else {
+      toast.error("Could not add task. Please try again.");
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-purple-50/30">
+    <div className="min-h-screen bg-gradient-to-b from-background to-violet-50/10">
       <TopBar />
       <Sidebar />
       
       <main className="pl-64 pt-16">
         <div className="p-6 max-w-[1600px] mx-auto">
-          <h1 className="text-3xl font-bold mb-2 text-foreground/90">Task Management</h1>
-          <p className="text-muted-foreground mb-8">Organize, track, and manage your tasks efficiently</p>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-bold text-foreground/90">Tasks Management</h1>
+            
+            <Dialog open={isAddTaskOpen} onOpenChange={setIsAddTaskOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center space-x-2">
+                  <Plus className="h-4 w-4" />
+                  <span>Add New Task</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Create New Task</DialogTitle>
+                  <DialogDescription>
+                    Add details for your new task below
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="title" className="text-right">Title</Label>
+                    <Input 
+                      id="title" 
+                      className="col-span-3" 
+                      placeholder="Enter task title"
+                      value={newTask.title}
+                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="priority" className="text-right">Priority</Label>
+                    <Select 
+                      value={newTask.priority} 
+                      onValueChange={(value: "low" | "medium" | "high") => 
+                        setNewTask({...newTask, priority: value})
+                      }
+                    >
+                      <SelectTrigger id="priority" className="col-span-3">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="status" className="text-right">Status</Label>
+                    <Select 
+                      value={newTask.status} 
+                      onValueChange={(value: "todo" | "inProgress" | "done") => 
+                        setNewTask({...newTask, status: value})
+                      }
+                    >
+                      <SelectTrigger id="status" className="col-span-3">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todo">To Do</SelectItem>
+                        <SelectItem value="inProgress">In Progress</SelectItem>
+                        <SelectItem value="done">Done</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="deadline" className="text-right">Deadline</Label>
+                    <Input 
+                      id="deadline" 
+                      type="date"
+                      className="col-span-3" 
+                      value={newTask.deadline || ""}
+                      onChange={(e) => setNewTask({...newTask, deadline: e.target.value})}
+                    />
+                  </div>
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddTaskOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleCreateTask}>
+                    Create Task
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
           
           <div className="grid grid-cols-12 gap-6">
-            {/* Quick Stats - Top Row, now 5 cards with missed deadlines */}
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-purple-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Total Tasks</p>
-                      <p className="text-3xl font-bold text-primary">{stats.totalTasks}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <BarChart3 className="h-6 w-6 text-primary" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="col-span-12 lg:col-span-8">
+              <KanbanBoard ref={(ref) => setKanbanRef(ref)} />
             </div>
             
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-green-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Completed</p>
-                      <p className="text-3xl font-bold text-green-500">{stats.completedTasks}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                      <CheckCircle2 className="h-6 w-6 text-green-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-blue-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">In Progress</p>
-                      <p className="text-3xl font-bold text-blue-500">{stats.inProgressTasks}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-blue-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-amber-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Upcoming Deadlines</p>
-                      <p className="text-3xl font-bold text-amber-500">{stats.upcomingDeadlines}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
-                      <Clock className="h-6 w-6 text-amber-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* New Missed Deadlines card */}
-            <div className="col-span-12 lg:col-span-3 xl:col-span-2 space-y-0">
-              <Card className={`glass-card ${bentoItemClasses} overflow-hidden border border-red-200/40 bg-white/60`}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Missed Deadlines</p>
-                      <p className="text-3xl font-bold text-red-500">{stats.missedDeadlines}</p>
-                    </div>
-                    <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                      <AlertTriangle className="h-6 w-6 text-red-500" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Middle Row - Clock/Calendar and To-Do */}
-            <div className="col-span-12 lg:col-span-6">
-              <div className={bentoItemClasses}>
-                <ClockCalendar />
-              </div>
-            </div>
-            
-            <div className="col-span-12 lg:col-span-6">
-              <div className={bentoItemClasses}>
-                <ToDoList />
-              </div>
-            </div>
-            
-            {/* Bottom Row - Kanban Board */}
-            <div className="col-span-12">
-              <div className={bentoItemClasses}>
-                <KanbanBoard />
-              </div>
+            <div className="col-span-12 lg:col-span-4 space-y-6">
+              <ClockCalendar onTaskScheduled={(task) => {
+                if (kanbanRef && kanbanRef.addNewTask) {
+                  kanbanRef.addNewTask("todo", {
+                    ...task,
+                    id: `task-${Date.now()}`,
+                    status: "todo"
+                  });
+                }
+              }} />
+              <ToDoList />
             </div>
           </div>
         </div>

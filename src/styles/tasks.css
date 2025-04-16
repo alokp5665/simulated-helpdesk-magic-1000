@@ -1,0 +1,29 @@
+
+/* Calendar styling for scheduled dates */
+.scheduled-date:not(.rdp-day_selected) {
+  border: 2px solid #ea384c !important;
+  color: #ea384c !important;
+  position: relative;
+  overflow: visible;
+}
+
+.scheduled-date:not(.rdp-day_selected):hover {
+  background-color: #f8d7da !important;
+}
+
+.scheduled-date.rdp-day_selected {
+  background-color: #ea384c !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+/* Calendar styling for holiday dates */
+.holiday-date:not(.rdp-day_selected) {
+  background-color: #f8d7da !important;
+  color: #ea384c !important;
+  position: relative;
+}
+
+.holiday-date:not(.rdp-day_selected):hover {
+  background-color: #f1acad !important;
+}

@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -176,13 +175,38 @@ const getProgressFromSubtasks = (subtasks: { completed: boolean }[]) => {
   return Math.round((completed / subtasks.length) * 100);
 };
 
-export const KanbanBoard = () => {
+export const KanbanBoard = forwardRef((props, ref) => {
   const [columns, setColumns] = useState<KanbanColumns>(INITIAL_TASKS);
   const [isLoading, setIsLoading] = useState(false);
   const [newTaskContent, setNewTaskContent] = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<"low" | "medium" | "high">("medium");
   const [showAnalytics, setShowAnalytics] = useState(false);
   const newTaskInputRef = useRef<HTMLInputElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    addNewTask: (status: "todo" | "inProgress" | "done", taskData: any) => {
+      const newTask: KanbanTask = {
+        id: taskData.id || `task-${Date.now()}`,
+        content: taskData.title || taskData.content,
+        status,
+        priority: taskData.priority || "medium",
+        progress: status === "done" ? 100 : 0,
+        deadline: taskData.deadline,
+        assignee: taskData.assignee || TEAM_MEMBERS[Math.floor(Math.random() * TEAM_MEMBERS.length)],
+        subtasks: taskData.subtasks || [
+          { id: `st-${Date.now()}-1`, title: "First step", completed: false },
+          { id: `st-${Date.now()}-2`, title: "Review", completed: false }
+        ]
+      };
+      
+      setColumns(prev => ({
+        ...prev,
+        [status]: [...prev[status], newTask]
+      }));
+      
+      return newTask;
+    }
+  }));
 
   useEffect(() => {
     setIsLoading(true);
@@ -448,7 +472,6 @@ export const KanbanBoard = () => {
     </div>
   );
 
-  // Calculate team analytics data
   const teamAnalytics = {
     taskOwnership: [
       { name: 'Sarah Johnson', count: 4, color: '#4338ca' },
@@ -813,4 +836,6 @@ export const KanbanBoard = () => {
       </CardContent>
     </Card>
   );
-};
+});
+
+KanbanBoard.displayName = "KanbanBoard";
